@@ -926,6 +926,11 @@ function setupEventListeners() {
                 showToast(i18n.t('toast_comfy_no_slots_refresh'), 'error');
                 return;
             }
+            // スキャンを要求してノードの現在テキストをサーバに同期してから読む
+            try {
+                await IPC.requestComfyScan();
+                await new Promise(r => setTimeout(r, 600));
+            } catch { /* ComfyUI未起動時は無視 */ }
             const results = await Promise.all(
                 Array.from(rows).map(row => {
                     const name = row.dataset.slot;
