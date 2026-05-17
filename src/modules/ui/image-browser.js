@@ -50,8 +50,10 @@ export async function initImageBrowser() {
         _folderTree = [];
         _allImages = [];
         _pngInfoCache = {};
-        await renderImageExplorer();
-        clearImageInfo();
+        if (State.currentMode === 'images') {
+            await renderImageExplorer();
+            clearImageInfo();
+        }
     });
 }
 
