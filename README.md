@@ -6,6 +6,8 @@
 
 ---
 
+## Introduction
+
 I tried a lot of prompt management tools, but none of them felt quite right — missing features here, poor overview there. So I built grimoire with exactly the features I wanted: making prompt input for WebUI and ComfyUI easy, intuitive, and quick to edit.
 
 Tags are displayed as color-coded chips, so your prompt is always easy to read at a glance. A single library button can hold multiple tags at once, acting like a preset. You can also randomize within any category, group, or subgroup with a single click. Danbooru tag autocomplete helps you find the right tags fast.
