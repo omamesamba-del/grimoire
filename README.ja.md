@@ -42,14 +42,13 @@ Checkpoint・VAE・サンプラー・ステップ数・解像度・Hires.fix・R
 
 ---
 
-## 動作要件
-
-- [Node.js](https://nodejs.org/) v18 以上
-- [Git](https://git-scm.com/)
-
----
-
 ## セットアップ
+
+[Releases](../../releases) から **grimoire.exe** をダウンロードして実行するだけです。インストール不要。
+
+### ソースから起動（開発者向け）
+
+[Node.js](https://nodejs.org/) v18 以上と [Git](https://git-scm.com/) が必要です。
 
 ```bash
 git clone https://github.com/omamesamba-del/grimoire.git
@@ -57,8 +56,6 @@ cd grimoire
 npm install
 npm start
 ```
-
-またはポータブル版 `.exe` を [Releases](../../releases) からダウンロードしてください。
 
 ---
 

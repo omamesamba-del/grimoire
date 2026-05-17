@@ -42,14 +42,13 @@ Four built-in themes: **Navy**, **White**, **Black**, **Gray**.
 
 ---
 
-## Requirements
-
-- [Node.js](https://nodejs.org/) v18 or later
-- [Git](https://git-scm.com/)
-
----
-
 ## Getting Started
+
+Download **grimoire.exe** from [Releases](../../releases) and run it — no installation required.
+
+### Run from source (developers)
+
+Requires [Node.js](https://nodejs.org/) v18+ and [Git](https://git-scm.com/).
 
 ```bash
 git clone https://github.com/omamesamba-del/grimoire.git
@@ -57,8 +56,6 @@ cd grimoire
 npm install
 npm start
 ```
-
-Or download the portable `.exe` from [Releases](../../releases).
 
 ---
 
