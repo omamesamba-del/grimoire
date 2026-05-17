@@ -21,7 +21,7 @@ Organize your favorite tags in YAML files, build prompts visually, and send them
 ## Getting Started
 
 ```bash
-git clone https://github.com/your-username/grimoire.git
+git clone https://github.com/omamesamba-del/grimoire.git
 cd grimoire
 npm install
 npm start
@@ -45,7 +45,28 @@ Place `.yml` files in the `tag/` folder. Each file defines categories and tags:
 
 ## WebUI Bridge
 
-Copy `webui-extension/grimoire-bridge/` into your WebUI's `extensions/` folder and restart WebUI.
+**Repository:** [sd-webui-grimoire-bridge](https://github.com/omamesamba-del/sd-webui-grimoire-bridge)
+
+1. Clone or download the repository into your WebUI's `extensions/` folder:
+   ```bash
+   cd extensions
+   git clone https://github.com/omamesamba-del/sd-webui-grimoire-bridge.git
+   ```
+2. Restart WebUI.
+3. In grimoire, go to **Settings → Generation** and set the WebUI URL (default: `http://127.0.0.1:7860`).
+
+## ComfyUI Bridge
+
+**Repository:** [comfyui-grimoire-bridge](https://github.com/omamesamba-del/comfyui-grimoire-bridge)
+
+1. Clone or download the repository into your ComfyUI's `custom_nodes/` folder:
+   ```bash
+   cd custom_nodes
+   git clone https://github.com/omamesamba-del/comfyui-grimoire-bridge.git
+   ```
+2. Restart ComfyUI.
+3. Add a **Grimoire Slot** node to your workflow and give it a slot name.
+4. In grimoire, go to **Settings → Generation** and set the ComfyUI URL (default: `http://127.0.0.1:8188`) and the slot name.
 
 ## License
 
