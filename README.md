@@ -2,9 +2,21 @@
 
 **A prompt library and builder for Stable Diffusion / ComfyUI.**
 
-Organize your tags in YAML files, build prompts visually with drag-and-drop chips, and send them directly to AUTOMATIC1111, Forge, or ComfyUI — all from a single desktop app.
-
 > 日本語版: [README.ja.md](README.ja.md)
+
+---
+
+I tried a lot of prompt management tools, but none of them felt quite right — missing features here, poor overview there. So I built grimoire with exactly the features I wanted: making prompt input for WebUI and ComfyUI easy, intuitive, and quick to edit.
+
+Tags are displayed as color-coded chips, so your prompt is always easy to read at a glance. A single library button can hold multiple tags at once, acting like a preset. You can also randomize within any category, group, or subgroup with a single click. Danbooru tag autocomplete helps you find the right tags fast.
+
+**AI mode** connects to Ollama (local), Claude API, or OpenAI to generate SD-ready prompts from plain natural language — just describe what you want.
+
+**Images mode** lets you browse your generated images in a grid, copy PNG metadata, and apply generation settings back to grimoire in one click. Search by tag, filename, or model name.
+
+**LoRA / Embedding / Checkpoint modes** can fetch metadata directly from CivitAI — thumbnails, trigger words, base model info, and more.
+
+**Gen mode** gives you full control over generation settings, with quick resolution and aspect ratio presets built in.
 
 ---
 
