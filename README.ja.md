@@ -8,7 +8,7 @@
 
 ---
 
-![grimoire メイン画面](docs/screenshots/main.png)
+![grimoire メイン画面](docs/screenshots/grimoire001.gif)
 
 ---
 
@@ -16,6 +16,8 @@
 
 ### ライブラリ & ビルダー
 タグを YAML ファイルでカテゴリ・グループに整理。タグをクリックすると Builder にチップとして追加されます。チップはドラッグで並び替え、Positive / Negative 間の移動も可能です。
+
+![ライブラリ & ビルダー](docs/screenshots/main.png)
 
 ### スタイルパレット
 Mod / Color / Material / Pattern / Deco のスタイル修飾子をワンクリックで適用。選択したスタイルはプロンプト先頭に自動で付与されます。

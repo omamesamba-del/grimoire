@@ -8,7 +8,7 @@ Organize your tags in YAML files, build prompts visually with drag-and-drop chip
 
 ---
 
-![grimoire main screen](docs/screenshots/main.png)
+![grimoire main screen](docs/screenshots/grimoire001.gif)
 
 ---
 
@@ -16,6 +16,8 @@ Organize your tags in YAML files, build prompts visually with drag-and-drop chip
 
 ### Library & Builder
 Organize thousands of tags into categories and groups with YAML files. Click tags to add them as chips in the Builder. Drag chips to reorder or move between Positive and Negative areas.
+
+![Library and Builder](docs/screenshots/main.png)
 
 ### Style Palette
 Apply style modifiers (Mod / Color / Material / Pattern / Deco) to any tag with a single click. Styles are prepended to your prompt automatically.
