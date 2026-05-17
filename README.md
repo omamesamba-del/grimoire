@@ -112,14 +112,39 @@ Restart WebUI, then set the WebUI URL in grimoire under **Settings → Generatio
 
 **Repository:** [comfyui-grimoire-bridge](https://github.com/omamesamba-del/comfyui-grimoire-bridge)
 
-Adds a **Grimoire Slot** node to ComfyUI. grimoire sends prompts to named slots, so you can wire them anywhere in your workflow.
-
 **Install:**
 ```bash
 cd custom_nodes
 git clone https://github.com/omamesamba-del/comfyui-grimoire-bridge.git
 ```
-Restart ComfyUI. Add a **Grimoire Slot** node, give it a slot name, then set the ComfyUI URL and slot name in grimoire under **Settings → Generation** (default: `http://127.0.0.1:8188`).
+Restart ComfyUI, then set the ComfyUI URL in grimoire under **Settings → Generation** (default: `http://127.0.0.1:8188`).
+
+### How ComfyUI Mode Works
+
+ComfyUI integration is more flexible than WebUI — instead of a single positive/negative pair, you can have **any number of named slots** that map directly to nodes in your workflow.
+
+![ComfyUI slots panel](docs/screenshots/comfy01.png)
+
+Switch grimoire to **COMFY mode** using the toggle in the top-right corner. The builder panel changes to show **ComfyUI Slots** — one panel per Grimoire Slot node detected in your open workflow. Click a slot to make it the active target, then click tags from the library to add them there. Drag the `⠿` handle to reorder slots.
+
+### Setting Up the Workflow
+
+![ComfyUI workflow with Grimoire nodes](docs/screenshots/comfy02.png)
+
+The bridge provides three custom nodes, all found under the **PromptBuilder** category:
+
+| Node | Description |
+|------|-------------|
+| **Grimoire Slot** | A named text slot. Set `slot_name` (e.g. `positive`, `chara`, `negative`) and connect the output to any STRING input — typically a CLIP Text Encode node. |
+| **Grimoire Join** | Joins multiple Grimoire Slot outputs into one string with a configurable separator. Use the **+** button to add more inputs. |
+| **Grimoire Params** | All-in-one generation settings node. Receives checkpoint, VAE, sampler, steps, resolution, and more from grimoire's Gen Settings tab. Outputs MODEL, CLIP, VAE, and all numeric params. |
+
+**Typical setup:**
+1. Add one **Grimoire Slot** node per text area (e.g. `positive`, `chara`, `negative`, `expression`)
+2. Connect each slot's output to a CLIP Text Encode node (or use **Grimoire Join** to combine multiple slots first)
+3. Optionally add **Grimoire Params** and connect its outputs to your KSampler and loaders
+4. In grimoire, switch to COMFY mode — the slots panel will auto-detect your slot names
+5. Build your prompt in grimoire, then press **Send** (or `Ctrl+Enter`) to push all slots and queue generation
 
 ---
 

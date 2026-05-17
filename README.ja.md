@@ -112,14 +112,39 @@ WebUI を再起動後、grimoire の **設定 → 生成設定** で WebUI の U
 
 **リポジトリ:** [comfyui-grimoire-bridge](https://github.com/omamesamba-del/comfyui-grimoire-bridge)
 
-ComfyUI に **Grimoire Slot** ノードを追加します。grimoire から名前付きスロットにプロンプトを送信し、ワークフロー内の任意の場所に接続できます。
-
 **インストール:**
 ```bash
 cd custom_nodes
 git clone https://github.com/omamesamba-del/comfyui-grimoire-bridge.git
 ```
-ComfyUI を再起動後、**Grimoire Slot** ノードをワークフローに追加してスロット名を付けます。grimoire の **設定 → 生成設定** で ComfyUI の URL とスロット名を設定してください（デフォルト: `http://127.0.0.1:8188`）。
+ComfyUI を再起動後、grimoire の **設定 → 生成設定** で ComfyUI の URL を設定してください（デフォルト: `http://127.0.0.1:8188`）。
+
+### ComfyUI モードの仕組み
+
+ComfyUI 連携は WebUI より柔軟です。Positive / Negative の固定ペアではなく、**任意の数の名前付きスロット**をワークフロー内の好きな場所に接続できます。
+
+![ComfyUI スロットパネル](docs/screenshots/comfy01.png)
+
+右上のトグルで grimoire を **COMFY モード**に切り替えると、ビルダーパネルが **ComfyUI Slots** 表示に変わります。現在開いているワークフローの Grimoire Slot ノードを自動検出し、スロットごとにパネルが表示されます。スロットをクリックしてアクティブにし、ライブラリのタグをクリックすると、そのスロットにタグが追加されます。`⠿` ハンドルをドラッグしてスロットの並び順を変更できます。
+
+### ワークフローのセットアップ
+
+![ComfyUI ワークフロー（Grimoire ノード）](docs/screenshots/comfy02.png)
+
+ブリッジは **PromptBuilder** カテゴリに 3 種類のカスタムノードを追加します。
+
+| ノード | 説明 |
+|--------|------|
+| **Grimoire Slot** | 名前付きテキストスロット。`slot_name`（例: `positive`、`chara`、`negative`）を設定し、出力を CLIP Text Encode など任意の STRING 入力に接続します。 |
+| **Grimoire Join** | 複数の Grimoire Slot 出力を区切り文字で結合します。**+** ボタンで入力を追加できます。 |
+| **Grimoire Params** | 生成設定をまとめて受け取るオールインワンノード。Checkpoint・VAE・サンプラー・ステップ数・解像度などを grimoire の Gen タブから受信し、MODEL / CLIP / VAE と数値パラメータを出力します。 |
+
+**基本的なセットアップ手順:**
+1. テキストエリアごとに **Grimoire Slot** ノードを追加し、スロット名を付ける（例: `positive`・`chara`・`negative`・`expression`）
+2. 各スロットの出力を CLIP Text Encode に接続（複数スロットをまとめる場合は **Grimoire Join** を経由）
+3. 必要に応じて **Grimoire Params** を追加し、KSampler やローダーに接続
+4. grimoire を COMFY モードに切り替えると、スロット名が自動検出されてパネルに表示される
+5. grimoire でプロンプトを組み立て、**Send**（または `Ctrl+Enter`）で全スロットを送信して生成を開始
 
 ---
 
