@@ -29,7 +29,7 @@
       {
         "from": "data",
         "to": "data",
-        "filter": ["**/*", "!fav_image/**", "!tag_images/**", "!yaml_backups/**"]
+        "filter": ["**/*", "!config.json", "!fav_image/**", "!tag_images/**", "!yaml_backups/**"]
       },
       {
         "from": "tag",
