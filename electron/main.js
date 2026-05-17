@@ -1320,7 +1320,6 @@ ipcMain.handle('danbooru:search', async (event, query) => await danbooruService.
 
 // Config & Presets
 ipcMain.handle('config:get', () => resolveConfigPaths(configService.getConfig()));
-ipcMain.handle('get-app-version', () => app.getVersion());
 ipcMain.handle('config:save', async (event, config) => {
   log('Saving new configuration...', 'INFO', 'Main');
   const oldResolved = resolveConfigPaths(configService.getConfig());
