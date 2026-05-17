@@ -160,6 +160,7 @@ ComfyUI 連携は WebUI より柔軟です。Positive / Negative の固定ペア
 | `A` | AI Assist モード |
 | `Ctrl+Z` / `Ctrl+Y` | プロンプトの Undo / Redo |
 | `Ctrl+Enter` | WebUI / ComfyUI に送信 |
+| `Ctrl+,` | 設定を開く |
 | `F2` | 選択項目のリネーム |
 
 ショートカットは **設定 → ショートカット** から自由にカスタマイズできます。

@@ -160,6 +160,7 @@ The bridge provides three custom nodes, all found under the **PromptBuilder** ca
 | `A` | AI Assist mode |
 | `Ctrl+Z` / `Ctrl+Y` | Undo / Redo (prompt) |
 | `Ctrl+Enter` | Send to WebUI / ComfyUI |
+| `Ctrl+,` | Open Settings |
 | `F2` | Rename selected item |
 
 Shortcuts are fully customizable under **Settings → Shortcuts**.
