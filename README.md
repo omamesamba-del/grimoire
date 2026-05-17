@@ -12,6 +12,8 @@ I tried a lot of prompt management tools, but none of them felt quite right — 
 
 Tags are displayed as color-coded chips, so your prompt is always easy to read at a glance. A single library button can hold multiple tags at once, acting like a preset. You can also randomize within any category, group, or subgroup with a single click. Danbooru tag autocomplete helps you find the right tags fast.
 
+The **Style Palette** lets you add decorative modifiers — colors, materials, patterns, decorations — to any tag with a single click, without having to remember or type them manually.
+
 **AI mode** connects to Ollama (local), Claude API, or OpenAI to generate SD-ready prompts from plain natural language — just describe what you want.
 
 **Images mode** lets you browse your generated images in a grid, copy PNG metadata, and apply generation settings back to grimoire in one click. Search by tag, filename, or model name.
@@ -34,7 +36,9 @@ Organize thousands of tags into categories and groups with YAML files. Click tag
 ![Library and Builder](docs/screenshots/main.png)
 
 ### Style Palette
-Apply style modifiers (Mod / Color / Material / Pattern / Deco) to any tag with a single click. Styles are prepended to your prompt automatically.
+Apply style modifiers (Mod / Color / Material / Pattern / Deco) to any tag with a single click. Styles are prepended to your prompt automatically — no need to remember or type decorative words by hand.
+
+![Style Palette](docs/screenshots/grimoire003.gif)
 
 ### AI Assist
 Describe what you want in plain text and let the AI generate SD-ready prompts. Supports **Ollama** (local), **Claude API**, and **OpenAI**.
