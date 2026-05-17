@@ -78,6 +78,10 @@
               <span class="menu-icon">🔄</span>
               <span class="menu-text" data-i18n="menu_restart">アプリを再起動</span>
             </button>
+            <button id="btn-about-menu" class="menu-item">
+              <span class="menu-icon">ℹ️</span>
+              <span class="menu-text" data-i18n="menu_about">grimoire について</span>
+            </button>
             <button id="btn-quit-menu" class="menu-item menu-item-danger">
               <span class="menu-icon">🚪</span>
               <span class="menu-text" data-i18n="menu_quit">終了</span>
@@ -1245,6 +1249,22 @@
         <button id="checkpoint-edit-cancel" class="btn-secondary">Cancel</button>
         <button id="checkpoint-edit-apply" class="btn-secondary">▶ Apply Now</button>
         <button id="checkpoint-edit-save" class="btn-primary">💾 Save Settings</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- About Dialog -->
+  <dialog id="about-dialog" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width:400px;text-align:center;">
+      <h2 class="modal-title" style="margin-bottom:0.25rem;">grimoire</h2>
+      <p id="about-version" style="font-size:0.85rem;opacity:0.6;margin:0 0 1rem;">v1.0.0</p>
+      <p style="font-size:0.9rem;margin-bottom:1.25rem;" data-i18n="about_description">Prompt library &amp; builder for Stable Diffusion / ComfyUI</p>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.5rem;font-size:0.85rem;">
+        <a href="#" id="about-link-github" style="color:var(--accent);">GitHub</a>
+      </div>
+      <p style="font-size:0.75rem;opacity:0.4;margin:0 0 1.25rem;" data-i18n="about_license">MIT License</p>
+      <div class="modal-actions">
+        <button id="btn-about-close" class="btn-primary" data-i18n="btn_close">閉じる</button>
       </div>
     </div>
   </dialog>
