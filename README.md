@@ -44,7 +44,18 @@ Four built-in themes: **Navy**, **White**, **Black**, **Gray**.
 
 ## Getting Started
 
-Download **grimoire.exe** from [Releases](../../releases) and run it — no installation required.
+1. Download **grimoire.exe** from [Releases](../../releases)
+2. Create a dedicated folder (e.g. `grimoire/`) and place the exe inside
+3. Run `grimoire.exe`
+
+On first launch, grimoire automatically creates the following folders next to the exe:
+
+| Folder | Contents |
+|--------|----------|
+| `data/` | App config and settings |
+| `tag/` | Your YAML tag library files |
+
+Keeping the exe in its own folder prevents these from being scattered across your filesystem.
 
 ### Run from source (developers)
 
