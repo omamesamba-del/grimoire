@@ -254,14 +254,26 @@ async function initApp() {
 }
 
 function setupEventListeners() {
-    // 設定保存時に assetPaths を同期
-    window.addEventListener('settings:saved', (e) => {
+    // 設定保存時に assetPaths を同期 → パスが変わった場合はアセットを再スキャン
+    window.addEventListener('settings:saved', async (e) => {
         const cfg = e.detail || {};
+        const prevLora      = State.assetPaths.lora;
+        const prevEmbedding = State.assetPaths.embedding;
+        const prevCheckpoint = State.assetPaths.checkpoint;
         State.assetPaths = {
             lora:       cfg.loraPath       || '',
             embedding:  cfg.embeddingsPath || '',
             checkpoint: cfg.checkpointsPath || '',
         };
+        const pathChanged = prevLora !== State.assetPaths.lora
+                         || prevEmbedding !== State.assetPaths.embedding
+                         || prevCheckpoint !== State.assetPaths.checkpoint;
+        if (pathChanged) {
+            State.allAssets = await loadAssets();
+            if (['lora', 'embedding', 'checkpoint'].includes(State.currentMode)) {
+                window.dispatchEvent(new CustomEvent('renderGridReq'));
+            }
+        }
     });
 
     // Mode Tabs (v5)
