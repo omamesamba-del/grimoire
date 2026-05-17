@@ -191,7 +191,9 @@ export function syncComfySlotsVisibility(isComfyMode) {
     const panel = document.getElementById(PANEL_ID);
     const normalSections = document.querySelectorAll('#builder-pane-content .prompt-section');
 
+    const rawDetails = document.querySelector('.raw-prompt-details');
     if (panel)          panel.style.display = isComfyMode ? 'flex' : 'none';
+    if (rawDetails)     rawDetails.style.display = isComfyMode ? 'none' : '';
     normalSections.forEach(s => { s.style.display = isComfyMode ? 'none' : ''; });
 
     if (isComfyMode) {
