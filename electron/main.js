@@ -1113,6 +1113,17 @@ ipcMain.handle('webui:send', async (event, payload) => {
   }
 });
 
+ipcMain.handle('webui:resetBusy', async () => {
+  try {
+    const cfg = resolveConfigPaths(configService.getConfig());
+    const baseUrl = (cfg.webuiUrl || 'http://127.0.0.1:7860').replace(/\/$/, '');
+    await net.fetch(`${baseUrl}/pb/reset-busy`, { method: 'POST', signal: AbortSignal.timeout(3000) });
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
 ipcMain.handle('webui:checkBridge', async () => {
   try {
     const cfg = resolveConfigPaths(configService.getConfig());
