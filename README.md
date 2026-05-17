@@ -133,3 +133,7 @@ Shortcuts are fully customizable under **Settings → Shortcuts**.
 ## License
 
 MIT
+
+---
+
+> **Note:** This application was developed with the assistance of AI (Claude by Anthropic).
