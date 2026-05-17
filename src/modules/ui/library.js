@@ -613,7 +613,7 @@ export function renderAssetGrid(query = '') {
             noRes.innerHTML = `<span style="font-size:2.5rem">📁</span><p>${i18n.t(`${mode}_no_path_hint`)}</p>`;
             noRes.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0.75rem;opacity:0.5;text-align:center;padding:1rem;';
         } else {
-            noRes.innerText = `No ${mode} assets found.`;
+            noRes.innerText = i18n.t(`${mode}_empty`);
         }
         grid.appendChild(noRes);
         return;

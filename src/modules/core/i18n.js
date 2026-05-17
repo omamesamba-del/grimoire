@@ -344,6 +344,9 @@ class I18n {
                 'lora_no_path_hint':        '設定 → Paths → LoRA でフォルダを設定してください',
                 'embedding_no_path_hint':   '設定 → Paths → Embeddings でフォルダを設定してください',
                 'checkpoint_no_path_hint':  '設定 → Paths → Checkpoints でフォルダを設定してください',
+                'lora_empty':               'LoRA が見つかりません',
+                'embedding_empty':          'Embedding が見つかりません',
+                'checkpoint_empty':         'Checkpoint が見つかりません',
 
                 // ── 画像ブラウザ ───────────────────────────────────────────
                 'images_no_folder_hint':     '設定 → Paths → Output Images でフォルダを設定してください',
@@ -815,6 +818,9 @@ class I18n {
                 'lora_no_path_hint':        'Set a folder in Settings → Paths → LoRA',
                 'embedding_no_path_hint':   'Set a folder in Settings → Paths → Embeddings',
                 'checkpoint_no_path_hint':  'Set a folder in Settings → Paths → Checkpoints',
+                'lora_empty':               'No LoRA found',
+                'embedding_empty':          'No Embeddings found',
+                'checkpoint_empty':         'No Checkpoints found',
 
                 // ── Image Browser ─────────────────────────────────────────
                 'images_no_folder_hint':     'Set a folder in Settings → Paths → Output Images',
