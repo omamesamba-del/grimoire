@@ -971,7 +971,7 @@ function _showImgCtxMenu(x, y, filePath) {
     const favItem = menu.querySelector('[data-action="add-favorite"]');
     if (favItem) {
         const alreadyFav = _isInFavFolder(filePath);
-        favItem.textContent = alreadyFav ? '✅ お気に入り済み' : '★ お気に入り';
+        favItem.textContent = alreadyFav ? i18n.t('btn_already_favorite') : i18n.t('btn_add_favorite_img');
         favItem.classList.toggle('img-ctx-disabled', alreadyFav);
     }
 }
