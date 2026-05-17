@@ -35,6 +35,12 @@ Browse your output folder with a thumbnail grid. View PNG metadata (prompt, seed
 
 ![Images browser](docs/screenshots/images.png)
 
+### Tag Images
+Attach a preview image to any tag — it appears as a thumbnail on the tag card. To register an image, drag and drop an image file directly onto a tag card in the library, or right-click a generated image in the Images Browser and select **Use as tag image**.
+
+### CivitAI Integration
+Fetch metadata for LoRA, Embedding, and Checkpoint files directly from CivitAI. Right-click any asset card and choose **Fetch Info (CivitAI)** to pull the cover image, trained words, base model, and description. Use **Fetch All** in LoRA / Embedding mode to batch-fetch metadata for all assets at once. A CivitAI API key can be set in **Settings → Assets** to avoid rate limiting.
+
 ### Themes
 Four built-in themes: **Navy**, **White**, **Black**, **Gray**.
 
