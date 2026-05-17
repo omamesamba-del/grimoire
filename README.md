@@ -72,7 +72,8 @@ npm start
 
 ## YAML Library Format
 
-Place `.yml` files in the `tag/` folder. grimoire reads them automatically on startup.
+Place `.yml` files in the `tag/` folder. grimoire reads them automatically on startup.  
+If tags don't appear or you've edited a file manually, use **Reload YAML** from the hamburger menu to refresh without restarting.
 
 ```yaml
 - category: My Category
