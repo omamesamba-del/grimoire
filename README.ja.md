@@ -133,3 +133,7 @@ ComfyUI を再起動後、**Grimoire Slot** ノードをワークフローに追
 ## ライセンス
 
 MIT
+
+---
+
+> **注意:** このアプリケーションは AI（Anthropic Claude）の支援を受けて開発されています。
