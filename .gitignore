@@ -1,0 +1,28 @@
+node_modules/
+dist/
+dist-electron/
+release/
+
+# User data (generated at runtime)
+data/tags.json
+data/tags.json.bak
+data/fav_image/
+data/tag_images/
+data/yaml_backups/
+data/gen_presets/
+
+# Logs
+debug.log
+debug.log.bak
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/

@@ -1,0 +1,29 @@
+Simple:
+  simple background: simple background
+  white background: white background
+  black background: black background
+  gradient background: gradient background
+
+Nature:
+  forest: forest
+  beach: beach
+  mountain: mountain
+  meadow: meadow
+  cherry blossom: cherry blossoms
+  night sky: night sky
+  starry sky: starry sky
+
+Urban:
+  city: city
+  rooftop: rooftop
+  alley: alley
+  cafe interior: cafe
+  bedroom: bedroom
+  classroom: classroom
+
+Fantasy:
+  fantasy landscape: fantasy landscape
+  magical forest: magical forest
+  ancient ruins: ancient ruins
+  floating island: floating island
+  crystal cave: crystal cave

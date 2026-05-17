@@ -1,0 +1,22 @@
+Shot Type:
+  portrait: portrait
+  close-up: close-up
+  medium shot: medium shot
+  full body: full body
+  wide shot: wide shot
+  bird's eye view: bird's-eye view
+  low angle: from below
+  dutch angle: dutch angle
+
+Framing:
+  centered: centered
+  cowboy shot: cowboy shot
+  upper body: upper body
+  face focus: face focus
+  dynamic pose: dynamic pose
+
+Depth of Field:
+  bokeh: bokeh
+  depth of field: depth of field
+  shallow focus: shallow focus
+  blurry background: blurry background

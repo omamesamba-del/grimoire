@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>grimoire</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body class="theme-dark app-loading">
+  <!-- Main App Container -->
+  <div class="app-container">
+    <!-- Title Bar (drag region + integrated controls) -->
+    <header class="app-header titlebar-drag">
+      <div class="header-left titlebar-no-drag">
+
+        <!-- Hamburger Menu -->
+        <div class="menu-wrapper">
+          <button id="btn-menu-toggle" class="icon-btn" title="Menu">☰</button>
+          <div id="header-menu" class="header-menu hidden">
+
+            <!-- ファイル -->
+            <div class="menu-item-label" data-i18n="menu_file">ファイル</div>
+            <button id="btn-import-yaml" class="menu-item">
+              <span class="menu-icon">📥</span>
+              <span class="menu-text" data-i18n="menu_import_yaml">YAML をインポート</span>
+            </button>
+            <button id="btn-reimport-yaml" class="menu-item">
+              <span class="menu-icon">🔄</span>
+              <span class="menu-text" data-i18n="menu_reimport_yaml">YAML から再インポート</span>
+            </button>
+            <button id="btn-export-yaml" class="menu-item">
+              <span class="menu-icon">📤</span>
+              <span class="menu-text" data-i18n="menu_export_yaml">YAML へエクスポート</span>
+            </button>
+            <button id="btn-add-category-menu" class="menu-item">
+              <span class="menu-icon">＋</span>
+              <span class="menu-text" data-i18n="menu_add_group">グループを追加</span>
+            </button>
+            <button id="btn-reload-data-menu" class="menu-item">
+              <span class="menu-icon">↺</span>
+              <span class="menu-text" data-i18n="menu_reload_data">データを再読み込み</span>
+            </button>
+
+            <div class="menu-divider"></div>
+
+            <!-- 表示 -->
+            <div class="menu-item-label" data-i18n="menu_view">表示</div>
+            <button id="btn-toggle-grid-list-menu" class="menu-item">
+              <span class="menu-icon">⊞</span>
+              <span class="menu-text" data-i18n="menu_toggle_grid_list">グリッド / リスト切替</span>
+            </button>
+            <button id="btn-toggle-explorer-menu" class="menu-item">
+              <span class="menu-icon">◀</span>
+              <span class="menu-text" data-i18n="menu_toggle_explorer">Explorerを折りたたむ</span>
+            </button>
+            <button id="btn-toggle-layout-menu" class="menu-item">
+              <span class="menu-icon">⬛</span>
+              <span class="menu-text" data-i18n="menu_toggle_layout">レイアウト切り替え</span>
+            </button>
+            <button id="btn-reset-layout-menu" class="menu-item">
+              <span class="menu-icon">🧹</span>
+              <span class="menu-text" data-i18n="menu_reset_layout">レイアウトをリセット</span>
+            </button>
+            <button id="btn-devtools-menu" class="menu-item">
+              <span class="menu-icon">🛠️</span>
+              <span class="menu-text" data-i18n="menu_devtools">開発者ツール</span>
+            </button>
+
+            <div class="menu-divider"></div>
+
+            <!-- アプリ -->
+            <div class="menu-item-label" data-i18n="menu_app">アプリ</div>
+            <button id="btn-settings-menu" class="menu-item">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-text" data-i18n="menu_settings">設定</span>
+            </button>
+            <button id="btn-restart-menu" class="menu-item">
+              <span class="menu-icon">🔄</span>
+              <span class="menu-text" data-i18n="menu_restart">アプリを再起動</span>
+            </button>
+            <button id="btn-quit-menu" class="menu-item menu-item-danger">
+              <span class="menu-icon">🚪</span>
+              <span class="menu-text" data-i18n="menu_quit">終了</span>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="mode-tabs-header">
+          <button class="mode-tab active" data-mode="tags"       title="Tags">      <span class="tab-icon">🏷️</span><span class="tab-label">Tags</span></button>
+          <button class="mode-tab"        data-mode="lora"       title="LoRA">      <span class="tab-icon">L</span>  <span class="tab-label">LoRA</span></button>
+          <button class="mode-tab"        data-mode="embedding"  title="Embedding"> <span class="tab-icon">E</span>  <span class="tab-label">Embedding</span></button>
+          <button class="mode-tab"        data-mode="checkpoint" title="Checkpoint"><span class="tab-icon">C</span>  <span class="tab-label">Checkpoint</span></button>
+          <button class="mode-tab"        data-mode="gen"        title="Gen">       <span class="tab-icon">⚡</span> <span class="tab-label">Gen</span></button>
+          <button class="mode-tab"        data-mode="images"     title="Images">    <span class="tab-icon">🖼️</span><span class="tab-label">Images</span></button>
+          <button class="mode-tab"        data-mode="ai"         title="AI">        <span class="tab-icon">✨</span> <span class="tab-label">AI</span></button>
+        </div>
+      </div>
+
+      <!-- Center: draggable + search -->
+      <div class="header-center titlebar-drag">
+        <div class="search-wrap titlebar-no-drag">
+          <select id="search-cat-filter" class="search-cat-filter" data-i18n-title="title_search_cat_filter" title="Filter by Category" hidden>
+            <option value="" data-i18n="filter_all">All</option>
+          </select>
+          <input type="text" id="library-search" class="header-search" placeholder="Search tags...">
+          <button id="btn-search-clear" class="btn-search-clear" data-i18n-title="title_search_clear" title="Clear" hidden>×</button>
+        </div>
+      </div>
+
+      <!-- Right: comfy toggle + layout/settings buttons + native window button spacer -->
+      <div class="header-titlebar-right titlebar-no-drag">
+        <div id="btn-toggle-comfy" class="mode-toggle-btn" title="Toggle ComfyUI Syntax">
+          <span class="mode-label">WEBUI</span>
+          <div class="mode-switch-track"><div class="mode-switch-thumb"></div></div>
+          <span class="mode-label">COMFY</span>
+        </div>
+        <button id="btn-toggle-layout-titlebar" class="titlebar-icon-btn" data-i18n-title="sc_label_toggle_layout" title="Toggle Layout">⬛</button>
+        <button id="btn-settings" class="titlebar-icon-btn" data-i18n-title="settings_title" title="Settings">⚙</button>
+      </div>
+      <div class="header-right"></div>
+    </header>
+
+    <!-- Main Workspace (3-Column Layout) -->
+    <main class="workspace-container" id="workspace-container">
+      <!-- 1. Explorer Pane (Left) -->
+      <section class="pane explorer-pane" id="explorer">
+        <div class="pane-header">
+          <span class="pane-title">Groups</span>
+          <div class="header-actions">
+            <div class="btn-add-inline" id="btn-reload-data" title="Reload data from disk">↺</div>
+            <div class="btn-add-inline" id="btn-add-category" title="Add New Group">＋</div>
+            <div class="btn-add-inline" id="btn-toggle-explorer" title="Explorerを折りたたむ">◀</div>
+          </div>
+        </div>
+        <div class="pane-content" id="explorer-content">
+          <!-- Group tree will be rendered here -->
+        </div>
+      </section>
+
+      <div class="divider" id="divider-1"></div>
+
+      <!-- right-stack: Library + Inspector (stacked vertically in layout-stacked mode) -->
+      <div class="right-stack" id="right-stack">
+
+      <!-- 2. Library Pane (Center) -->
+      <section class="pane library-pane" id="library">
+        <div class="pane-header">
+          <div class="library-mode-indicator">
+            <span id="library-title">Prompt Library</span>
+            <span id="library-count" class="badge-count"></span>
+          </div>
+          <div class="header-actions">
+            <div id="lib-size-ctrl" class="lib-size-ctrl">
+              <button id="btn-size-minus" class="btn-slider-adj">−</button>
+              <input type="range" id="asset-size-slider" min="0" max="6" step="1" value="3" data-i18n-title="title_asset_size_slider" title="Thumbnail Size">
+              <button id="btn-size-plus" class="btn-slider-adj">+</button>
+            </div>
+            <button id="btn-fetch-all-civitai" class="btn-civitai-all" title="Fetch all missing metadata from CivitAI" style="display:none;">⬇ CivitAI</button>
+            <button id="btn-random-pick" class="btn-icon-sm" data-i18n-title="title_random_pick_btn" title="Random Pick (Shift: 3 items)">🎲</button>
+            <button id="btn-style-palette-toggle" class="btn-icon-sm style-palette-trigger" data-i18n-title="title_style_palette_btn" title="Style Palette">🎨</button>
+          </div>
+        </div>
+
+        <!-- Style Palette dropdown (slides down from top of library) -->
+        <div class="style-palette-dropdown" id="style-palette-dropdown">
+          <button class="style-palette-edit-btn" id="style-palette-edit-btn" data-i18n-title="title_style_palette_edit" title="Edit Palette">✏️</button>
+          <div class="style-palette-body" id="style-palette-body">
+            <div class="style-row style-row-color-mods">
+              <span class="style-row-label">Mod</span>
+              <div class="style-chips" id="style-color-mods"></div>
+            </div>
+            <div class="style-row style-row-colors">
+              <span class="style-row-label">Color</span>
+              <div class="style-chips" id="style-colors"></div>
+            </div>
+            <div class="style-row">
+              <span class="style-row-label">Material</span>
+              <div class="style-chips" id="style-materials"></div>
+            </div>
+            <div class="style-row">
+              <span class="style-row-label">Pattern</span>
+              <div class="style-chips" id="style-patterns"></div>
+            </div>
+            <div class="style-row">
+              <span class="style-row-label">Deco</span>
+              <div class="style-chips" id="style-decorations"></div>
+            </div>
+            <div class="style-footer">
+              <span class="style-row-label">Custom</span>
+              <input type="text" id="style-custom-input" class="style-custom-input" placeholder="free text...">
+              <label class="style-mode-label">
+                <input type="checkbox" id="style-mode-a">
+                <span data-i18n="style_auto_apply">自動適用</span>
+              </label>
+              <label class="style-mode-label">
+                <input type="checkbox" id="style-apply-quickadd">
+                <span data-i18n="style_apply_quickadd">Apply to Quick-Add</span>
+              </label>
+              <button class="style-clear-btn" id="style-clear-btn" data-i18n="style_clear_btn">クリア</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane-content" style="position: relative;">
+          <!-- Tags View (visible in Tags mode) -->
+          <div id="tags-container" class="tab-content active">
+            <div id="tag-scroll-wrapper">
+              <div id="tag-grid" class="tag-grid"></div>
+            </div>
+          </div>
+
+          <!-- Assets View (LoRA/Embedding - visible in LoRA/Embedding modes) -->
+          <div id="assets-container" class="tab-content">
+            <div id="asset-grid" class="asset-grid"></div>
+          </div>
+
+          <!-- Image Browser View (visible in Images mode) -->
+          <div id="images-container" class="tab-content">
+            <div id="image-grid" class="image-grid"></div>
+          </div>
+
+          <!-- AI Prompt Generation View (visible in AI mode) -->
+          <div id="ai-container" class="tab-content">
+            <div class="ai-mode-wrap">
+              <!-- Provider selector -->
+              <div class="ai-provider-row">
+                <label class="ai-selector-label" data-i18n="ai_provider_label">使用する AI</label>
+                <select id="ai-provider-select" class="ai-provider-select">
+                  <option value="ollama">🖥️ Ollama（ローカル）</option>
+                  <option value="claude">🤖 Claude API</option>
+                  <option value="openai">🌐 OpenAI API</option>
+                </select>
+              </div>
+              <!-- Model selector -->
+              <div class="ai-provider-row" id="ai-model-row">
+                <label class="ai-selector-label" data-i18n="ai_model_label_ui">使用するモデル</label>
+                <select id="ai-model-select" class="ai-provider-select">
+                  <option value="">取得中…</option>
+                </select>
+                <button id="btn-ai-refresh-models" class="btn-ai-icon" data-i18n-title="title_refresh_models" title="Refresh Model List">↺</button>
+              </div>
+              <!-- Status / warning -->
+              <div id="ai-status-msg" class="ai-status-msg" hidden></div>
+
+              <!-- SD Info -->
+              <div class="ai-section-sep"></div>
+              <div class="ai-provider-row ai-sdinfo-header">
+                <label class="ai-selector-label" data-i18n="ai_sdinfo_label">SD情報</label>
+                <label class="ai-toggle-inline">
+                  <input type="checkbox" id="ai-use-sdinfo" checked>
+                  <span data-i18n="ai_use_sdinfo_label">モデル情報を参照する</span>
+                </label>
+              </div>
+              <div id="ai-sdinfo-detail">
+                <div class="ai-provider-row ai-sdinfo-sub">
+                  <label class="ai-selector-label" data-i18n="ai_checkpoint_label">Checkpoint</label>
+                  <!-- カスタムドロップダウン（hidden inputが実値を保持） -->
+                  <input type="hidden" id="ai-checkpoint-select">
+                  <div class="ai-ckpt-dropdown" id="ai-ckpt-dropdown">
+                    <button class="ai-ckpt-trigger" id="ai-ckpt-trigger" type="button">取得中…</button>
+                    <div class="ai-ckpt-panel" id="ai-ckpt-panel"></div>
+                  </div>
+                  <span id="ai-arch-badge" class="ai-arch-badge" hidden></span>
+                  <button id="btn-ai-fetch-civitai" class="btn-ai-civitai" title="Civitai からメタデータを取得して保存">Civitai</button>
+                </div>
+              </div>
+
+              <!-- Tag count -->
+              <div class="ai-provider-row">
+                <label class="ai-selector-label" data-i18n="ai_tag_count_label">タグ数</label>
+                <div class="ai-tagcount-wrap">
+                  <input type="number" id="ai-tag-min" value="20" min="5" max="200" class="ai-tagcount-input">
+                  <span class="ai-tagcount-sep" data-i18n="ai_tag_sep">〜</span>
+                  <input type="number" id="ai-tag-max" value="40" min="5" max="200" class="ai-tagcount-input">
+                  <span class="ai-tagcount-sep" data-i18n="ai_tag_unit">タグ</span>
+                </div>
+              </div>
+
+              <!-- Style + Tag format -->
+              <div class="ai-provider-row">
+                <label class="ai-selector-label" data-i18n="ai_style_label">スタイル</label>
+                <select id="ai-style-select" class="ai-provider-select ai-style-select">
+                  <option value="">指定なし</option>
+                  <option value="realistic">📷 リアル / Photorealistic</option>
+                  <option value="anime">🎌 アニメ / Anime</option>
+                  <option value="illustration">🎨 イラスト / Illustration</option>
+                  <option value="3d">💠 3D / 3DCG Render</option>
+                  <option value="figure">🗿 フィギュア / Figure</option>
+                  <option value="pixel">👾 ピクセルアート / Pixel Art</option>
+                  <option value="watercolor">💧 水彩 / Watercolor</option>
+                  <option value="oil">🖌️ 油彩 / Oil Painting</option>
+                  <option value="sketch">✏️ スケッチ / Sketch &amp; Line Art</option>
+                </select>
+              </div>
+
+              <!-- Tag format -->
+              <div class="ai-provider-row">
+                <label class="ai-selector-label" data-i18n="ai_tag_format_label">タグ形式</label>
+                <div class="ai-tagformat-wrap">
+                  <div class="ai-tagformat-checks">
+                    <label class="ai-toggle-inline">
+                      <input type="checkbox" id="ai-use-danbooru">
+                      <span data-i18n="ai_danbooru_label">Danbooru準拠</span>
+                    </label>
+                  </div>
+                  <span class="ai-tagformat-hint" data-i18n="ai_danbooru_hint">※ Danbooruタグ精度はモデルにより異なります</span>
+                </div>
+              </div>
+              <div class="ai-section-sep"></div>
+
+              <!-- Input -->
+              <div class="ai-mode-label" data-i18n="ai_input_section_label">💬 自然言語でプロンプトを生成</div>
+              <textarea id="ai-natural-input" class="ai-natural-input"
+                data-i18n="ai_input_placeholder"
+                placeholder="日本語や英語で自由に描写してください&#10;例: 夕暮れの海辺で白いワンピースの女の子が波を眺めている、映画的な雰囲気で&#10;&#10;Enter で変換 / Shift+Enter で改行"></textarea>
+              <div class="ai-prompt-controls">
+                <select id="ai-target-area" class="ai-target-select">
+                  <option value="positive" data-i18n="ai_target_positive">➕ Positive に追加</option>
+                  <option value="negative" data-i18n="ai_target_negative">➖ Negative に追加</option>
+                </select>
+                <button id="btn-ai-generate" class="btn-primary ai-generate-btn" data-i18n="ai_generate_btn">✨ AI 変換</button>
+                <button id="btn-ai-cancel" class="btn-secondary ai-cancel-btn" hidden data-i18n="ai_cancel_btn">✕ キャンセル</button>
+              </div>
+              <div id="ai-prompt-result" class="ai-mode-result" hidden>
+                <div class="ai-result-header">
+                  <span class="ai-result-label" data-i18n="ai_result_label">生成結果</span>
+                  <div class="ai-result-actions">
+                    <button id="btn-ai-apply" class="btn-primary" data-i18n="ai_apply_overwrite">→ 上書き</button>
+                    <button id="btn-ai-append" class="btn-secondary" data-i18n="ai_append">＋ 追記</button>
+                    <button id="btn-ai-copy" class="btn-secondary" data-i18n="ai_copy">📋 コピー</button>
+                  </div>
+                </div>
+                <div id="ai-result-text" class="ai-result-text"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generation Settings View (visible in Generation mode) -->
+          <div id="generation-container" class="tab-content">
+            <div class="gen-wrap">
+              <!-- Checkpoint / VAE / Clip skip -->
+              <div class="gen-row">
+                <div class="gen-field" style="flex:3">
+                  <label>Stable Diffusion checkpoint</label>
+                  <input type="text" id="gen-main-checkpoint" list="gen-main-checkpoint-dl"
+                         class="gen-combobox" autocomplete="off" placeholder="— select or type —">
+                  <datalist id="gen-main-checkpoint-dl"></datalist>
+                </div>
+                <div class="gen-field" style="flex:2">
+                  <label>SD VAE</label>
+                  <select id="gen-main-vae" class="gen-select"><option>Automatic</option></select>
+                </div>
+                <div class="gen-field gen-field-xs">
+                  <label>Clip skip</label>
+                  <input type="number" id="gen-clip-skip-num" class="gen-num" value="2" min="1" max="12">
+                </div>
+              </div>
+
+              <!-- Sampler / Schedule / Steps -->
+              <div class="gen-row">
+                <div class="gen-field" style="flex:2">
+                  <label id="lbl-gen-sampler">Sampling method</label>
+                  <select id="gen-sampler" class="gen-select"></select>
+                </div>
+                <div class="gen-field" style="flex:2">
+                  <label id="lbl-gen-schedule">Schedule type</label>
+                  <select id="gen-schedule" class="gen-select"></select>
+                </div>
+                <div class="gen-field gen-field-xs">
+                  <label>Steps</label>
+                  <input type="number" id="gen-steps-num" class="gen-num" value="25" min="1" max="150">
+                </div>
+              </div>
+
+              <!-- Hires. fix -->
+              <div class="gen-section-box">
+                <label class="gen-toggle-hdr">
+                  <input type="checkbox" id="gen-hires"> Hires. fix
+                </label>
+                <div id="gen-hires-details" class="gen-collapsible">
+                  <div class="gen-row">
+                    <div class="gen-field" style="flex:3">
+                      <label>Upscaler</label>
+                      <select id="gen-upscaler" class="gen-select"><option>None</option></select>
+                    </div>
+                    <div class="gen-field gen-field-xs">
+                      <label>Hires steps</label>
+                      <input type="number" id="gen-hires-steps-num" class="gen-num" value="0" min="0" max="150">
+                    </div>
+                    <div class="gen-field gen-field-xs">
+                      <label>Denoising</label>
+                      <input type="number" id="gen-denoising-num" class="gen-num" value="0.7" step="0.01" min="0" max="1">
+                    </div>
+                  </div>
+                  <div class="gen-row">
+                    <div class="gen-field gen-field-xs">
+                      <label>Upscale by</label>
+                      <input type="number" id="gen-upscale-by-num" class="gen-num" value="2" step="0.05" min="1" max="8">
+                    </div>
+                    <div class="gen-field gen-field-xs">
+                      <label>Resize W to</label>
+                      <input type="number" id="gen-hires-w" class="gen-num" value="0" step="8">
+                    </div>
+                    <div class="gen-field gen-field-xs">
+                      <label>Resize H to</label>
+                      <input type="number" id="gen-hires-h" class="gen-num" value="0" step="8">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Refiner -->
+              <div class="gen-section-box">
+                <label class="gen-toggle-hdr">
+                  <input type="checkbox" id="gen-refiner"> Refiner
+                </label>
+                <div id="gen-refiner-details" class="gen-collapsible">
+                  <div class="gen-row">
+                    <div class="gen-field" style="flex:3">
+                      <label>Checkpoint</label>
+                      <select id="gen-refiner-ckpt" class="gen-select"><option>None</option></select>
+                    </div>
+                    <div class="gen-field gen-field-xs">
+                      <label>Switch at</label>
+                      <input type="number" id="gen-refiner-switch-num" class="gen-num" value="0.8" step="0.01" min="0" max="1">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Width / Height / Batch -->
+              <div class="gen-res-grid">
+                <div class="gen-res-col">
+                  <div class="gen-field">
+                    <label>Width</label>
+                    <input type="number" id="gen-width-num" class="gen-num" value="832" step="8" min="64" max="4096">
+                  </div>
+                  <div class="gen-field">
+                    <label>Height</label>
+                    <input type="number" id="gen-height-num" class="gen-num" value="1216" step="8" min="64" max="4096">
+                  </div>
+                </div>
+                <button id="btn-res-swap" class="gen-swap-btn" title="Swap W/H">⇅</button>
+                <div class="gen-batch-col">
+                  <div class="gen-field">
+                    <label>Batch count</label>
+                    <input type="number" id="gen-batch-count-num" class="gen-num" value="1" min="1" max="100">
+                  </div>
+                  <div class="gen-field">
+                    <label>Batch size</label>
+                    <input type="number" id="gen-batch-size-num" class="gen-num" value="1" min="1" max="8">
+                  </div>
+                </div>
+              </div>
+
+              <!-- CFG / Seed -->
+              <div class="gen-row">
+                <div class="gen-field gen-field-xs">
+                  <label>CFG Scale</label>
+                  <input type="number" id="gen-cfg-num" class="gen-num" value="4.5" step="0.5" min="1" max="30">
+                </div>
+                <div class="gen-field" style="flex:3">
+                  <label>Seed</label>
+                  <div class="gen-seed-row">
+                    <input type="number" id="gen-seed" class="gen-num gen-seed-input" value="-1">
+                    <button id="btn-seed-random" class="gen-icon-btn" title="Randomize">🎲</button>
+                    <button id="btn-seed-reuse"  class="gen-icon-btn" title="Reuse last">♻️</button>
+                    <label class="gen-extra-toggle"><input type="checkbox" id="gen-seed-extra"> Extra</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AR & Resolution presets -->
+              <div class="gen-presets-wrap">
+                <div class="gen-presets-label">Aspect Ratio &amp; Resolution</div>
+                <div class="aspect-btns" id="gen-ar-container"></div>
+                <div class="res-btns"    id="gen-res-container"></div>
+              </div>
+
+              <!-- PNG Info Drop Zone -->
+              <div id="gen-png-panel" class="gen-png-panel">
+                <div class="gen-png-panel-title">🖼️ PNG Info</div>
+                <div id="gen-png-actions" class="gen-png-actions" style="display:none">
+                  <button id="btn-gen-png-send-prompt" class="btn-secondary gen-png-btn">📝 Send Prompt</button>
+                  <button id="btn-gen-png-send-gen"    class="btn-secondary gen-png-btn">⚙️ Send Gen Data</button>
+                  <button id="btn-gen-png-clear"       class="btn-secondary gen-png-btn">✕ Clear</button>
+                </div>
+                <div id="gen-png-dropzone" class="gen-png-dropzone">
+                  <span class="gen-png-drop-icon">⬇️</span>
+                  <span class="gen-png-drop-label">画像をドロップ / Drop image here</span>
+                </div>
+                <div id="gen-png-result" class="gen-png-result" style="display:none">
+                  <div class="gen-png-top">
+                    <img id="gen-png-preview" class="gen-png-preview" src="" alt="">
+                    <div class="gen-png-texts">
+                      <div class="gen-png-section">
+                        <div class="gen-png-label">Positive</div>
+                        <div id="gen-png-positive" class="gen-png-text gen-png-pos"></div>
+                      </div>
+                      <div class="gen-png-section" id="gen-png-neg-wrap">
+                        <div class="gen-png-label">Negative</div>
+                        <div id="gen-png-negative" class="gen-png-text gen-png-neg"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="gen-png-section" id="gen-png-params-wrap">
+                    <div class="gen-png-label">Generation Params</div>
+                    <table id="gen-png-params" class="gen-png-table"></table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="divider" id="divider-2"></div>
+
+      <!-- 3. Inspector Pane (Right - grimoire) -->
+      <section class="pane inspector-pane" id="inspector">
+        <div class="pane-header">
+          <span class="pane-title">grimoire</span>
+          <div class="header-actions builder-header-actions">
+            <div class="builder-send-group">
+              <div class="builder-split-btn" id="send-split">
+                <button class="builder-btn-send builder-split-main" id="btn-send-main" data-i18n="btn_generate" title="送信（右クリックまたは▾でオプション）">▶ Send</button>
+                <button class="builder-btn-send builder-split-arrow" id="btn-send-main-arrow" title="送信オプション">▾</button>
+              </div>
+            </div>
+            <button class="builder-btn-clear" id="clear-all" data-i18n="btn_clear_all">Clear</button>
+          </div>
+        </div>
+        <!-- Image Info Panel (Images mode) -->
+        <div id="image-info-panel" class="image-info-panel" style="display:none;">
+          <div class="image-info-placeholder">
+            <span>🖼️</span>
+            <p data-i18n="image_info_placeholder">画像を選択すると生成情報が表示されます</p>
+          </div>
+        </div>
+
+        <div class="pane-content" id="builder-pane-content">
+          <!-- ComfyUI Slots Panel (ComfyUI mode only) -->
+          <div id="comfy-slots-panel" style="display:none;">
+            <div class="comfy-slots-toolbar">
+              <span class="comfy-slots-title">ComfyUI Slots</span>
+              <input type="text" id="quick-add-comfy" class="area-inline-input comfy-quick-add" placeholder="Quick-Add...">
+              <button id="btn-comfy-slots-refresh" class="btn-icon-sm" title="スロット一覧を再取得">↺</button>
+            </div>
+            <div id="comfy-slots-list">
+              <div class="comfy-slots-empty">ComfyUI に接続してスロットを取得してください</div>
+            </div>
+          </div>
+
+          <!-- 1. Positive Chips Area -->
+          <div class="prompt-section">
+            <div class="area-label">
+              <span class="btn-toggle-section" id="toggle-positive">▼</span>
+              <span data-i18n="label_positive_prompt">Positive Prompt</span>
+              <input type="text" id="quick-add-positive" class="area-inline-input" data-i18n="quick_add_placeholder" placeholder="Type tag to add...">
+              <div class="label-actions">
+                <span class="btn-icon-action" id="insert-newline-positive" title="Insert Newline">↵</span>
+                <span class="btn-icon-action" id="clear-positive-inline" title="Clear Positive">🗑️</span>
+                <span class="btn-icon-action" id="copy-positive" title="Copy Positive">📋</span>
+              </div>
+            </div>
+            <div id="positive-chips" class="chip-container"></div>
+          </div>
+
+          <!-- 2. Negative Chips Area -->
+          <div class="prompt-section">
+            <div class="area-label">
+              <span class="btn-toggle-section" id="toggle-negative">▼</span>
+              <span data-i18n="label_negative_prompt">Negative Prompt</span>
+              <input type="text" id="quick-add-negative" class="area-inline-input" data-i18n="quick_add_placeholder" placeholder="Type tag to add...">
+              <div class="label-actions">
+                <span class="btn-icon-action" id="insert-newline-negative" title="Insert Newline">↵</span>
+                <span class="btn-icon-action" id="clear-negative-inline" title="Clear Negative">🗑️</span>
+                <span class="btn-icon-action" id="copy-negative" title="Copy Negative">📋</span>
+              </div>
+            </div>
+            <div id="negative-chips" class="chip-container"></div>
+          </div>
+
+          <!-- 3. Foldable Raw Text Input -->
+          <details class="raw-prompt-details">
+            <summary data-i18n="label_raw_prompt_editor">Raw Prompt Editor</summary>
+            <div class="raw-areas">
+              <div class="prompt-area">
+                <div class="area-label" data-i18n="label_raw_positive">Raw Positive</div>
+                <textarea id="positive-prompt" class="prompt-textarea" placeholder="Constructing prompt..."></textarea>
+              </div>
+              <div class="prompt-area">
+                <div class="area-label" data-i18n="label_raw_negative">Raw Negative</div>
+                <textarea id="negative-prompt" class="prompt-textarea" placeholder="Low quality, bad anatomy..."></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- 4. Prompt Preset Bar -->
+          <div class="prompt-preset-bar">
+            <span class="prompt-preset-label" data-i18n="label_preset">Preset</span>
+            <div class="prompt-preset-combo">
+              <input type="text" id="prompt-preset-input" class="prompt-preset-input" data-i18n="placeholder_preset_name_bar" placeholder="Preset name…" autocomplete="off">
+              <ul id="prompt-preset-dropdown" class="prompt-preset-dropdown" hidden></ul>
+            </div>
+            <button class="btn-icon-action" id="btn-prompt-preset-save" title="Save Preset">💾</button>
+            <button class="btn-icon-action" id="btn-prompt-preset-load" title="Load Preset">📂</button>
+            <button class="btn-icon-action" id="btn-prompt-preset-delete" title="Delete Preset">🗑️</button>
+          </div>
+        </div>
+      </section>
+      </div><!-- /#right-stack -->
+    </main>
+  </div>
+
+  <!-- Add Category Modal -->
+  <dialog class="modal-dialog" id="add-category-modal">
+    <div class="modal-content animate-fade-in">
+      <h2 class="modal-title" id="add-category-title">Add Group</h2>
+      <div class="form-group">
+        <label data-i18n="label_name">Name</label>
+        <input type="text" id="new-category-name" class="modal-input" data-i18n="placeholder_category_name" placeholder="e.g. Character, Atmosphere" autocomplete="off">
+      </div>
+      <input type="hidden" id="edit-category-id">
+
+      <div class="modal-actions">
+        <button id="btn-delete-cat" class="btn-secondary hidden" style="color: #fb7185; border-color: rgba(251, 113, 133, 0.4); background: rgba(251, 113, 133, 0.1);" data-i18n="btn_delete">Delete</button>
+        <button id="btn-cancel-add-cat" class="btn-secondary" data-i18n="btn_cancel">Cancel</button>
+        <button id="btn-save-add-cat" class="btn-primary" data-i18n="btn_save_category">Save Group</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Add Tag / Subgroup Modal -->
+  <dialog id="add-tag-modal" class="modal-dialog">
+    <div class="modal-content animate-fade-in">
+      <h2 id="add-tag-title">Add Tag</h2>
+      <div class="form-group" id="fg-subgroup-name" style="display: none;">
+        <label data-i18n="label_subgroup_name">Subgroup Name</label>
+        <input type="text" id="new-subgroup-name" class="modal-input" data-i18n="placeholder_subgroup_name" placeholder="e.g. Time of Day" autocomplete="off" autofocus>
+      </div>
+      <div class="form-group" id="fg-group-color" style="display: none;">
+        <label>Group Color</label>
+        <div id="group-color-palette" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+          <!-- Color options will be populated by JS -->
+        </div>
+        <input type="hidden" id="new-group-color">
+      </div>
+      <div class="form-group" id="fg-tag-key">
+        <label data-i18n="label_tag_key">Tag Display Name (Key)</label>
+        <input type="text" id="new-tag-key" class="modal-input" data-i18n="placeholder_tag_key" placeholder="e.g. morning" autocomplete="off" autofocus>
+      </div>
+      <div class="form-group" id="fg-tag-val">
+        <label data-i18n="label_tag_val">Tag Value (Prompt)</label>
+        <input type="text" id="new-tag-val" class="modal-input" data-i18n="placeholder_tag_val" placeholder="e.g. morning, bright sunlight" autocomplete="off">
+      </div>
+
+      <!-- Target Category / Group Selector (Reverted to Searchable Input) -->
+      <div class="form-group" id="fg-tag-group-move" style="margin-top: 1rem;">
+        <label data-i18n="tag_target_group">Target Group</label>
+        <div class="searchable-select-container">
+          <input type="text" id="tag-move-search" class="modal-input searchable-select-input" data-i18n="placeholder_search_categories" placeholder="Search groups..." autocomplete="off">
+          <div id="tag-move-dropdown" class="searchable-select-dropdown hidden"></div>
+        </div>
+      </div>
+      <input type="hidden" id="add-target-cat">
+      <input type="hidden" id="add-target-group">
+      <input type="hidden" id="add-mode">
+      <input type="hidden" id="edit-tag-id">
+
+      <!-- Additional Metadata / Tag Preview -->
+      <div id="tag-edit-assets" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;" data-i18n="label_preview_image">Preview Image</label>
+        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+          <div id="edit-tag-img-preview" style="width: 100px; height: 100px; border-radius: 8px; background: var(--slate-900); border: 1px dashed var(--slate-700); background-size: cover; background-position: center; flex-shrink: 0;"></div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+            <button id="btn-select-tag-img" class="btn-secondary" style="font-size: 0.75rem; width: 100%;" data-i18n="btn_change_image">Change Image</button>
+            <button id="btn-remove-tag-img" class="btn-secondary hidden" style="font-size: 0.75rem; width: 100%; color: #fb7185;" data-i18n="btn_remove_img">Remove Image</button>
+            <p style="font-size: 0.7rem; color: var(--slate-500);" data-i18n="hint_drag_image">You can also drag an image file onto the tag box in the grid.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-delete-item" class="btn-secondary hidden" style="color: #fb7185; border-color: rgba(251, 113, 133, 0.4); background: rgba(251, 113, 133, 0.1);" data-i18n="btn_delete">Delete</button>
+        <button id="btn-cancel-add-tag" class="btn-secondary" data-i18n="btn_cancel">Cancel</button>
+        <button id="btn-save-add-tag" class="btn-primary" data-i18n="btn_save">Save</button>
+      </div>
+    </div>
+    <!-- Danbooru autocomplete must be inside the dialog to appear above the top-layer -->
+    <div id="autocomplete-list-modal" class="ac-list hidden"></div>
+  </dialog>
+
+  <!-- Settings Modal -->
+  <dialog id="settings-modal" class="modal-dialog">
+    <div class="modal-content animate-fade-in settings-modal-content">
+      <div class="settings-layout">
+
+        <!-- Left Nav -->
+        <nav class="settings-nav">
+          <div class="settings-nav-title" data-i18n="settings_title">Settings</div>
+          <div class="settings-nav-item active" data-tab="appearance">
+            <span class="snav-icon">🎨</span> <span data-i18n="tab_design">デザイン</span>
+          </div>
+          <div class="settings-nav-item" data-tab="paths">
+            <span class="snav-icon">📁</span> <span data-i18n="tab_paths">Paths</span>
+          </div>
+          <div class="settings-nav-item" data-tab="civitai">
+            <span class="snav-icon">🌐</span> <span data-i18n="tab_civitai">CivitAI</span>
+          </div>
+          <div class="settings-nav-item" data-tab="generation">
+            <span class="snav-icon">⚙️</span> <span data-i18n="tab_generation">Generation</span>
+          </div>
+          <div class="settings-nav-item" data-tab="advanced">
+            <span class="snav-icon">🔧</span> <span data-i18n="tab_advanced">Advanced</span>
+          </div>
+          <div class="settings-nav-item" data-tab="ai">
+            <span class="snav-icon">✨</span> <span data-i18n="tab_ai_settings">AI 生成</span>
+          </div>
+          <div class="settings-nav-item" data-tab="shortcuts">
+            <span class="snav-icon">⌨️</span> <span data-i18n="tab_shortcuts">ショートカット</span>
+          </div>
+        </nav>
+
+        <!-- Right Content -->
+        <div class="settings-body">
+
+          <!-- Tab: Paths -->
+          <div class="settings-tab" id="stab-paths">
+            <h3 class="stab-title" data-i18n="tab_paths">Paths</h3>
+            <div class="stab-section-label" data-i18n="section_tags_path">Tags</div>
+            <div class="form-group">
+              <label data-i18n="label_tags_folder">Tags Folder</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-tags" class="modal-input" placeholder="Path to tag YAML files" autofocus>
+                <button id="btn-browse-tags" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <button id="btn-reimport-yaml" class="btn-secondary" data-i18n="btn_reimport_yaml">YAMLから再インポート</button>
+              <p class="field-hint" data-i18n="hint_reimport_yaml">タグフォルダのYAMLを読み込み直し、現在のタグデータを上書きします。</p>
+            </div>
+            <div class="form-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="setting-yaml-autosave">
+                <span data-i18n="label_yaml_autosave">YAML 自動保存</span>
+              </label>
+              <p class="field-hint" data-i18n="hint_yaml_autosave">ON にすると、タグ・グループの変更のたびに YAML を自動で上書き保存します。</p>
+            </div>
+            <div class="stab-section-label" style="margin-top:1.25rem;" data-i18n="section_output_images">Output Images</div>
+            <div class="form-group">
+              <label data-i18n="label_output_images_folder">生成画像フォルダ</label>
+              <p class="field-hint" data-i18n="hint_output_images_folder">🖼️ Images モードで表示する生成画像の保存先フォルダ</p>
+              <div class="input-with-btn">
+                <input type="text" id="setting-output-images" class="modal-input" placeholder="L:\AI\StabilityMatrix\Data\Images">
+                <button id="btn-browse-output-images" class="btn-secondary">Browse…</button>
+              </div>
+            </div>
+            <div class="stab-section-label" style="margin-top:1.25rem;" data-i18n="section_assets">Assets</div>
+            <div class="form-group">
+              <label>LoRA</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-lora" class="modal-input" placeholder="C:\...\loras">
+                <button id="btn-browse-lora" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Embeddings</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-embedding" class="modal-input" placeholder="C:\...\embeddings">
+                <button id="btn-browse-embedding" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_checkpoints">Checkpoints</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-checkpoint" class="modal-input" placeholder="L:\...\StableDiffusion">
+                <button id="btn-browse-checkpoint" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>VAE</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-vae" class="modal-input" placeholder="L:\...\VAE">
+                <button id="btn-browse-vae" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_upscalers">Upscalers (ESRGAN)</label>
+              <div class="input-with-btn">
+                <input type="text" id="setting-upscaler" class="modal-input" placeholder="L:\...\Upscalers">
+                <button id="btn-browse-upscaler" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: CivitAI -->
+          <div class="settings-tab" id="stab-civitai">
+            <h3 class="stab-title" data-i18n="tab_civitai">CivitAI</h3>
+            <div class="form-group">
+              <label><span data-i18n="label_api_key">API Key</span> <span class="label-hint" data-i18n="label_optional">optional</span></label>
+              <input type="password" id="setting-civitai-key" class="modal-input" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+              <p class="field-hint" data-i18n="hint_civitai_key">civitai.com → Account Settings → API Keys</p>
+            </div>
+            <div class="form-group">
+              <label>Domain</label>
+              <select id="setting-civitai-domain" class="modal-input" style="max-width:220px;">
+                <option value="auto">Auto (civitai.com → civitai.red fallback)</option>
+                <option value="civitai.com">civitai.com only</option>
+                <option value="civitai.red">civitai.red only</option>
+              </select>
+              <p class="field-hint" data-i18n="civitai_domain_hint">Auto: tries civitai.com, falls back to civitai.red</p>
+            </div>
+          </div>
+
+          <!-- Tab: Appearance -->
+          <div class="settings-tab active" id="stab-appearance">
+            <h3 class="stab-title" data-i18n="tab_design">デザイン</h3>
+            <div class="form-group">
+              <label data-i18n="label_theme">Theme</label>
+              <select id="setting-theme" class="modal-input" style="max-width:200px;">
+                <option value="dark">Navy</option>
+                <option value="light">White</option>
+                <option value="black">Black</option>
+                <option value="gray">Gray</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label data-i18n="setting_lang">Language</label>
+              <select id="setting-language" class="modal-input" style="max-width:200px;">
+                <option value="ja">日本語 (Japanese)</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="stab-section-label" style="margin-top:1.25rem;" data-i18n="section_cat_colors">Group Colors</div>
+            <div id="settings-group-colors" style="display:flex; flex-direction:column; gap:0.5rem;">
+              <!-- Group color rows will be injected here -->
+            </div>
+            <div class="stab-section-label" style="margin-top:1.25rem;">Custom Colors</div>
+            <div class="form-group">
+              <label>Add Custom Color</label>
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <input type="color" id="custom-color-picker" class="modal-input" style="width:60px; height:40px; border:none; cursor:pointer;">
+                <button id="btn-add-custom-color" class="btn-secondary">＋ Add</button>
+              </div>
+            </div>
+            <div id="settings-custom-colors" style="display:flex; flex-direction:column; gap:0.5rem;">
+              <!-- Custom colors will be listed here -->
+            </div>
+          </div>
+
+          <!-- Tab: Generation -->
+          <div class="settings-tab" id="stab-generation">
+            <h3 class="stab-title" data-i18n="tab_generation">Generation</h3>
+
+            <div class="form-group">
+              <label data-i18n="label_webui_url">WebUI API URL</label>
+              <p class="field-hint" data-i18n="hint_webui_url">Stable Diffusion WebUI address (must be started with --api flag)</p>
+              <input type="text" id="setting-webui-url" class="modal-input" placeholder="http://127.0.0.1:7860">
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_send_webui">Send on WebUI button</label>
+              <div class="toggle-row">
+                <label class="toggle-label">
+                  <input type="checkbox" id="setting-send-prompt"> <span data-i18n="label_send_prompt">Send Prompt (positive / negative)</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="setting-send-gen"> <span data-i18n="label_send_gen">Send Generation Settings (checkpoint, steps, size…)</span>
+                </label>
+              </div>
+            </div>
+            <hr class="settings-divider">
+
+            <div class="form-group">
+              <label data-i18n="label_comfy_url">ComfyUI URL</label>
+              <p class="field-hint" data-i18n="hint_comfy_url">ComfyUI のアドレス（comfyui-grimoire-bridge カスタムノードが必要）</p>
+              <input type="text" id="setting-comfy-url" class="modal-input" placeholder="http://127.0.0.1:8188">
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_comfy_default_slot">デフォルト送信スロット</label>
+              <p class="field-hint" data-i18n="hint_comfy_default_slot">Comfy ボタンクリックで即送信する GrimoireSlot のスロット名（▾メニューから別スロットへの送信も可）</p>
+              <input type="text" id="setting-comfy-default-slot" class="modal-input" placeholder="slot_1">
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_comfy_gen_slot">Gen スロット名</label>
+              <p class="field-hint" data-i18n="hint_comfy_gen_slot">gen設定を送信する GrimoireGenParams ノードのスロット名</p>
+              <input type="text" id="setting-comfy-gen-slot" class="modal-input" placeholder="gen_1">
+            </div>
+            <hr class="settings-divider">
+
+            <div class="form-group">
+              <label data-i18n="label_gen_presets_folder">Generation Presets Folder</label>
+              <p class="field-hint" data-i18n="hint_gen_presets_folder">Folder where generation presets (.json) are stored</p>
+              <div class="input-with-btn">
+                <input type="text" id="setting-gen-presets" class="modal-input" placeholder="C:\...\gen_presets">
+                <button id="btn-browse-gen-presets" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_custom_ars">Custom Aspect Ratios</label>
+              <p class="field-hint" data-i18n="hint_custom_ars">Comma separated, e.g. 1:1, 4:3, 16:9</p>
+              <textarea id="setting-custom-ars" class="modal-input" style="height:70px; font-family:monospace; font-size:0.8rem;" placeholder="1:1, 4:3, 16:9..."></textarea>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_custom_res">Custom Resolutions</label>
+              <p class="field-hint" data-i18n="hint_custom_res">Comma separated, e.g. 1024x1024, 1216x832</p>
+              <textarea id="setting-custom-res" class="modal-input" style="height:110px; font-family:monospace; font-size:0.8rem;" placeholder="1024x1024, 1216x832..."></textarea>
+            </div>
+          </div>
+
+          <!-- Tab: Advanced -->
+          <div class="settings-tab" id="stab-advanced">
+            <h3 class="stab-title" data-i18n="tab_advanced">Advanced</h3>
+            <div class="form-group">
+              <label data-i18n="label_layout">Layout</label>
+              <button id="btn-reset-layout-ui" class="btn-secondary" style="color:#fb7185; border-color:rgba(251,113,133,0.3);" data-i18n="btn_reset_layout">🧹 Reset Layout to Default</button>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_multi_instance">多重起動</label>
+              <label class="toggle-label">
+                <input type="checkbox" id="setting-allow-multi-instance">
+                <span data-i18n="label_allow_multi_instance">複数のウィンドウを同時に起動できるようにする</span>
+              </label>
+              <p class="setting-hint" data-i18n="hint_restart_required">変更後は再起動が必要です</p>
+            </div>
+            <div class="form-group">
+              <label data-i18n="label_danbooru_suggest">Danbooru Suggestions</label>
+              <label class="toggle-label">
+                <input type="checkbox" id="setting-danbooru-underscore" checked>
+                <span data-i18n="danbooru_underscore_convert">Convert underscores to spaces on selection</span>
+              </label>
+              <button id="btn-reset-danbooru-history" class="btn-secondary" style="margin-top:0.5rem; color:#fb7185; border-color:rgba(251,113,133,0.3);" data-i18n="btn_reset_danbooru_history">🗑️ Reset Usage Counts</button>
+            </div>
+          </div>
+
+          <!-- Tab: AI Prompt Generation -->
+          <div class="settings-tab" id="stab-ai">
+            <h3 class="stab-title" data-i18n="tab_ai_settings">AI 生成</h3>
+            <!-- Ollama -->
+            <div class="ai-provider-card">
+              <div class="ai-provider-header-static">
+                <span class="ai-prov-icon">🖥️</span>
+                <span class="ai-prov-name">Ollama <span class="ai-prov-badge" data-i18n="ai_badge_local">ローカル・無料</span></span>
+              </div>
+              <div class="ai-provider-fields">
+                <div class="form-group" style="margin:0">
+                  <label data-i18n="ai_settings_url">URL</label>
+                  <input type="text" id="setting-ai-ollama-url" class="modal-input" placeholder="http://localhost:11434">
+                </div>
+                <div class="form-group" style="margin:0">
+                  <label><span data-i18n="ai_settings_model">モデル</span> <span class="ai-field-hint" data-i18n="ai_settings_ollama_hint">（例: llama3, mistral）</span></label>
+                  <input type="text" id="setting-ai-ollama-model" class="modal-input" placeholder="llama3">
+                </div>
+              </div>
+            </div>
+
+            <!-- Claude -->
+            <div class="ai-provider-card">
+              <div class="ai-provider-header-static">
+                <span class="ai-prov-icon">🤖</span>
+                <span class="ai-prov-name">Claude API <span class="ai-prov-badge ai-prov-badge-api">Anthropic</span></span>
+              </div>
+              <div class="ai-provider-fields">
+                <div class="form-group" style="margin:0">
+                  <label data-i18n="ai_settings_api_key">API キー</label>
+                  <input type="password" id="setting-claude-apikey" class="modal-input" placeholder="sk-ant-...">
+                </div>
+                <div class="form-group" style="margin:0">
+                  <label><span data-i18n="ai_settings_model">モデル</span> <span class="ai-field-hint" data-i18n="ai_settings_claude_hint">（空欄 = claude-haiku-4-5）</span></label>
+                  <input type="text" id="setting-claude-model" class="modal-input" placeholder="claude-haiku-4-5">
+                </div>
+              </div>
+            </div>
+
+            <!-- OpenAI -->
+            <div class="ai-provider-card">
+              <div class="ai-provider-header-static">
+                <span class="ai-prov-icon">🌐</span>
+                <span class="ai-prov-name">OpenAI API <span class="ai-prov-badge ai-prov-badge-api">OpenAI</span></span>
+              </div>
+              <div class="ai-provider-fields">
+                <div class="form-group" style="margin:0">
+                  <label data-i18n="ai_settings_api_key">API キー</label>
+                  <input type="password" id="setting-openai-apikey" class="modal-input" placeholder="sk-...">
+                </div>
+                <div class="form-group" style="margin:0">
+                  <label><span data-i18n="ai_settings_model">モデル</span> <span class="ai-field-hint" data-i18n="ai_settings_openai_hint">（空欄 = gpt-4o-mini）</span></label>
+                  <input type="text" id="setting-openai-model" class="modal-input" placeholder="gpt-4o-mini">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Shortcuts -->
+          <div class="settings-tab" id="stab-shortcuts">
+            <h3 class="stab-title">⌨️ <span data-i18n="tab_shortcuts">ショートカット</span></h3>
+            <p class="field-hint" style="margin-bottom:1rem;" data-i18n="sc_hint">バインディングをクリックして新しいキーを押すと変更できます。Backspace で無効化。</p>
+            <div id="sc-table-root"></div>
+          </div>
+
+          <!-- Footer Actions (always visible) -->
+          <div class="settings-footer">
+            <button id="btn-cancel-settings" class="btn-secondary" data-i18n="btn_cancel">Cancel</button>
+            <button id="btn-save-settings" class="btn-primary" data-i18n="btn_save">Save</button>
+          </div>
+
+        </div><!-- /.settings-body -->
+      </div><!-- /.settings-layout -->
+    </div>
+  </dialog>
+
+  <!-- Other existing modals (keeping for compatibility) -->
+
+  <!-- 5. Selection HUD -->
+  <div id="selection-hud">
+    <div class="hud-count"><span id="hud-count-val">0</span> <span data-i18n="hud_items_selected">items selected</span></div>
+    <div class="hud-actions">
+      <button id="btn-hud-register" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 20px;" data-i18n="btn_hud_register">📌 タグを登録</button>
+      <button id="btn-hud-star" class="btn-primary" style="padding: 0.5rem 1rem; border-radius: 20px;" data-i18n="btn_bulk_star">★ Bulk Star</button>
+      <button id="btn-hud-delete" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 20px; color:#fb7185;" data-i18n="btn_bulk_delete">🗑 Bulk Delete</button>
+    </div>
+  </div>
+
+  <!-- 6. Custom Alert/Confirm Dialog -->
+  <dialog id="alert-modal" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width: 400px;">
+      <p id="alert-message" style="margin-bottom: 2rem; line-height: 1.6; color: var(--text-primary);"></p>
+      <div class="modal-actions" id="alert-actions" style="justify-content: flex-end; gap: 1rem;">
+        <button id="btn-alert-cancel" class="btn-secondary hidden">Cancel</button>
+        <button id="btn-alert-ok" class="btn-primary">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 7. Custom Context Menu -->
+  <div id="custom-context-menu">
+    <!-- Tag mode items -->
+    <div id="menu-tag-items">
+      <div class="menu-item" id="menu-add-tag" data-i18n="btn_add_tag">➕ Add Tag</div>
+      <div class="menu-item" id="menu-add-group" data-i18n="btn_add_group">📂 Add Subgroup</div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" id="menu-rename" data-i18n="btn_edit">✏️ Edit</div>
+      <div id="menu-cat-only">
+          <div class="menu-sep"></div>
+          <div style="padding: 0.4rem 1rem; font-size: 0.8rem; color: var(--text-secondary);">GROUP COLOR</div>
+          <div class="color-grid" id="menu-color-grid"></div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" id="menu-delete" style="color: #fb7185;" data-i18n="btn_delete">🗑 Delete Item</div>
+    </div>
+    <!-- Asset folder items -->
+    <div id="menu-asset-items" style="display:none;">
+      <div class="menu-item" id="menu-asset-new-subfolder">📁 New Subfolder</div>
+      <div class="menu-item" id="menu-asset-rename-folder">✏️ Rename Folder</div>
+    </div>
+    <!-- Asset card items -->
+    <div id="menu-asset-card-items" style="display:none;">
+      <div class="menu-item" id="menu-asset-edit-settings" data-i18n="menu_asset_edit_settings">✏️ Edit Recommended Settings</div>
+      <div class="menu-separator" id="menu-asset-edit-settings-sep"></div>
+      <div class="menu-item" id="menu-asset-fetch-civitai" data-i18n="menu_asset_fetch_civitai">🔍 Fetch Info (CivitAI)</div>
+      <div class="menu-item" id="menu-asset-open-civitai-page" data-i18n="menu_asset_open_civitai_page">🌐 Open CivitAI Page</div>
+      <div class="menu-separator"></div>
+      <div class="menu-item" id="menu-asset-move-to">📦 Move to Folder...</div>
+      <div class="menu-separator"></div>
+      <div class="menu-item" id="menu-asset-delete" style="color:#fb7185;" data-i18n="menu_asset_delete_file">🗑 Delete File</div>
+    </div>
+    <!-- Gen preset folder items -->
+    <div id="menu-gen-preset-folder-items" style="display:none;">
+      <div class="menu-item" id="menu-gen-preset-new-folder">📁 New Subfolder</div>
+      <div class="menu-item" id="menu-gen-preset-rename-folder">✏️ Rename Folder</div>
+      <div class="menu-item" id="menu-gen-preset-delete-folder" style="color:#fb7185;">🗑 Delete Folder</div>
+    </div>
+    <!-- Gen preset file items -->
+    <div id="menu-gen-preset-file-items" style="display:none;">
+      <div class="menu-item" id="menu-gen-preset-rename-file">✏️ Rename</div>
+      <div class="menu-item" id="menu-gen-preset-delete-file" style="color:#fb7185;">🗑 Delete</div>
+    </div>
+  </div>
+
+  <!-- Other dialogs... -->
+  <dialog id="asset-folder-picker" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width: 420px;">
+      <h3 class="modal-title" style="margin-bottom:1rem;">Move to Folder</h3>
+      <div id="folder-picker-list" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:0.25rem; margin-bottom:1.5rem;"></div>
+      <div class="modal-actions">
+        <button id="btn-folder-picker-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-folder-picker-confirm" class="btn-primary">Move</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="asset-conflict-dialog" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width:400px;">
+      <h3 style="margin:0 0 0.75rem; font-size:1rem;">File Already Exists</h3>
+      <p id="conflict-dialog-msg" style="color:var(--text-secondary); font-size:0.875rem; margin:0 0 1.5rem; line-height:1.6;"></p>
+      <div class="modal-actions" style="gap:0.5rem;">
+        <button id="btn-conflict-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-conflict-rename" class="btn-secondary">Rename <span style="opacity:0.6; font-size:0.8em;">(1)</span></button>
+        <button id="btn-conflict-overwrite" class="btn-primary" style="background:rgba(251,113,133,0.15); border-color:rgba(251,113,133,0.4); color:#fb7185;">Overwrite</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="confirm-dialog" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width:360px;">
+      <p id="confirm-dialog-message" style="margin:0 0 1.2rem; font-size:0.95rem; line-height:1.5;"></p>
+      <div class="modal-actions" style="margin-top:0;">
+        <button type="button" id="btn-confirm-dialog-cancel" class="btn-secondary">Cancel</button>
+        <button type="button" id="btn-confirm-dialog-ok" class="btn-primary btn-danger">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="input-dialog" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width:360px;">
+      <h3 id="input-dialog-title" style="margin:0 0 1rem; font-size:1rem;"></h3>
+      <input type="text" id="input-dialog-field" class="modal-input" autocomplete="off">
+      <div class="modal-actions" style="margin-top:1rem;">
+        <button type="button" id="btn-input-dialog-cancel" class="btn-secondary">Cancel</button>
+        <button type="button" id="btn-input-dialog-confirm" class="btn-primary">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="save-gen-preset-dialog" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="max-width:380px;">
+      <h3 style="margin:0 0 1rem; font-size:1rem;">Save Generation Preset</h3>
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label style="font-size:0.75rem; color:var(--slate-400);">Name</label>
+        <input type="text" id="gen-preset-name-input" class="modal-input" placeholder="My Preset" autocomplete="off">
+      </div>
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label style="font-size:0.75rem; color:var(--slate-400);">Folder <span style="opacity:0.5;">(optional)</span></label>
+        <select id="gen-preset-folder-select" class="modal-input" style="font-size:0.85rem;">
+          <option value="">/ (root)</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-gen-preset-cancel" class="btn-secondary">Cancel</button>
+        <button type="button" id="btn-gen-preset-confirm" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="import-yaml-modal" class="modal-dialog">
+    <div class="modal-content animate-fade-in" style="min-width:420px;max-width:560px;">
+      <h2 class="modal-title" data-i18n="yaml_import_title">YAMLインポート</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.75rem;" data-i18n="yaml_import_hint">インポートするカテゴリを選択してください。既存カテゴリは上書きされます。</p>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+        <button id="import-yaml-check-all" class="btn-secondary" style="font-size:0.78rem;padding:2px 8px;" data-i18n="yaml_select_all">全選択</button>
+        <button id="import-yaml-uncheck-all" class="btn-secondary" style="font-size:0.78rem;padding:2px 8px;" data-i18n="yaml_uncheck_all">全解除</button>
+      </div>
+      <div id="import-yaml-list" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:0.5rem;display:flex;flex-direction:column;gap:4px;"></div>
+      <div class="modal-actions" style="margin-top:1rem;">
+        <button id="import-yaml-confirm" class="btn-primary" data-i18n="yaml_import_btn">インポート</button>
+        <button id="import-yaml-cancel" class="btn-secondary" data-i18n="btn_cancel">キャンセル</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Checkpoint Recommended Settings Editor -->
+  <dialog id="checkpoint-edit-dialog" class="modal-dialog">
+    <div class="modal-content cp-edit-modal" style="min-width:640px;max-width:820px;width:min(820px,95vw);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h2 class="modal-title" style="margin:0;font-size:1rem;">Checkpoint: <span id="checkpoint-edit-name">—</span></h2>
+        <button id="checkpoint-edit-close" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.2rem;line-height:1;padding:2px 6px;">✕</button>
+      </div>
+
+      <!-- CivitAI sample images -->
+      <div id="checkpoint-edit-images-section" style="margin-bottom:0.85rem;">
+        <div class="cp-edit-section-label">CivitAI Sample Images <span style="opacity:0.6;">(click to auto-fill from PNG info)</span></div>
+        <div id="checkpoint-edit-images" class="cp-edit-images-grid"></div>
+      </div>
+
+      <!-- Positive / Negative -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+        <div>
+          <label class="cp-edit-label">Positive Prompt</label>
+          <textarea id="checkpoint-edit-positive" class="cp-edit-textarea" rows="5" placeholder="Recommended positive prompt…"></textarea>
+        </div>
+        <div>
+          <label class="cp-edit-label">Negative Prompt</label>
+          <textarea id="checkpoint-edit-negative" class="cp-edit-textarea" rows="5" placeholder="Recommended negative prompt…"></textarea>
+        </div>
+      </div>
+
+      <!-- Gen Data -->
+      <details class="cp-edit-details" open>
+        <summary class="cp-edit-summary">Generation Settings</summary>
+        <div class="cp-edit-gen-grid">
+          <div class="cp-edit-field">
+            <label>Sampler</label>
+            <input id="checkpoint-edit-sampler" class="cp-edit-input" type="text" placeholder="e.g. Euler a">
+          </div>
+          <div class="cp-edit-field">
+            <label>Schedule</label>
+            <input id="checkpoint-edit-schedule" class="cp-edit-input" type="text" placeholder="e.g. Karras">
+          </div>
+          <div class="cp-edit-field">
+            <label>Steps</label>
+            <input id="checkpoint-edit-steps" class="cp-edit-input" type="number" min="1" max="150">
+          </div>
+          <div class="cp-edit-field">
+            <label>CFG Scale</label>
+            <input id="checkpoint-edit-cfg" class="cp-edit-input" type="number" step="0.5" min="1">
+          </div>
+          <div class="cp-edit-field">
+            <label>Seed</label>
+            <input id="checkpoint-edit-seed" class="cp-edit-input" type="number">
+          </div>
+          <div class="cp-edit-field">
+            <label>Width</label>
+            <input id="checkpoint-edit-width" class="cp-edit-input" type="number" step="8" min="64">
+          </div>
+          <div class="cp-edit-field">
+            <label>Height</label>
+            <input id="checkpoint-edit-height" class="cp-edit-input" type="number" step="8" min="64">
+          </div>
+          <div class="cp-edit-field">
+            <label>Clip Skip</label>
+            <input id="checkpoint-edit-clipskip" class="cp-edit-input" type="number" min="1" max="12">
+          </div>
+          <div class="cp-edit-field" style="grid-column:1/-1;display:flex;align-items:center;gap:0.5rem;padding-top:0.25rem;">
+            <input type="checkbox" id="checkpoint-edit-hires-enabled" style="width:14px;height:14px;">
+            <label for="checkpoint-edit-hires-enabled" style="margin:0;font-size:0.82rem;color:var(--text-secondary);">Enable Hires Fix</label>
+          </div>
+          <div class="cp-edit-field">
+            <label>Hires Upscaler</label>
+            <input id="checkpoint-edit-hires-upscaler" class="cp-edit-input" type="text" placeholder="e.g. 4x-UltraSharp">
+          </div>
+          <div class="cp-edit-field">
+            <label>Hires Steps</label>
+            <input id="checkpoint-edit-hires-steps" class="cp-edit-input" type="number" min="0">
+          </div>
+          <div class="cp-edit-field">
+            <label>Hires Denoise</label>
+            <input id="checkpoint-edit-hires-denoise" class="cp-edit-input" type="number" step="0.05" min="0" max="1" placeholder="0.0–1.0">
+          </div>
+        </div>
+      </details>
+
+      <div class="modal-actions" style="margin-top:1rem;">
+        <button id="checkpoint-edit-cancel" class="btn-secondary">Cancel</button>
+        <button id="checkpoint-edit-apply" class="btn-secondary">▶ Apply Now</button>
+        <button id="checkpoint-edit-save" class="btn-primary">💾 Save Settings</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="./src/main.js"></script>
+  <!-- Chip Info Popup (Dynamic) -->
+  <div id="chip-info-popup"></div>
+  <!-- Global Autocomplete Dropdown -->
+  <div id="autocomplete-list" class="ac-list hidden"></div>
+</body>
+</html>

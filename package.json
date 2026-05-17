@@ -1,0 +1,63 @@
+{
+  "name": "grimoire",
+  "version": "1.0.0",
+  "description": "Prompt library & builder for Stable Diffusion / ComfyUI",
+  "main": "dist-electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win portable"
+  },
+  "keywords": ["stable-diffusion", "comfyui", "prompt", "ai-art"],
+  "author": "",
+  "license": "MIT",
+  "build": {
+    "appId": "com.grimoire.app",
+    "productName": "grimoire",
+    "asar": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "preload-bridge.js"
+    ],
+    "extraResources": [
+      {
+        "from": "data",
+        "to": "data",
+        "filter": ["**/*", "!fav_image/**", "!tag_images/**", "!yaml_backups/**"]
+      },
+      {
+        "from": "tag",
+        "to": "tag"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "src/assets/icon.ico"
+    },
+    "portable": {
+      "artifactName": "grimoire-${version}-portable.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.0.0",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "sortablejs": "^1.15.7"
+  }
+}

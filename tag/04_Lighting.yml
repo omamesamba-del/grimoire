@@ -1,0 +1,20 @@
+Natural:
+  golden hour: golden hour
+  sunlight: sunlight
+  dappled light: dappled light
+  blue hour: blue hour
+  overcast: overcast sky
+
+Artificial:
+  studio lighting: studio lighting
+  rim lighting: rim lighting
+  neon light: neon lights
+  candlelight: candlelight
+  moonlight: moonlight
+
+Quality:
+  soft light: soft lighting
+  hard light: hard lighting
+  backlight: backlighting
+  volumetric lighting: volumetric lighting
+  dramatic lighting: dramatic lighting

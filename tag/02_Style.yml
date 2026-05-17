@@ -1,0 +1,33 @@
+Illustration:
+  anime style: anime style
+  manga style: manga style
+  cel shading: cel shading
+  flat color: flat color
+  lineart: lineart
+
+Realistic:
+  photorealistic: photorealistic
+  hyperrealistic: hyperrealistic
+  cinematic: cinematic
+  RAW photo: RAW photo
+  film grain: film grain
+
+Artistic:
+  oil painting: oil painting
+  watercolor: watercolor painting
+  pencil sketch: pencil sketch
+  digital art: digital art
+  concept art: concept art
+  impressionist: impressionism
+
+3D / Render:
+  3D render: 3d render
+  octane render: octane render
+  unreal engine: unreal engine
+  ray tracing: ray tracing
+
+Special:
+  pixel art: pixel art
+  chibi: chibi
+  monochrome: monochrome
+  silhouette: silhouette

@@ -1,0 +1,65 @@
+Body:
+  Face:
+    Eyes:
+      blue eyes: blue eyes
+      red eyes: red eyes
+      green eyes: green eyes
+      heterochromia: heterochromia
+    Hair:
+      Color:
+        blonde hair: blonde hair
+        black hair: black hair
+        white hair: white hair
+        silver hair: silver hair
+        pink hair: pink hair
+      Length:
+        long hair: long hair
+        short hair: short hair
+        medium hair: medium hair
+        twin tails: twintails
+      Style:
+        wavy hair: wavy hair
+        straight hair: straight hair
+        curly hair: curly hair
+        braided hair: braid
+  Figure:
+    Build:
+      slender: slender
+      athletic: athletic build
+    Pose:
+      standing: standing
+      sitting: sitting
+      lying down: lying
+      arms crossed: crossed arms
+
+Outfit:
+  Casual:
+    Top:
+      t-shirt: t-shirt
+      hoodie: hoodie
+      sweater: sweater
+    Bottom:
+      jeans: jeans
+      skirt: skirt
+      shorts: shorts
+  Formal:
+    Uniform:
+      school uniform: school uniform
+      military uniform: military uniform
+      maid outfit: maid outfit
+    Suit:
+      business suit: business suit
+      dress: dress
+
+Expression:
+  Positive:
+    smile: smile
+    laugh: laughing
+    happy: happy
+  Neutral:
+    expressionless: expressionless
+    serious: serious
+  Negative:
+    sad: sad
+    angry: angry
+    crying: tears
