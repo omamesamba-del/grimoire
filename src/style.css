@@ -720,6 +720,16 @@ body.app-loading #image-info-panel {
   gap: 4px;
   padding: 4px 8px 2px;
 }
+.comfy-slot-drag {
+  font-size: 1rem;
+  opacity: 0.3;
+  cursor: grab;
+  padding: 0 6px 0 2px;
+  user-select: none;
+  line-height: 1;
+}
+.comfy-slot-drag:hover { opacity: 0.7; }
+.comfy-slot-drag:active { cursor: grabbing; }
 .comfy-slot-name {
   font-size: 0.72rem;
   font-weight: 700;
