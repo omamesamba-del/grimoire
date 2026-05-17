@@ -90,6 +90,8 @@ export async function loadComfySlots() {
     if (_sortable) { try { _sortable.destroy(); } catch (_) {} }
     _sortable = new Sortable(list, {
         handle: '.comfy-slot-drag',
+        draggable: '.comfy-slot-row',
+        group: { name: 'comfy-slots', pull: false, put: false },
         animation: 150,
         ghostClass: 'sortable-ghost',
         onEnd: () => {
