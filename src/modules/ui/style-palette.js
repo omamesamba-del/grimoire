@@ -399,7 +399,7 @@ function _buildEditorDialog() {
     dlg.innerHTML = `
         <div class="spe-content">
             <div class="spe-header">
-                <span class="spe-title">Style Palette 編集</span>
+                <span class="spe-title">${i18n.t('style_edit_title')}</span>
                 <button class="spe-close-x" id="spe-close-x" onclick="document.getElementById('spe-dialog').close()">✕</button>
             </div>
             <div class="spe-tabs" id="spe-tabs"></div>
@@ -452,7 +452,7 @@ function _renderEditorBody(tabKey) {
                        placeholder="${isColor ? i18n.t('style_edit_val_ph') : i18n.t('style_edit_mat_val_ph')}" autocomplete="off">
                 <div id="spe-ac-list" class="spe-ac-list hidden"></div>
             </div>
-            <button class="spe-add-btn" id="spe-add-btn">＋ 追加</button>
+            <button class="spe-add-btn" id="spe-add-btn">${i18n.t('style_edit_add_btn')}</button>
         </div>`;
 
     _renderEditorList(tabKey);
@@ -478,13 +478,13 @@ function _renderEditorList(tabKey) {
         row.className = 'spe-row';
         row.dataset.idx = idx;
         row.innerHTML = `
-            <span class="spe-row-drag" title="ドラッグで並べ替え">⠿</span>
+            <span class="spe-row-drag" title="${i18n.t('style_edit_drag_title')}">⠿</span>
             ${isColor
                 ? `<span class="spe-row-swatch" style="background:${item.hex || '#888'};${item.hex === '#ffffff' ? 'border:1px solid #475569;' : ''}"></span>`
                 : ''}
             <span class="spe-row-label">${item.label}</span>
             <span class="spe-row-value">${item.value}</span>
-            <button class="spe-row-del" data-idx="${idx}" title="削除">✕</button>`;
+            <button class="spe-row-del" data-idx="${idx}" title="${i18n.t('style_edit_del_title')}">✕</button>`;
 
         row.querySelector('.spe-row-del').addEventListener('click', () => {
             paletteData[tabKey].splice(idx, 1);

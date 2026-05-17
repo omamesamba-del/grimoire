@@ -408,6 +408,10 @@ class I18n {
 
                 // ── スタイルパレット追加 ─────────────────────────────────
                 'style_apply_quickadd':          'Quick-Add にも適用',
+                'style_edit_title':              'Style Palette 編集',
+                'style_edit_add_btn':            '＋ 追加',
+                'style_edit_drag_title':         'ドラッグで並べ替え',
+                'style_edit_del_title':          '削除',
 
                 // ── コンテキストメニュー（アセットカード） ─────────────────
                 'menu_asset_edit_settings':      '✏️ 推奨設定を編集',
@@ -882,6 +886,10 @@ class I18n {
 
                 // ── Style Palette additions ──────────────────────────────
                 'style_apply_quickadd':          'Apply to Quick-Add',
+                'style_edit_title':              'Edit Style Palette',
+                'style_edit_add_btn':            '＋ Add',
+                'style_edit_drag_title':         'Drag to reorder',
+                'style_edit_del_title':          'Delete',
 
                 // ── Context Menu (Asset Card) ────────────────────────────
                 'menu_asset_edit_settings':      '✏️ Edit Recommended Settings',
