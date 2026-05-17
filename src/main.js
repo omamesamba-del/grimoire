@@ -753,7 +753,18 @@ function setupEventListeners() {
                           : i18n.t('toast_webui_sent');
                 showToast(msg, 'success');
             } else if (result?.busy) {
-                showToast(i18n.t('toast_webui_busy'), 'warning');
+                await IPC.resetWebuiBusy();
+                const retry = webuiGenerateOnly
+                    ? await IPC.sendToWebUI({ mode: 'generate-only', trigger: true })
+                    : await IPC.sendToWebUI({ positive: getActivePrompt('positive-prompt'), negative: getActivePrompt('negative-prompt'), mode: webuiSendMode, trigger: webuiSendTrigger, gen: webuiSendGen ? getGenPayload() : null });
+                if (retry?.success) {
+                    const msg = (webuiGenerateOnly || webuiSendTrigger)
+                              ? i18n.t('toast_webui_generated')
+                              : i18n.t('toast_webui_sent');
+                    showToast(msg, 'success');
+                } else {
+                    showToast(i18n.t('toast_webui_busy'), 'warning');
+                }
             } else {
                 showToast(result?.error || 'Send failed', 'error');
                 console.warn('[WebUI Send]', result?.error);

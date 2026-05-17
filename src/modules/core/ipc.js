@@ -144,6 +144,11 @@ export const IPC = {
         return { success: true };
     },
 
+    async resetWebuiBusy() {
+        if (isElectron) return await window.electronAPI.resetWebuiBusy();
+        return { success: true };
+    },
+
     async checkWebuiBridge() {
         if (isElectron) return await window.electronAPI.checkWebuiBridge();
         return { connected: true, version: 'mock' };

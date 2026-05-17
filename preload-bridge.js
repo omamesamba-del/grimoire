@@ -21,6 +21,7 @@ window.electronAPI = {
   registerTagImage: (tagName, filePath) => ipcRenderer.invoke('tags:register-image', { tagName, filePath }),
   registerTagImageBuffer: (tagName, buffer, ext) => ipcRenderer.invoke('tags:register-image-buffer', { tagName, buffer, ext }),
   sendToWebUI: (payload) => ipcRenderer.invoke('webui:send', payload),
+  resetWebuiBusy: () => ipcRenderer.invoke('webui:resetBusy'),
   checkWebuiBridge: () => ipcRenderer.invoke('webui:checkBridge'),
   getWebuiState:    () => ipcRenderer.invoke('webui:getState'),
   checkComfyBridge: ()              => ipcRenderer.invoke('comfy:checkBridge'),
