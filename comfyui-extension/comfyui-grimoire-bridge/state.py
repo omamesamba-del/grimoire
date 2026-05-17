@@ -1,3 +1,0 @@
-slot_state:  dict[str, str] = {}   # slot_name → text
-gen_params:  dict[str, object] = {} # checkpoint / vae / sampler_name / scheduler / steps / ...
-known_slots: set[str]       = set() # PromptBuilderSlot の slot_name 一覧
