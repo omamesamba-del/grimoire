@@ -95,6 +95,9 @@ window.electronAPI = {
   getImagesInFolder: (folderPath) => ipcRenderer.invoke('images:get-images', folderPath),
   getPngInfo: (filePath) => ipcRenderer.invoke('images:get-pnginfo', filePath),
 
+  // Updates
+  checkForUpdates: () => ipcRenderer.invoke('app:check-updates'),
+
   // Shell
   openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
   showItemInFolder: (filePath) => ipcRenderer.invoke('shell:show-item-in-folder', filePath),

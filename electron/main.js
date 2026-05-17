@@ -1007,6 +1007,19 @@ ipcMain.handle('log:write', (event, { msg, level }) => {
 
 ipcMain.handle('get-app-version', () => app.getVersion());
 
+ipcMain.handle('app:check-updates', async () => {
+  try {
+    const res = await net.fetch('https://api.github.com/repos/omamesamba-del/grimoire/releases/latest', {
+      headers: { 'User-Agent': 'grimoire-app' }
+    });
+    if (!res.ok) return { error: 'fetch_failed' };
+    const data = await res.json();
+    return { latestVersion: (data.tag_name || '').replace(/^v/, '') };
+  } catch (e) {
+    return { error: 'network_error' };
+  }
+});
+
 ipcMain.handle('tags:register-image-buffer', async (event, { tagName, buffer, ext }) => {
   try {
     const safeName = tagName.replace(/[^a-z0-9_-]/gi, '_');
