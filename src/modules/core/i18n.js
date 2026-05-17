@@ -230,6 +230,11 @@ class I18n {
                 'menu_about':               'grimoire について',
                 'about_description':        'Prompt library & builder for Stable Diffusion / ComfyUI',
                 'about_license':            'MIT License',
+                'about_check_updates':      'アップデートを確認',
+                'about_checking':           '確認中...',
+                'about_up_to_date':         '✅ 最新バージョンです',
+                'about_update_available':   '🆕 {version} が公開されています',
+                'about_update_error':       '⚠️ チェックに失敗しました',
 
                 // ── 選択 HUD ─────────────────────────────────────────────────
                 'hud_items_selected':       'アイテム選択中',
@@ -712,6 +717,11 @@ class I18n {
                 'menu_about':               'About grimoire',
                 'about_description':        'Prompt library & builder for Stable Diffusion / ComfyUI',
                 'about_license':            'MIT License',
+                'about_check_updates':      'Check for Updates',
+                'about_checking':           'Checking...',
+                'about_up_to_date':         '✅ You\'re up to date',
+                'about_update_available':   '🆕 {version} is available',
+                'about_update_error':       '⚠️ Could not check for updates',
 
                 // ── Selection HUD ────────────────────────────────────────────
                 'hud_items_selected':       'items selected',

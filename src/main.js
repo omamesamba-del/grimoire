@@ -402,6 +402,31 @@ function setupEventListeners() {
     document.getElementById('btn-about-close')?.addEventListener('click', () => {
         document.getElementById('about-dialog')?.close();
     });
+    document.getElementById('btn-check-updates')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btn-check-updates');
+        const statusEl = document.getElementById('about-update-status');
+        if (!btn || !statusEl) return;
+        btn.disabled = true;
+        statusEl.style.color = '';
+        statusEl.textContent = i18n.t('about_checking');
+        const result = await window.electronAPI?.checkForUpdates?.();
+        btn.disabled = false;
+        if (!result || result.error) {
+            statusEl.style.color = 'var(--color-warn, #f59e0b)';
+            statusEl.textContent = i18n.t('about_update_error');
+            return;
+        }
+        const current = (await window.electronAPI?.getAppVersion?.()) ?? '0.0.0';
+        if (result.latestVersion === current) {
+            statusEl.style.color = 'var(--color-ok, #22c55e)';
+            statusEl.textContent = i18n.t('about_up_to_date');
+        } else {
+            statusEl.style.color = 'var(--accent)';
+            statusEl.textContent = i18n.t('about_update_available').replace('{version}', `v${result.latestVersion}`);
+            statusEl.style.cursor = 'pointer';
+            statusEl.onclick = () => window.electronAPI?.openExternal?.('https://github.com/omamesamba-del/grimoire/releases');
+        }
+    });
 
     // Explorer collapse toggle
     const btnToggleExplorer = document.getElementById('btn-toggle-explorer');
