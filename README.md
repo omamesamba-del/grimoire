@@ -1,22 +1,53 @@
 # grimoire
 
-A prompt library and builder for Stable Diffusion / ComfyUI.
+**A prompt library and builder for Stable Diffusion / ComfyUI.**
 
-Organize your favorite tags in YAML files, build prompts visually, and send them directly to your WebUI or ComfyUI workflow.
+Organize your tags in YAML files, build prompts visually with drag-and-drop chips, and send them directly to AUTOMATIC1111, Forge, or ComfyUI — all from a single desktop app.
+
+> 日本語版: [README.ja.md](README.ja.md)
+
+---
+
+![grimoire main screen](docs/screenshots/main.png)
+
+---
 
 ## Features
 
-- **Library** — Browse tags organized by category. Import from YAML files.
-- **Builder** — Drag-and-drop prompt chips with positive/negative separation.
-- **AI Assist** — Generate prompt ideas via Ollama, Claude API, or OpenAI.
-- **WebUI Bridge** — Send prompts directly to AUTOMATIC1111 / Forge / SD.Next.
-- **ComfyUI Bridge** — Send prompts to ComfyUI workflow slots.
-- **Images** — Browse generated output images with built-in metadata viewer.
+### Library & Builder
+Organize thousands of tags into categories and groups with YAML files. Click tags to add them as chips in the Builder. Drag chips to reorder or move between Positive and Negative areas.
+
+### Style Palette
+Apply style modifiers (Mod / Color / Material / Pattern / Deco) to any tag with a single click. Styles are prepended to your prompt automatically.
+
+### AI Assist
+Describe what you want in plain text and let the AI generate SD-ready prompts. Supports **Ollama** (local), **Claude API**, and **OpenAI**.
+
+![AI Assist](docs/screenshots/ai-assist.png)
+
+### Generation Settings
+Configure checkpoint, VAE, sampler, steps, resolution, Hires.fix, and Refiner — then send directly to WebUI or ComfyUI.
+
+![Generation settings](docs/screenshots/generation.png)
+
+### Images Browser
+Browse your output folder with a thumbnail grid. View PNG metadata (prompt, seed, generation params) inline.
+
+![Images browser](docs/screenshots/images.png)
+
+### Themes
+Four built-in themes: **Navy**, **White**, **Black**, **Gray**.
+
+![Theme comparison](docs/screenshots/themes.png)
+
+---
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) v18 or later
 - [Git](https://git-scm.com/)
+
+---
 
 ## Getting Started
 
@@ -29,9 +60,11 @@ npm start
 
 Or download the portable `.exe` from [Releases](../../releases).
 
+---
+
 ## YAML Library Format
 
-Place `.yml` files in the `tag/` folder. Each file defines categories and tags:
+Place `.yml` files in the `tag/` folder. grimoire reads them automatically on startup.
 
 ```yaml
 - category: My Category
@@ -41,32 +74,61 @@ Place `.yml` files in the `tag/` folder. Each file defines categories and tags:
       tags:
         - masterpiece
         - best quality
+        - name: Subsection
+          tags:
+            - detailed background
+            - cinematic lighting
 ```
+
+---
 
 ## WebUI Bridge
 
 **Repository:** [sd-webui-grimoire-bridge](https://github.com/omamesamba-del/sd-webui-grimoire-bridge)
 
-1. Clone or download the repository into your WebUI's `extensions/` folder:
-   ```bash
-   cd extensions
-   git clone https://github.com/omamesamba-del/sd-webui-grimoire-bridge.git
-   ```
-2. Restart WebUI.
-3. In grimoire, go to **Settings → Generation** and set the WebUI URL (default: `http://127.0.0.1:7860`).
+Extends AUTOMATIC1111 / Forge / SD.Next with a `/grimoire/v1/set-prompt` endpoint so grimoire can push prompts and generation settings directly.
+
+**Install:**
+```bash
+cd extensions
+git clone https://github.com/omamesamba-del/sd-webui-grimoire-bridge.git
+```
+Restart WebUI, then set the WebUI URL in grimoire under **Settings → Generation** (default: `http://127.0.0.1:7860`).
+
+---
 
 ## ComfyUI Bridge
 
 **Repository:** [comfyui-grimoire-bridge](https://github.com/omamesamba-del/comfyui-grimoire-bridge)
 
-1. Clone or download the repository into your ComfyUI's `custom_nodes/` folder:
-   ```bash
-   cd custom_nodes
-   git clone https://github.com/omamesamba-del/comfyui-grimoire-bridge.git
-   ```
-2. Restart ComfyUI.
-3. Add a **Grimoire Slot** node to your workflow and give it a slot name.
-4. In grimoire, go to **Settings → Generation** and set the ComfyUI URL (default: `http://127.0.0.1:8188`) and the slot name.
+Adds a **Grimoire Slot** node to ComfyUI. grimoire sends prompts to named slots, so you can wire them anywhere in your workflow.
+
+**Install:**
+```bash
+cd custom_nodes
+git clone https://github.com/omamesamba-del/comfyui-grimoire-bridge.git
+```
+Restart ComfyUI. Add a **Grimoire Slot** node, give it a slot name, then set the ComfyUI URL and slot name in grimoire under **Settings → Generation** (default: `http://127.0.0.1:8188`).
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `T` | Tags mode |
+| `L` | LoRA mode |
+| `E` | Embedding mode |
+| `G` | Generation mode |
+| `I` | Images mode |
+| `A` | AI Assist mode |
+| `Ctrl+Z` / `Ctrl+Y` | Undo / Redo (prompt) |
+| `Ctrl+Enter` | Send to WebUI / ComfyUI |
+| `F2` | Rename selected item |
+
+Shortcuts are fully customizable under **Settings → Shortcuts**.
+
+---
 
 ## License
 
