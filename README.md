@@ -52,8 +52,10 @@ On first launch, grimoire automatically creates the following folders next to th
 
 | Folder | Contents |
 |--------|----------|
-| `data/` | App config and settings |
-| `tag/` | Your YAML tag library files |
+| `data/` | App config, settings, and tag images |
+| `tag/` | YAML tag library files (sample files included) |
+| `gen_presets/` | Saved generation presets |
+| `prompt_presets/` | Saved prompt presets |
 
 Keeping the exe in its own folder prevents these from being scattered across your filesystem.
 
