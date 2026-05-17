@@ -10,6 +10,7 @@ import { IPC } from '../core/ipc.js';
 import { State } from '../core/state.js';
 import { renderPromptChips } from './prompt-chips.js';
 import { i18n } from '../core/i18n.js';
+import Sortable from 'sortablejs';
 
 const SCAN_WAIT_MS = 500;   // ms to wait after request-scan before fetching slots
 
@@ -17,8 +18,11 @@ const PANEL_ID    = 'comfy-slots-panel';
 const LIST_ID     = 'comfy-slots-list';
 const SLOT_ID_PFX = 'comfy-slot-';   // textarea の id = "comfy-slot-{name}"
 
+const SLOT_ORDER_KEY = 'comfySlotOrder';
+
 let _onSendSlot = null;   // (slotName, text, trigger) => void  呼び出し元から注入
 let _savedSlotTexts = {}; // スロットテキストの永続キャッシュ（モード切替・リフレッシュで復元用）
+let _sortable = null;
 
 /** 外部から送信ハンドラを登録 */
 export function registerComfySlotsHandler(fn) {
@@ -59,21 +63,40 @@ export async function loadComfySlots() {
         return;
     }
 
+    // 保存済み順序に従って並べ替え（未知のスロットは末尾に追加）
+    const savedOrder = JSON.parse(localStorage.getItem(SLOT_ORDER_KEY) || '[]');
+    const ordered = [
+        ...savedOrder.filter(n => slots.includes(n)),
+        ...slots.filter(n => !savedOrder.includes(n)),
+    ];
+
     list.innerHTML = '';
-    slots.forEach((name, i) => {
+    ordered.forEach((name, i) => {
         const row = buildSlotRow(name);
         list.appendChild(row);
-        // 同名スロットのテキストを永続キャッシュから復元
         if (_savedSlotTexts[name]) {
             const ta = row.querySelector('.comfy-slot-text');
             if (ta) {
                 ta.value = _savedSlotTexts[name];
-                ta.dispatchEvent(new Event('input')); // チップ再描画
+                ta.dispatchEvent(new Event('input'));
             }
         } else {
             renderPromptChips(SLOT_ID_PFX + 'chips-' + name, SLOT_ID_PFX + name);
         }
         if (i === 0) activateSlot(name);
+    });
+
+    // Sortable を初期化（既存インスタンスを破棄してから）
+    if (_sortable) { try { _sortable.destroy(); } catch (_) {} }
+    _sortable = new Sortable(list, {
+        handle: '.comfy-slot-drag',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: () => {
+            const order = Array.from(list.querySelectorAll('.comfy-slot-row'))
+                .map(r => r.dataset.slot);
+            localStorage.setItem(SLOT_ORDER_KEY, JSON.stringify(order));
+        },
     });
 }
 
@@ -90,6 +113,11 @@ function buildSlotRow(name) {
     const header = document.createElement('div');
     header.className = 'comfy-slot-header';
 
+    const dragHandle = document.createElement('span');
+    dragHandle.className = 'comfy-slot-drag';
+    dragHandle.textContent = '⠿';
+    dragHandle.title = i18n.t('drag_to_reorder');
+
     const label = document.createElement('span');
     label.className = 'comfy-slot-name';
     label.textContent = name;
@@ -102,6 +130,7 @@ function buildSlotRow(name) {
         _onSendSlot?.(name, textarea.value, false);
     });
 
+    header.appendChild(dragHandle);
     header.appendChild(label);
     header.appendChild(sendBtn);
 

@@ -311,6 +311,7 @@ class I18n {
                 'comfy_slots_empty':         'スロットが見つかりません。ワークフローに Grimoire Slot ノードを追加してください。',
                 'comfy_slot_send_title':     '"{name}" に送信',
                 'comfy_slot_placeholder':    '{name} のテキスト…',
+                'drag_to_reorder':           'ドラッグして並べ替え',
 
                 // ── プロンプトチップ ──────────────────────────────────────
                 'chip_break_title':          '改行 (右クリックで削除)',
@@ -798,6 +799,7 @@ class I18n {
                 'comfy_slots_empty':         'No slots found. Add a Grimoire Slot node to your workflow.',
                 'comfy_slot_send_title':     'Send to "{name}"',
                 'comfy_slot_placeholder':    '{name} text…',
+                'drag_to_reorder':           'Drag to reorder',
 
                 // ── Prompt Chips ─────────────────────────────────────────
                 'chip_break_title':          'Line break (right-click to delete)',
