@@ -46,7 +46,7 @@
       "icon": "src/assets/icon.ico"
     },
     "portable": {
-      "artifactName": "grimoire-${version}-portable.exe"
+      "artifactName": "grimoire.exe"
     }
   },
   "devDependencies": {
