@@ -4,7 +4,7 @@
 変更後は必ず `npm run build` を実行すること。アプリは `dist/` + `dist-electron/` を読む。
 
 ```bash
-cd "L:\AI\grimoire"
+cd "L:\atelier\grimoire"
 npm run build
 ```
 
@@ -14,7 +14,7 @@ npm run build
 **機能の実装・修正・削除が完了するたびに、必ず git コミットすること。**
 
 ```bash
-cd "L:\AI\grimoire"
+cd "L:\atelier\grimoire"
 git add .
 git commit -m "変更内容を日本語で簡潔に"
 ```
@@ -24,7 +24,7 @@ git commit -m "変更内容を日本語で簡潔に"
 - ユーザーへの報告の中にコミット完了を明記すること
 
 ## プロジェクト情報
-- パス: `L:\AI\grimoire\`
+- パス: `L:\atelier\grimoire\`
 - 詳細ドキュメント: `docs/todo.md` / `docs/notes.md`
 - テーマ内部値: Navy=`dark` / White=`light` / Black=`black` / Gray=`gray`（デフォルト）
 
