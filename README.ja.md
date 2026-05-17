@@ -20,7 +20,7 @@
 
 ---
 
-![grimoire メイン画面](docs/screenshots/grimoire001.gif)
+![grimoire メイン画面](docs/screenshots/grimoire002.gif)
 
 ---
 

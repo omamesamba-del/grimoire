@@ -20,7 +20,7 @@ Tags are displayed as color-coded chips, so your prompt is always easy to read a
 
 ---
 
-![grimoire main screen](docs/screenshots/grimoire001.gif)
+![grimoire main screen](docs/screenshots/grimoire002.gif)
 
 ---
 
