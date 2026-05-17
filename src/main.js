@@ -382,6 +382,27 @@ function setupEventListeners() {
         window.electronAPI?.quitApp?.();
     });
 
+    // About dialog
+    document.getElementById('btn-about-menu')?.addEventListener('click', async () => {
+        headerMenu?.classList.add('hidden');
+        const dlg = document.getElementById('about-dialog');
+        if (!dlg) return;
+        const version = await window.electronAPI?.getAppVersion?.() ?? '—';
+        const versionEl = document.getElementById('about-version');
+        if (versionEl) versionEl.textContent = `v${version}`;
+        const githubLink = document.getElementById('about-link-github');
+        if (githubLink) {
+            githubLink.onclick = (e) => {
+                e.preventDefault();
+                window.electronAPI?.openExternal?.('https://github.com/omamesamba-del/grimoire');
+            };
+        }
+        dlg.showModal();
+    });
+    document.getElementById('btn-about-close')?.addEventListener('click', () => {
+        document.getElementById('about-dialog')?.close();
+    });
+
     // Explorer collapse toggle
     const btnToggleExplorer = document.getElementById('btn-toggle-explorer');
     const btnToggleExplorerMenu = document.getElementById('btn-toggle-explorer-menu');

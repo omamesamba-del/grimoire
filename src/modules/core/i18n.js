@@ -227,6 +227,9 @@ class I18n {
                 'menu_settings':            '設定',
                 'menu_restart':             'アプリを再起動',
                 'menu_quit':                '終了',
+                'menu_about':               'grimoire について',
+                'about_description':        'Prompt library & builder for Stable Diffusion / ComfyUI',
+                'about_license':            'MIT License',
 
                 // ── 選択 HUD ─────────────────────────────────────────────────
                 'hud_items_selected':       'アイテム選択中',
@@ -706,6 +709,9 @@ class I18n {
                 'menu_settings':            'Settings',
                 'menu_restart':             'Restart App',
                 'menu_quit':                'Quit',
+                'menu_about':               'About grimoire',
+                'about_description':        'Prompt library & builder for Stable Diffusion / ComfyUI',
+                'about_license':            'MIT License',
 
                 // ── Selection HUD ────────────────────────────────────────────
                 'hud_items_selected':       'items selected',
