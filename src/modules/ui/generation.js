@@ -259,7 +259,7 @@ function wireControls() {
     // Seed random / reuse
     document.getElementById('btn-seed-random')?.addEventListener('click', () => {
         const s = document.getElementById('gen-seed');
-        if (s) s.value = Math.floor(Math.random() * 4294967295);
+        if (s) s.value = -1;
     });
     document.getElementById('btn-seed-reuse')?.addEventListener('click', () => {
         const s = document.getElementById('gen-seed');

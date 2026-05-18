@@ -1216,13 +1216,26 @@ body.app-loading #image-info-panel {
   padding-top: 4px;
   flex-shrink: 0;
 }
-.pinfo-actions > button {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  padding: 6px 4px;
-  font-size: 0.72rem;
+.pinfo-icon-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
 }
+.pinfo-icon-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: var(--glow-primary); }
+.pinfo-icon-btn:disabled { opacity: 0.35; cursor: default; }
+.pinfo-icon-btn.btn-primary { background: var(--glow-primary); border-color: var(--glow-primary); }
+.pinfo-icon-btn.btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
 .btn-send-to-tags {
   font-weight: 600;
   border-radius: 6px;
