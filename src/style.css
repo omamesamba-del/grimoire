@@ -1121,6 +1121,11 @@ body.app-loading #image-info-panel {
   gap: 4px;
   flex-shrink: 0;
 }
+.pinfo-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .pinfo-label {
   font-size: 0.65rem;
   font-weight: 700;
@@ -1128,6 +1133,19 @@ body.app-loading #image-info-panel {
   color: var(--glow-primary);
   letter-spacing: 0.05em;
 }
+.pinfo-copy-btn {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: 1.4;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.pinfo-copy-btn:hover { opacity: 1; }
 .pinfo-text {
   font-size: 0.75rem;
   line-height: 1.55;
@@ -3740,7 +3758,8 @@ dialog::backdrop {
   flex: 1;
 }
 
-.gen-field > label {
+.gen-field > label,
+.gen-field-hdr > label {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--slate-400);
@@ -3748,6 +3767,63 @@ dialog::backdrop {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.gen-field-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.gen-send-chk {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--glow-primary);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.gen-send-chk:hover { opacity: 1; }
+/* disabled group: dim label & controls, keep send-chk clickable */
+[data-gen-group].gen-group-disabled > .gen-field-hdr > label {
+  opacity: 0.3;
+}
+[data-gen-group].gen-group-disabled > *:not(.gen-field-hdr) {
+  opacity: 0.3;
+  pointer-events: none;
+}
+.gen-section-box.gen-group-disabled > .gen-toggle-hdr > label {
+  opacity: 0.3;
+}
+.gen-section-box.gen-group-disabled > .gen-collapsible {
+  opacity: 0.3;
+  pointer-events: none;
+}
+/* send mask toolbar */
+.gen-mask-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2px;
+}
+.gen-mask-bar-label {
+  font-size: 0.65rem;
+  color: var(--slate-400);
+  margin-right: 2px;
+  user-select: none;
+}
+.gen-mask-all-btn {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.gen-mask-all-btn:hover { border-color: var(--glow-primary); color: var(--text-primary); }
 
 .gen-field-xs {
   flex: 0 0 90px;
@@ -3787,12 +3863,19 @@ dialog::backdrop {
 .gen-toggle-hdr {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--slate-200);
-  cursor: pointer;
   user-select: none;
+}
+.gen-toggle-hdr > label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  flex: 1;
 }
 
 .gen-collapsible {
@@ -4861,7 +4944,7 @@ dialog::backdrop {
   transition: all 0.3s var(--ease-out);
 }
 
-.gen-section-box:has(input:checked) {
+.gen-section-box:has(input:not(.gen-send-chk):checked) {
   background: rgba(244, 63, 94, 0.03);
   border-color: rgba(244, 63, 94, 0.3);
 }

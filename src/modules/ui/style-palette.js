@@ -15,104 +15,104 @@ import { i18n } from '../core/i18n.js';
 // ──────────────────────────────────────────────────────────────
 
 const DEFAULT_COLOR_MODS = [
-    { label: 'dark',        value: 'dark' },
-    { label: 'light',       value: 'light' },
-    { label: 'two-tone',    value: 'two-tone' },
-    { label: 'gradient',    value: 'gradient' },
-    { label: 'multicolor',  value: 'multicolored' },
-    { label: 'pastel',      value: 'pastel' },
-    { label: 'neon',        value: 'neon' },
-    { label: 'metallic',    value: 'metallic' },
+    { label: 'dark',        labelEn: 'dark',        value: 'dark' },
+    { label: 'light',       labelEn: 'light',       value: 'light' },
+    { label: 'two-tone',    labelEn: 'two-tone',    value: 'two-tone' },
+    { label: 'gradient',    labelEn: 'gradient',    value: 'gradient' },
+    { label: 'multicolor',  labelEn: 'multicolor',  value: 'multicolored' },
+    { label: 'pastel',      labelEn: 'pastel',      value: 'pastel' },
+    { label: 'neon',        labelEn: 'neon',        value: 'neon' },
+    { label: 'metallic',    labelEn: 'metallic',    value: 'metallic' },
 ];
 
 const DEFAULT_COLORS = [
     // ── 基本色 ──
-    { label: '白',      value: 'white',           hex: '#ffffff' },
-    { label: '黒',      value: 'black',           hex: '#1a1a2e' },
-    { label: '灰',      value: 'gray',            hex: '#9ca3af' },
-    { label: '赤',      value: 'red',             hex: '#ef4444' },
-    { label: '青',      value: 'blue',            hex: '#3b82f6' },
-    { label: '緑',      value: 'green',           hex: '#22c55e' },
-    { label: '黄',      value: 'yellow',          hex: '#eab308' },
-    { label: '橙',      value: 'orange',          hex: '#f97316' },
-    { label: 'ピンク',  value: 'pink',            hex: '#ec4899' },
-    { label: '紫',      value: 'purple',          hex: '#a855f7' },
-    { label: '水色',    value: 'light blue',      hex: '#38bdf8' },
-    { label: 'ベージュ',value: 'beige',           hex: '#d4b896' },
-    { label: '茶',      value: 'brown',           hex: '#92400e' },
-    { label: '金',      value: 'gold',            hex: '#ca8a04' },
-    { label: '銀',      value: 'silver',          hex: '#a8a29e' },
-    { label: '虹',      value: 'rainbow colored', hex: '#e040fb' },
+    { label: '白',      labelEn: 'White',     value: 'white',           hex: '#ffffff' },
+    { label: '黒',      labelEn: 'Black',     value: 'black',           hex: '#1a1a2e' },
+    { label: '灰',      labelEn: 'Gray',      value: 'gray',            hex: '#9ca3af' },
+    { label: '赤',      labelEn: 'Red',       value: 'red',             hex: '#ef4444' },
+    { label: '青',      labelEn: 'Blue',      value: 'blue',            hex: '#3b82f6' },
+    { label: '緑',      labelEn: 'Green',     value: 'green',           hex: '#22c55e' },
+    { label: '黄',      labelEn: 'Yellow',    value: 'yellow',          hex: '#eab308' },
+    { label: '橙',      labelEn: 'Orange',    value: 'orange',          hex: '#f97316' },
+    { label: 'ピンク',  labelEn: 'Pink',      value: 'pink',            hex: '#ec4899' },
+    { label: '紫',      labelEn: 'Purple',    value: 'purple',          hex: '#a855f7' },
+    { label: '水色',    labelEn: 'Lt.Blue',   value: 'light blue',      hex: '#38bdf8' },
+    { label: 'ベージュ',labelEn: 'Beige',     value: 'beige',           hex: '#d4b896' },
+    { label: '茶',      labelEn: 'Brown',     value: 'brown',           hex: '#92400e' },
+    { label: '金',      labelEn: 'Gold',      value: 'gold',            hex: '#ca8a04' },
+    { label: '銀',      labelEn: 'Silver',    value: 'silver',          hex: '#a8a29e' },
+    { label: '虹',      labelEn: 'Rainbow',   value: 'rainbow colored', hex: '#e040fb' },
     // ── ライト系 ──
-    { label: 'L赤',     value: 'light red',       hex: '#fca5a5' },
-    { label: 'L青',     value: 'light blue',      hex: '#93c5fd' },
-    { label: 'L緑',     value: 'light green',     hex: '#86efac' },
-    { label: 'L黄',     value: 'light yellow',    hex: '#fde68a' },
-    { label: 'L橙',     value: 'light orange',    hex: '#fdba74' },
-    { label: 'Lピンク', value: 'light pink',      hex: '#fda4af' },
-    { label: 'L紫',     value: 'light purple',    hex: '#c4b5fd' },
-    { label: 'L茶',     value: 'light brown',     hex: '#d4a574' },
+    { label: 'L赤',     labelEn: 'L.Red',     value: 'light red',       hex: '#fca5a5' },
+    { label: 'L青',     labelEn: 'L.Blue',    value: 'light blue',      hex: '#93c5fd' },
+    { label: 'L緑',     labelEn: 'L.Green',   value: 'light green',     hex: '#86efac' },
+    { label: 'L黄',     labelEn: 'L.Yellow',  value: 'light yellow',    hex: '#fde68a' },
+    { label: 'L橙',     labelEn: 'L.Orange',  value: 'light orange',    hex: '#fdba74' },
+    { label: 'Lピンク', labelEn: 'L.Pink',    value: 'light pink',      hex: '#fda4af' },
+    { label: 'L紫',     labelEn: 'L.Purple',  value: 'light purple',    hex: '#c4b5fd' },
+    { label: 'L茶',     labelEn: 'L.Brown',   value: 'light brown',     hex: '#d4a574' },
     // ── ダーク系 ──
-    { label: 'D赤',     value: 'dark red',        hex: '#991b1b' },
-    { label: 'D青',     value: 'dark blue',       hex: '#1e40af' },
-    { label: 'D緑',     value: 'dark green',      hex: '#166534' },
-    { label: 'D橙',     value: 'dark orange',     hex: '#c2410c' },
-    { label: 'Dピンク', value: 'dark pink',       hex: '#be185d' },
-    { label: 'D紫',     value: 'dark purple',     hex: '#6b21a8' },
-    { label: 'D茶',     value: 'dark brown',      hex: '#7c2d12' },
-    { label: 'D灰',     value: 'dark gray',       hex: '#374151' },
+    { label: 'D赤',     labelEn: 'D.Red',     value: 'dark red',        hex: '#991b1b' },
+    { label: 'D青',     labelEn: 'D.Blue',    value: 'dark blue',       hex: '#1e40af' },
+    { label: 'D緑',     labelEn: 'D.Green',   value: 'dark green',      hex: '#166534' },
+    { label: 'D橙',     labelEn: 'D.Orange',  value: 'dark orange',     hex: '#c2410c' },
+    { label: 'Dピンク', labelEn: 'D.Pink',    value: 'dark pink',       hex: '#be185d' },
+    { label: 'D紫',     labelEn: 'D.Purple',  value: 'dark purple',     hex: '#6b21a8' },
+    { label: 'D茶',     labelEn: 'D.Brown',   value: 'dark brown',      hex: '#7c2d12' },
+    { label: 'D灰',     labelEn: 'D.Gray',    value: 'dark gray',       hex: '#374151' },
 ];
 
 const DEFAULT_MATERIALS = [
-    { label: 'レザー',    value: 'leather' },
-    { label: 'ラテックス',value: 'latex' },
-    { label: 'シルク',    value: 'silk' },
-    { label: '綿',        value: 'cotton' },
-    { label: 'ニット',    value: 'knit' },
-    { label: 'デニム',    value: 'denim' },
-    { label: 'ベルベット',value: 'velvet' },
-    { label: '透明',      value: 'transparent' },
-    { label: 'メッシュ',  value: 'mesh' },
-    { label: 'サテン',    value: 'satin' },
-    { label: 'レース',    value: 'lace' },
-    { label: 'シアー',    value: 'see-through' },
-    { label: 'ウール',    value: 'wool' },
-    { label: '光沢',      value: 'shiny' },
-    { label: 'マット',    value: 'matte' },
+    { label: 'レザー',    labelEn: 'Leather',   value: 'leather' },
+    { label: 'ラテックス',labelEn: 'Latex',     value: 'latex' },
+    { label: 'シルク',    labelEn: 'Silk',      value: 'silk' },
+    { label: '綿',        labelEn: 'Cotton',    value: 'cotton' },
+    { label: 'ニット',    labelEn: 'Knit',      value: 'knit' },
+    { label: 'デニム',    labelEn: 'Denim',     value: 'denim' },
+    { label: 'ベルベット',labelEn: 'Velvet',    value: 'velvet' },
+    { label: '透明',      labelEn: 'Transp.',   value: 'transparent' },
+    { label: 'メッシュ',  labelEn: 'Mesh',      value: 'mesh' },
+    { label: 'サテン',    labelEn: 'Satin',     value: 'satin' },
+    { label: 'レース',    labelEn: 'Lace',      value: 'lace' },
+    { label: 'シアー',    labelEn: 'Sheer',     value: 'see-through' },
+    { label: 'ウール',    labelEn: 'Wool',      value: 'wool' },
+    { label: '光沢',      labelEn: 'Shiny',     value: 'shiny' },
+    { label: 'マット',    labelEn: 'Matte',     value: 'matte' },
 ];
 
 const DEFAULT_PATTERNS = [
-    { label: 'チェック',   value: 'plaid' },
-    { label: 'ストライプ', value: 'striped' },
-    { label: '水玉',       value: 'polka dot' },
-    { label: 'フローラル', value: 'floral print' },
-    { label: 'アーガイル', value: 'argyle' },
-    { label: '迷彩',       value: 'camouflage print' },
-    { label: 'アニマル',   value: 'animal print' },
-    { label: 'ペイズリー', value: 'paisley' },
-    { label: 'ハート',     value: 'heart pattern' },
-    { label: '星',         value: 'star pattern' },
+    { label: 'チェック',   labelEn: 'Plaid',    value: 'plaid' },
+    { label: 'ストライプ', labelEn: 'Stripe',   value: 'striped' },
+    { label: '水玉',       labelEn: 'Polka Dot',value: 'polka dot' },
+    { label: 'フローラル', labelEn: 'Floral',   value: 'floral print' },
+    { label: 'アーガイル', labelEn: 'Argyle',   value: 'argyle' },
+    { label: '迷彩',       labelEn: 'Camo',     value: 'camouflage print' },
+    { label: 'アニマル',   labelEn: 'Animal',   value: 'animal print' },
+    { label: 'ペイズリー', labelEn: 'Paisley',  value: 'paisley' },
+    { label: 'ハート',     labelEn: 'Heart',    value: 'heart pattern' },
+    { label: '星',         labelEn: 'Star',     value: 'star pattern' },
 ];
 
 const DEFAULT_DECORATIONS = [
-    { label: 'フリル',       value: 'frilled' },
-    { label: 'レース飾り',   value: 'lace-trimmed' },
-    { label: 'リボン飾り',   value: 'ribbon-trimmed' },
-    { label: 'ファー飾り',   value: 'fur-trimmed' },
-    { label: '花飾り',       value: 'flower-trimmed' },
-    { label: 'バックレス',   value: 'backless' },
-    { label: 'オフショル',   value: 'off-shoulder' },
-    { label: 'ホルター',     value: 'halter' },
-    { label: 'ストラップレス', value: 'strapless' },
-    { label: 'シースルー',   value: 'see-through' },
-    { label: 'タイト',       value: 'skin-tight' },
-    { label: 'ゆったり',     value: 'oversized' },
-    { label: 'クロップド',   value: 'cropped' },
-    { label: 'ウェット',     value: 'wet' },
-    { label: '破れ',         value: 'torn' },
-    { label: 'ハイレグ',     value: 'highleg' },
-    { label: 'サイドスリット', value: 'side slit' },
-    { label: 'ハイネック',   value: 'high neck' },
+    { label: 'フリル',       labelEn: 'Frill',      value: 'frilled' },
+    { label: 'レース飾り',   labelEn: 'Lace Trim',  value: 'lace-trimmed' },
+    { label: 'リボン飾り',   labelEn: 'Ribbon',     value: 'ribbon-trimmed' },
+    { label: 'ファー飾り',   labelEn: 'Fur Trim',   value: 'fur-trimmed' },
+    { label: '花飾り',       labelEn: 'Floral',     value: 'flower-trimmed' },
+    { label: 'バックレス',   labelEn: 'Backless',   value: 'backless' },
+    { label: 'オフショル',   labelEn: 'Off-Shldr',  value: 'off-shoulder' },
+    { label: 'ホルター',     labelEn: 'Halter',     value: 'halter' },
+    { label: 'ストラップレス',labelEn: 'Strapless', value: 'strapless' },
+    { label: 'シースルー',   labelEn: 'See-thru',   value: 'see-through' },
+    { label: 'タイト',       labelEn: 'Tight',      value: 'skin-tight' },
+    { label: 'ゆったり',     labelEn: 'Oversized',  value: 'oversized' },
+    { label: 'クロップド',   labelEn: 'Cropped',    value: 'cropped' },
+    { label: 'ウェット',     labelEn: 'Wet',        value: 'wet' },
+    { label: '破れ',         labelEn: 'Torn',       value: 'torn' },
+    { label: 'ハイレグ',     labelEn: 'High Leg',   value: 'highleg' },
+    { label: 'サイドスリット',labelEn: 'Side Slit', value: 'side slit' },
+    { label: 'ハイネック',   labelEn: 'High Neck',  value: 'high neck' },
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -147,6 +147,11 @@ function _savePaletteData() {
 }
 
 function _clone(arr) { return JSON.parse(JSON.stringify(arr)); }
+
+function _getLabel(item) {
+    if (i18n.currentLang !== 'ja' && item.labelEn) return item.labelEn;
+    return item.label;
+}
 
 // ──────────────────────────────────────────────────────────────
 // Public API
@@ -241,6 +246,9 @@ export function initStylePalette() {
 
     _updateBadge();
     _buildEditorDialog();
+
+    // 言語切替時にチップラベルを再描画
+    window.addEventListener('languageChanged', _rebuildAllChips);
 }
 
 function _setModeA(enabled) {
@@ -265,12 +273,12 @@ function _buildChips(containerId, data, stateKey) {
 
         if (stateKey === 'colors') {
             chip.classList.add('style-chip-color');
-            chip.title = `${item.label} (${item.value})`;
+            chip.title = `${_getLabel(item)} (${item.value})`;
             chip.style.setProperty('--swatch-bg', item.hex || '#888');
             if (item.hex === '#ffffff') chip.style.setProperty('--swatch-border', '1px solid #475569');
         } else {
             const t = document.createElement('span');
-            t.textContent = item.label;
+            t.textContent = _getLabel(item);
             chip.appendChild(t);
             chip.title = item.value;
         }

@@ -548,13 +548,19 @@ export async function showImageInfo(filePath) {
         ${dateStr ? `<div class="pinfo-date">📅 ${dateStr}</div>` : ''}
 
         <div class="pinfo-section">
-            <div class="pinfo-label">✅ Positive</div>
+            <div class="pinfo-label-row">
+                <div class="pinfo-label">✅ Positive</div>
+                ${positive ? `<button class="pinfo-copy-btn" id="btn-pinfo-copy-positive">Copy</button>` : ''}
+            </div>
             <div class="pinfo-text pinfo-positive">${_esc(positive) || `<span style="opacity:.4">${i18n.t('images_no_positive')}</span>`}</div>
         </div>
 
         ${negative ? `
         <div class="pinfo-section">
-            <div class="pinfo-label">❌ Negative</div>
+            <div class="pinfo-label-row">
+                <div class="pinfo-label">❌ Negative</div>
+                <button class="pinfo-copy-btn" id="btn-pinfo-copy-negative">Copy</button>
+            </div>
             <div class="pinfo-text pinfo-negative">${_esc(negative)}</div>
         </div>` : ''}
 
@@ -593,6 +599,17 @@ export async function showImageInfo(filePath) {
             filterImages(model);
         }
     });
+
+    const _makeCopyHandler = (text, btnId) => {
+        document.getElementById(btnId)?.addEventListener('click', () => {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById(btnId);
+                if (btn) { btn.textContent = '✓'; setTimeout(() => btn.textContent = 'Copy', 1500); }
+            });
+        });
+    };
+    _makeCopyHandler(positive, 'btn-pinfo-copy-positive');
+    _makeCopyHandler(negative, 'btn-pinfo-copy-negative');
 
     document.getElementById('btn-send-to-tags')?.addEventListener('click', () => {
         sendToTags(positive, negative);
