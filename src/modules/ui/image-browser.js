@@ -8,6 +8,7 @@ import { saveTagOrder } from '../tags/service.js';
 import { showConfirmDialog } from './modals.js';
 import { attachPopupEvents } from './library.js';
 import { i18n } from '../core/i18n.js';
+import { applyPreset } from './generation.js';
 
 // ── Module State ───────────────────────────────────────────────
 let _rootPath = '';
@@ -573,21 +574,17 @@ export async function showImageInfo(filePath) {
         ${!raw ? `<div class="pinfo-no-meta">${i18n.t('images_no_meta')}</div>` : ''}
 
         <div class="pinfo-actions">
-            <button class="btn-send-to-tags btn-primary" id="btn-send-to-tags"
-                ${!positive ? 'disabled' : ''}>
-                ${i18n.t('btn_send_to_tags')}
-            </button>
-            <button class="btn-secondary" id="btn-copy-positive"
-                ${!positive ? 'disabled' : ''}>
-                ${i18n.t('btn_copy_positive')}
-            </button>
-            <button class="btn-secondary" id="btn-register-to-tag">
-                ${i18n.t('btn_register_to_tag_img')}
-            </button>
-            <button class="btn-secondary" id="btn-add-favorite"
-                ${_isInFavFolder(filePath) ? 'disabled' : ''}>
-                ${_isInFavFolder(filePath) ? i18n.t('btn_already_favorite') : i18n.t('btn_add_favorite_img')}
-            </button>
+            <button class="pinfo-icon-btn btn-primary" id="btn-send-to-tags"
+                title="${i18n.t('btn_send_to_tags')}" ${!positive ? 'disabled' : ''}>🏷️</button>
+            <button class="pinfo-icon-btn" id="btn-send-to-gen"
+                title="Send to Gen" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚙️</button>
+            <button class="pinfo-icon-btn" id="btn-copy-positive"
+                title="${i18n.t('btn_copy_positive')}" ${!positive ? 'disabled' : ''}>📋</button>
+            <button class="pinfo-icon-btn" id="btn-register-to-tag"
+                title="${i18n.t('btn_register_to_tag_img')}">🔖</button>
+            <button class="pinfo-icon-btn" id="btn-add-favorite"
+                title="${_isInFavFolder(filePath) ? i18n.t('btn_already_favorite') : i18n.t('btn_add_favorite_img')}"
+                ${_isInFavFolder(filePath) ? 'disabled' : ''}>⭐</button>
         </div>
     `;
 
@@ -614,10 +611,13 @@ export async function showImageInfo(filePath) {
     document.getElementById('btn-send-to-tags')?.addEventListener('click', () => {
         sendToTags(positive, negative);
     });
+    document.getElementById('btn-send-to-gen')?.addEventListener('click', () => {
+        _sendToGen(params);
+    });
     document.getElementById('btn-copy-positive')?.addEventListener('click', () => {
         navigator.clipboard.writeText(positive).then(() => {
             const btn = document.getElementById('btn-copy-positive');
-            if (btn) { btn.textContent = i18n.t('toast_copy_done'); setTimeout(() => btn.textContent = i18n.t('btn_copy_positive'), 2000); }
+            if (btn) { btn.textContent = '✓'; setTimeout(() => btn.textContent = '📋', 1500); }
         });
     });
 
@@ -858,6 +858,30 @@ export function clearImageInfo() {
             <p>${i18n.t('image_info_placeholder')}</p>
         </div>`;
     }
+}
+
+// ── Send to Gen ────────────────────────────────────────────────
+function _sendToGen(params) {
+    if (!params || !Object.keys(params).length) return;
+    const sizeMatch = (params['Size'] || '').match(/(\d+)x(\d+)/);
+    applyPreset({
+        checkpoint:      params['Model']              || undefined,
+        vae:             params['VAE']                || undefined,
+        clipSkip:        params['Clip skip']          ? parseInt(params['Clip skip'])          : undefined,
+        sampler:         params['Sampler']            || undefined,
+        schedule:        params['Schedule type']      || undefined,
+        steps:           params['Steps']              ? parseInt(params['Steps'])              : undefined,
+        width:           sizeMatch                    ? parseInt(sizeMatch[1])                 : undefined,
+        height:          sizeMatch                    ? parseInt(sizeMatch[2])                 : undefined,
+        cfg:             params['CFG scale']          ? parseFloat(params['CFG scale'])        : undefined,
+        seed:            params['Seed']               ? parseInt(params['Seed'])               : undefined,
+        hiresFix:        !!params['Hires upscaler'],
+        hiresUpscaler:   params['Hires upscaler']     || undefined,
+        hiresSteps:      params['Hires steps']        ? parseInt(params['Hires steps'])        : undefined,
+        hiresDenoising:  params['Denoising strength'] ? parseFloat(params['Denoising strength']): undefined,
+        hiresUpscaleBy:  params['Hires upscale']      ? parseFloat(params['Hires upscale'])    : undefined,
+    });
+    window.dispatchEvent(new CustomEvent('app:switch-mode', { detail: 'gen' }));
 }
 
 // ── Send to Tags ───────────────────────────────────────────────

@@ -1389,11 +1389,29 @@ function setupGlobalAutocomplete() {
                 if (el.id === 'quick-add-positive' || el.id === 'quick-add-negative') {
                     const p = el.id === 'quick-add-positive' ? 'positive' : 'negative';
                     const chk = document.getElementById('setting-danbooru-underscore');
-                    const tagVal = (chk ? chk.checked : true) ? item.value.replaceAll('_', ' ') : item.value;
+                    const convert = chk ? chk.checked : true;
+                    const tagVal = convert ? item.value.replaceAll('_', ' ') : item.value;
                     const qaChk = document.getElementById('style-apply-quickadd');
                     const spDropdown2 = document.getElementById('style-palette-dropdown');
                     const paletteOpen2 = spDropdown2 && !spDropdown2.classList.contains('sp-hidden');
-                    const finalVal = paletteOpen2 && qaChk?.checked && hasActiveStyle() ? applyStyleToValue(tagVal) : tagVal;
+                    // コンマ区切りの先行トークンは別チップ、スペース区切りの先行ワードはサジェストと結合して1チップ
+                    // 例: "1girl, black pantyhose" で "pantyhose" を選択
+                    //   → "1girl" チップ + "black pantyhose" チップ
+                    const commaTokens = el.value.split(',');
+                    const lastToken = commaTokens[commaTokens.length - 1];
+                    const spaceWords = lastToken.split(' ');
+                    spaceWords.pop(); // サジェスト対象の最後のワードを除去
+                    // コンマ前のトークンを別チップとして追加
+                    for (const token of commaTokens.slice(0, -1).map(s => s.trim()).filter(Boolean)) {
+                        const tv = convert ? token.replaceAll('_', ' ') : token;
+                        const tf = paletteOpen2 && qaChk?.checked && hasActiveStyle() ? applyStyleToValue(tv) : tv;
+                        addToPrompt(tf, `${p}-prompt`);
+                        recordTagUsage(token);
+                    }
+                    // スペース先行ワード + サジェストを結合して1チップ
+                    const prefix = spaceWords.map(s => s.trim()).filter(Boolean).join(' ');
+                    const combined = prefix ? `${prefix} ${tagVal}` : tagVal;
+                    const finalVal = paletteOpen2 && qaChk?.checked && hasActiveStyle() ? applyStyleToValue(combined) : combined;
                     addToPrompt(finalVal, `${p}-prompt`);
                     recordTagUsage(item.value);
                     el.value = '';
