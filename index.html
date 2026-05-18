@@ -344,45 +344,71 @@
           <!-- Generation Settings View (visible in Generation mode) -->
           <div id="generation-container" class="tab-content">
             <div class="gen-wrap">
+              <!-- Send mask toolbar -->
+              <div class="gen-mask-bar">
+                <span class="gen-mask-bar-label">Send:</span>
+                <button class="gen-mask-all-btn" id="btn-gen-mask-all-on">All On</button>
+                <button class="gen-mask-all-btn" id="btn-gen-mask-all-off">All Off</button>
+              </div>
+
               <!-- Checkpoint / VAE / Clip skip -->
               <div class="gen-row">
-                <div class="gen-field" style="flex:3">
-                  <label>Stable Diffusion checkpoint</label>
+                <div class="gen-field" style="flex:3" data-gen-group="checkpoint">
+                  <div class="gen-field-hdr">
+                    <label>Stable Diffusion checkpoint</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="checkpoint" checked title="Include in send">
+                  </div>
                   <input type="text" id="gen-main-checkpoint" list="gen-main-checkpoint-dl"
                          class="gen-combobox" autocomplete="off" placeholder="— select or type —">
                   <datalist id="gen-main-checkpoint-dl"></datalist>
                 </div>
-                <div class="gen-field" style="flex:2">
-                  <label>SD VAE</label>
+                <div class="gen-field" style="flex:2" data-gen-group="vae">
+                  <div class="gen-field-hdr">
+                    <label>SD VAE</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="vae" checked title="Include in send">
+                  </div>
                   <select id="gen-main-vae" class="gen-select"><option>Automatic</option></select>
                 </div>
-                <div class="gen-field gen-field-xs">
-                  <label>Clip skip</label>
+                <div class="gen-field gen-field-xs" data-gen-group="clipSkip">
+                  <div class="gen-field-hdr">
+                    <label>Clip skip</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="clipSkip" checked title="Include in send">
+                  </div>
                   <input type="number" id="gen-clip-skip-num" class="gen-num" value="2" min="1" max="12">
                 </div>
               </div>
 
               <!-- Sampler / Schedule / Steps -->
               <div class="gen-row">
-                <div class="gen-field" style="flex:2">
-                  <label id="lbl-gen-sampler">Sampling method</label>
+                <div class="gen-field" style="flex:2" data-gen-group="sampler">
+                  <div class="gen-field-hdr">
+                    <label id="lbl-gen-sampler">Sampling method</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="sampler" checked title="Include in send">
+                  </div>
                   <select id="gen-sampler" class="gen-select"></select>
                 </div>
-                <div class="gen-field" style="flex:2">
-                  <label id="lbl-gen-schedule">Schedule type</label>
+                <div class="gen-field" style="flex:2" data-gen-group="schedule">
+                  <div class="gen-field-hdr">
+                    <label id="lbl-gen-schedule">Schedule type</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="schedule" checked title="Include in send">
+                  </div>
                   <select id="gen-schedule" class="gen-select"></select>
                 </div>
-                <div class="gen-field gen-field-xs">
-                  <label>Steps</label>
+                <div class="gen-field gen-field-xs" data-gen-group="steps">
+                  <div class="gen-field-hdr">
+                    <label>Steps</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="steps" checked title="Include in send">
+                  </div>
                   <input type="number" id="gen-steps-num" class="gen-num" value="25" min="1" max="150">
                 </div>
               </div>
 
               <!-- Hires. fix -->
-              <div class="gen-section-box">
-                <label class="gen-toggle-hdr">
-                  <input type="checkbox" id="gen-hires"> Hires. fix
-                </label>
+              <div class="gen-section-box" data-gen-group="hires">
+                <div class="gen-toggle-hdr">
+                  <label><input type="checkbox" id="gen-hires"> Hires. fix</label>
+                  <input type="checkbox" class="gen-send-chk" data-gen-group="hires" checked title="Include in send">
+                </div>
                 <div id="gen-hires-details" class="gen-collapsible">
                   <div class="gen-row">
                     <div class="gen-field" style="flex:3">
@@ -416,10 +442,11 @@
               </div>
 
               <!-- Refiner -->
-              <div class="gen-section-box">
-                <label class="gen-toggle-hdr">
-                  <input type="checkbox" id="gen-refiner"> Refiner
-                </label>
+              <div class="gen-section-box" data-gen-group="refiner">
+                <div class="gen-toggle-hdr">
+                  <label><input type="checkbox" id="gen-refiner"> Refiner</label>
+                  <input type="checkbox" class="gen-send-chk" data-gen-group="refiner" checked title="Include in send">
+                </div>
                 <div id="gen-refiner-details" class="gen-collapsible">
                   <div class="gen-row">
                     <div class="gen-field" style="flex:3">
@@ -437,22 +464,28 @@
               <!-- Width / Height / Batch -->
               <div class="gen-res-grid">
                 <div class="gen-res-col">
-                  <div class="gen-field">
-                    <label>Width</label>
+                  <div class="gen-field" data-gen-group="resolution">
+                    <div class="gen-field-hdr">
+                      <label>Width</label>
+                      <input type="checkbox" class="gen-send-chk" data-gen-group="resolution" checked title="Include in send">
+                    </div>
                     <input type="number" id="gen-width-num" class="gen-num" value="832" step="8" min="64" max="4096">
                   </div>
-                  <div class="gen-field">
+                  <div class="gen-field" data-gen-group="resolution">
                     <label>Height</label>
                     <input type="number" id="gen-height-num" class="gen-num" value="1216" step="8" min="64" max="4096">
                   </div>
                 </div>
                 <button id="btn-res-swap" class="gen-swap-btn" title="Swap W/H">⇅</button>
                 <div class="gen-batch-col">
-                  <div class="gen-field">
-                    <label>Batch count</label>
+                  <div class="gen-field" data-gen-group="batch">
+                    <div class="gen-field-hdr">
+                      <label>Batch count</label>
+                      <input type="checkbox" class="gen-send-chk" data-gen-group="batch" checked title="Include in send">
+                    </div>
                     <input type="number" id="gen-batch-count-num" class="gen-num" value="1" min="1" max="100">
                   </div>
-                  <div class="gen-field">
+                  <div class="gen-field" data-gen-group="batch">
                     <label>Batch size</label>
                     <input type="number" id="gen-batch-size-num" class="gen-num" value="1" min="1" max="8">
                   </div>
@@ -461,12 +494,18 @@
 
               <!-- CFG / Seed -->
               <div class="gen-row">
-                <div class="gen-field gen-field-xs">
-                  <label>CFG Scale</label>
+                <div class="gen-field gen-field-xs" data-gen-group="cfg">
+                  <div class="gen-field-hdr">
+                    <label>CFG Scale</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="cfg" checked title="Include in send">
+                  </div>
                   <input type="number" id="gen-cfg-num" class="gen-num" value="4.5" step="0.5" min="1" max="30">
                 </div>
-                <div class="gen-field" style="flex:3">
-                  <label>Seed</label>
+                <div class="gen-field" style="flex:3" data-gen-group="seed">
+                  <div class="gen-field-hdr">
+                    <label>Seed</label>
+                    <input type="checkbox" class="gen-send-chk" data-gen-group="seed" checked title="Include in send">
+                  </div>
                   <div class="gen-seed-row">
                     <input type="number" id="gen-seed" class="gen-num gen-seed-input" value="-1">
                     <button id="btn-seed-random" class="gen-icon-btn" title="Randomize">🎲</button>

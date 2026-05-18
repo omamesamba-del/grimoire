@@ -4,6 +4,47 @@ import { State } from '../core/state.js';
 let _models = { checkpoints: [], vaes: [], upscalers: [] };
 
 const GEN_STORAGE_KEY = 'genSettings';
+const GEN_SEND_MASK_KEY = 'genSendMask';
+const ALL_MASK_GROUPS = ['checkpoint','vae','clipSkip','sampler','schedule','steps','resolution','batch','cfg','seed','hires','refiner'];
+let _sendMask = Object.fromEntries(ALL_MASK_GROUPS.map(k => [k, true]));
+
+function _loadSendMask() {
+    try {
+        const raw = localStorage.getItem(GEN_SEND_MASK_KEY);
+        if (raw) _sendMask = { ...Object.fromEntries(ALL_MASK_GROUPS.map(k => [k, true])), ...JSON.parse(raw) };
+    } catch (_) {}
+}
+function _saveSendMask() {
+    localStorage.setItem(GEN_SEND_MASK_KEY, JSON.stringify(_sendMask));
+}
+function _applyGroupDisabled(group, disabled) {
+    document.querySelectorAll(`[data-gen-group="${group}"]`).forEach(el => {
+        el.classList.toggle('gen-group-disabled', disabled);
+    });
+}
+function _wireSendMask() {
+    document.querySelectorAll('.gen-send-chk').forEach(chk => {
+        const group = chk.dataset.genGroup;
+        if (!group) return;
+        chk.checked = _sendMask[group] !== false;
+        _applyGroupDisabled(group, !chk.checked);
+        chk.addEventListener('change', () => {
+            _sendMask[group] = chk.checked;
+            _saveSendMask();
+            _applyGroupDisabled(group, !chk.checked);
+        });
+    });
+    document.getElementById('btn-gen-mask-all-on')?.addEventListener('click', () => {
+        ALL_MASK_GROUPS.forEach(g => { _sendMask[g] = true; });
+        _saveSendMask();
+        document.querySelectorAll('.gen-send-chk').forEach(chk => { chk.checked = true; _applyGroupDisabled(chk.dataset.genGroup, false); });
+    });
+    document.getElementById('btn-gen-mask-all-off')?.addEventListener('click', () => {
+        ALL_MASK_GROUPS.forEach(g => { _sendMask[g] = false; });
+        _saveSendMask();
+        document.querySelectorAll('.gen-send-chk').forEach(chk => { chk.checked = false; _applyGroupDisabled(chk.dataset.genGroup, true); });
+    });
+}
 
 // ── バックエンド別サンプラー / スケジューラー定義 ─────────────────────────────
 const SAMPLERS = {
@@ -81,8 +122,36 @@ export function syncSamplerScheduleToMode() {
     }
 }
 
+function _collectAll() {
+    const v = id => document.getElementById(id)?.value ?? '';
+    const n = id => parseFloat(document.getElementById(id)?.value ?? '0');
+    const b = id => document.getElementById(id)?.checked ?? false;
+    return {
+        checkpoint: v('gen-main-checkpoint'),
+        vae: v('gen-main-vae'),
+        clipSkip: n('gen-clip-skip-num'),
+        sampler: v('gen-sampler'),
+        schedule: v('gen-schedule'),
+        steps: n('gen-steps-num'),
+        width: n('gen-width-num'),
+        height: n('gen-height-num'),
+        batchCount: n('gen-batch-count-num'),
+        batchSize: n('gen-batch-size-num'),
+        cfg: n('gen-cfg-num'),
+        seed: n('gen-seed'),
+        hiresFix: b('gen-hires'),
+        hiresUpscaler: v('gen-upscaler'),
+        hiresSteps: n('gen-hires-steps-num'),
+        hiresDenoising: n('gen-denoising-num'),
+        hiresUpscaleBy: n('gen-upscale-by-num'),
+        refiner: b('gen-refiner'),
+        refinerCheckpoint: v('gen-refiner-ckpt'),
+        refinerSwitchAt: n('gen-refiner-switch-num'),
+    };
+}
+
 function saveGenSettings() {
-    localStorage.setItem(GEN_STORAGE_KEY, JSON.stringify(getGenPayload()));
+    localStorage.setItem(GEN_STORAGE_KEY, JSON.stringify(_collectAll()));
 }
 
 function restoreGenSettings() {
@@ -98,7 +167,9 @@ export async function initGeneration() {
     syncSamplerScheduleToMode();   // ← バックエンドモードに合わせた初期化
     wireControls();
     loadArResPresets();
+    _loadSendMask();
     restoreGenSettings();
+    _wireSendMask();
 
     // Auto-save on any change inside the generation container
     document.getElementById('generation-container')?.addEventListener('change', saveGenSettings);
@@ -379,29 +450,28 @@ function collectFolders(node, prefix) {
 }
 
 export function getGenPayload() {
-    const v = id => document.getElementById(id)?.value ?? '';
-    const n = id => parseFloat(document.getElementById(id)?.value ?? '0');
-    const b = id => document.getElementById(id)?.checked ?? false;
+    const all = _collectAll();
+    const m = k => _sendMask[k] !== false;
     return {
-        checkpoint: v('gen-main-checkpoint'),
-        vae: v('gen-main-vae'),
-        clipSkip: n('gen-clip-skip-num'),
-        sampler: v('gen-sampler'),
-        schedule: v('gen-schedule'),
-        steps: n('gen-steps-num'),
-        width: n('gen-width-num'),
-        height: n('gen-height-num'),
-        batchCount: n('gen-batch-count-num'),
-        batchSize: n('gen-batch-size-num'),
-        cfg: n('gen-cfg-num'),
-        seed: n('gen-seed'),
-        hiresFix: b('gen-hires'),
-        hiresUpscaler: v('gen-upscaler'),
-        hiresSteps: n('gen-hires-steps-num'),
-        hiresDenoising: n('gen-denoising-num'),
-        hiresUpscaleBy: n('gen-upscale-by-num'),
-        refiner: b('gen-refiner'),
-        refinerCheckpoint: v('gen-refiner-ckpt'),
-        refinerSwitchAt: n('gen-refiner-switch-num'),
+        checkpoint:        m('checkpoint')  ? all.checkpoint        : null,
+        vae:               m('vae')         ? all.vae               : null,
+        clipSkip:          m('clipSkip')    ? all.clipSkip          : null,
+        sampler:           m('sampler')     ? all.sampler           : null,
+        schedule:          m('schedule')    ? all.schedule          : null,
+        steps:             m('steps')       ? all.steps             : null,
+        width:             m('resolution')  ? all.width             : null,
+        height:            m('resolution')  ? all.height            : null,
+        batchCount:        m('batch')       ? all.batchCount        : null,
+        batchSize:         m('batch')       ? all.batchSize         : null,
+        cfg:               m('cfg')         ? all.cfg               : null,
+        seed:              m('seed')        ? all.seed              : null,
+        hiresFix:          m('hires')       ? all.hiresFix          : null,
+        hiresUpscaler:     m('hires')       ? all.hiresUpscaler     : null,
+        hiresSteps:        m('hires')       ? all.hiresSteps        : null,
+        hiresDenoising:    m('hires')       ? all.hiresDenoising    : null,
+        hiresUpscaleBy:    m('hires')       ? all.hiresUpscaleBy    : null,
+        refiner:           m('refiner')     ? all.refiner           : null,
+        refinerCheckpoint: m('refiner')     ? all.refinerCheckpoint : null,
+        refinerSwitchAt:   m('refiner')     ? all.refinerSwitchAt   : null,
     };
 }

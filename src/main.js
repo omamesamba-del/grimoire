@@ -1370,8 +1370,9 @@ function setupGlobalAutocomplete() {
         if (SKIP_IDS.has(el.id)) return;
 
         clearTimeout(acDebounce);
-        // Use last comma-separated token as query
-        const query = el.value.split(',').pop().trim();
+        // Use last word (split by comma then space) as query
+        const _commaToken = el.value.split(',').pop();
+        const query = _commaToken.split(' ').pop().trim();
         if (query.length < 2) { hideAutocomplete(); return; }
 
         acDebounce = setTimeout(async () => {
@@ -1402,13 +1403,18 @@ function setupGlobalAutocomplete() {
                 // アンダースコア→スペース変換（setting-danbooru-underscore）
                 const _chk = document.getElementById('setting-danbooru-underscore');
                 const _val = (_chk ? _chk.checked : true) ? item.value.replaceAll('_', ' ') : item.value;
-                // Multi-token fields (comma-separated): replace last token
+                // Replace the last word (after comma and/or space) with the selected tag
                 if (el.value.includes(',')) {
                     const parts = el.value.split(',');
-                    parts[parts.length - 1] = ' ' + _val;
+                    const lastPart = parts[parts.length - 1];
+                    const words = lastPart.split(' ');
+                    words[words.length - 1] = _val;
+                    parts[parts.length - 1] = words.join(' ');
                     el.value = parts.join(',').replace(/^\s*,\s*/, '') + ', ';
                 } else {
-                    el.value = _val;
+                    const words = el.value.split(' ');
+                    words[words.length - 1] = _val;
+                    el.value = words.join(' ');
                 }
                 // Notify any listeners (e.g. tag-search filter)
                 el.dispatchEvent(new Event('input', { bubbles: true }));
