@@ -495,7 +495,7 @@ function setupEventListeners() {
         btnFetchAll.onclick = async () => {
             if (btnFetchAll.disabled) return;
             const mode = State.currentMode;
-            const assets = (mode === 'lora' ? State.allAssets.loras : State.allAssets.embeddings) || [];
+            const assets = (mode === 'checkpoint' ? State.allAssets.checkpoints : mode === 'lora' ? State.allAssets.loras : State.allAssets.embeddings) || [];
             const missing = assets.filter(a => a.fullPath && !a.hasInfoFile);
             if (missing.length === 0) { alert('All assets already have metadata.'); return; }
             if (!await showConfirmDialog(`Fetch metadata for ${missing.length} asset(s) without metadata?`)) return;

@@ -141,6 +141,7 @@
         <div class="pane-content" id="explorer-content">
           <!-- Group tree will be rendered here -->
         </div>
+        <div class="explorer-actions" id="explorer-actions"></div>
       </section>
 
       <div class="divider" id="divider-1"></div>
@@ -1103,6 +1104,7 @@
       <div class="menu-item" id="menu-asset-edit-settings" data-i18n="menu_asset_edit_settings">✏️ Edit Recommended Settings</div>
       <div class="menu-separator" id="menu-asset-edit-settings-sep"></div>
       <div class="menu-item" id="menu-asset-fetch-civitai" data-i18n="menu_asset_fetch_civitai">🔍 Fetch Info (CivitAI)</div>
+      <div class="menu-item" id="menu-asset-delete-metadata" style="color:#fb7185;">🗑 Delete Metadata</div>
       <div class="menu-item" id="menu-asset-open-civitai-page" data-i18n="menu_asset_open_civitai_page">🌐 Open CivitAI Page</div>
       <div class="menu-separator"></div>
       <div class="menu-item" id="menu-asset-move-to">📦 Move to Folder...</div>
@@ -1286,6 +1288,8 @@
 
       <div class="modal-actions" style="margin-top:1rem;">
         <button id="checkpoint-edit-cancel" class="btn-secondary">Cancel</button>
+        <button id="checkpoint-edit-send-tags" class="btn-secondary">Send Tags</button>
+        <button id="checkpoint-edit-send-gens" class="btn-secondary">Send Gen Settings</button>
         <button id="checkpoint-edit-apply" class="btn-secondary">▶ Apply Now</button>
         <button id="checkpoint-edit-save" class="btn-primary">💾 Save Settings</button>
       </div>

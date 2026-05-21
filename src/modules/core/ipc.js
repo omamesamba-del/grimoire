@@ -325,6 +325,11 @@ export const IPC = {
     async deleteAssetFile(fullPath) {
         if (isElectron) return await window.electronAPI.deleteAssetFile(fullPath);
         return { success: true, deletedFiles: [] };
+    },
+
+    async deleteAssetMetadata(fullPath) {
+        if (isElectron) return await window.electronAPI.deleteAssetMetadata(fullPath);
+        return { success: true, deletedFiles: [] };
     }
 };
 

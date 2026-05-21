@@ -174,6 +174,19 @@ export function setupContextMenu() {
         window.dispatchEvent(new CustomEvent('checkpoint:open-edit', { detail: asset }));
     };
 
+    document.getElementById('menu-asset-delete-metadata').onclick = async () => {
+        const asset = State.contextTarget;
+        if (!asset?.fullPath) return;
+        if (!await showConfirmDialog(`Delete metadata for "${asset.name}"?\n(.civitai.info and preview image will be removed)`)) return;
+        try {
+            await IPC.deleteAssetMetadata(asset.fullPath);
+            State.allAssets = await loadAssets();
+            renderAssetGrid();
+        } catch (err) {
+            alert(`Failed to delete metadata: ${err.message}`);
+        }
+    };
+
     document.getElementById('menu-asset-fetch-civitai').onclick = async () => {
         const asset = State.contextTarget;
         if (!asset?.fullPath) return;
