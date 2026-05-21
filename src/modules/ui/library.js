@@ -13,6 +13,7 @@ import { IPC } from '../core/ipc.js';
 import Sortable, { MultiDrag } from 'sortablejs';
 import { hasActiveStyle, applyStyleToValue } from './style-palette.js';
 import { PALETTE_CSS_VAR } from '../core/palette.js';
+import { applyPbSettingsFromAsset } from './checkpointEdit.js';
 
 // Track Sortable instances to destroy them before re-rendering
 const tagGridSortables = [];
@@ -804,7 +805,6 @@ export function renderAssetGrid(query = '') {
                     State.lastSelectedAssetIndex = asset.fullPath ? assetIndex : -1;
                     grid.querySelectorAll('.asset-card').forEach(c => c.classList.remove('asset-selected'));
                     if (mode === 'checkpoint') {
-                        // Set the gen-mode checkpoint input directly
                         const ckptInput = document.getElementById('gen-main-checkpoint');
                         if (ckptInput) {
                             const basename = (asset.relPath || asset.name || '')

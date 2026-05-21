@@ -495,6 +495,13 @@ body.app-loading #image-info-panel {
   position: relative;
   transition: width 0.2s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.explorer-actions {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
 }
 
 .explorer-pane.collapsed {
@@ -2504,12 +2511,13 @@ body.app-loading #image-info-panel {
     align-items: center;
     gap: 0.8rem;
     padding: 0.8rem 1.2rem;
-    margin-top: 1rem;
     cursor: pointer;
     color: var(--slate-400);
     font-size: 0.85rem;
-    border-top: 1px solid var(--border-color);
     transition: all 0.2s;
+}
+.btn-add-explorer + .btn-add-explorer {
+    border-top: 1px solid var(--border-color);
 }
 .btn-add-explorer:hover {
     background: rgba(255, 255, 255, 0.03);

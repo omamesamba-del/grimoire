@@ -25,6 +25,18 @@ export function initCheckpointEdit() {
     document.getElementById('checkpoint-edit-close')?.addEventListener('click', () => dialog.close());
     document.getElementById('checkpoint-edit-cancel')?.addEventListener('click', () => dialog.close());
 
+    // Send Tags
+    document.getElementById('checkpoint-edit-send-tags')?.addEventListener('click', () => {
+        if (!_currentAsset) return;
+        _sendTags();
+    });
+
+    // Send Gen Settings
+    document.getElementById('checkpoint-edit-send-gens')?.addEventListener('click', () => {
+        if (!_currentAsset) return;
+        _sendGens();
+    });
+
     // Apply Now
     document.getElementById('checkpoint-edit-apply')?.addEventListener('click', () => {
         if (!_currentAsset) return;
@@ -79,6 +91,43 @@ export function initCheckpointEdit() {
     });
 }
 
+// ── Apply saved settings on checkpoint click ──────────────────────────────────
+
+export function applyPbSettingsFromAsset(asset) {
+    const s = asset?.pbSettings;
+    if (!s) return;
+
+    // Prompts: append
+    const posEl = document.getElementById('positive-prompt');
+    const negEl = document.getElementById('negative-prompt');
+    if (posEl && s.positive) {
+        const cur = posEl.value.trim();
+        posEl.value = cur ? `${cur}, ${s.positive}` : s.positive;
+        posEl.dispatchEvent(new Event('input'));
+    }
+    if (negEl && s.negative) {
+        const cur = negEl.value.trim();
+        negEl.value = cur ? `${cur}, ${s.negative}` : s.negative;
+        negEl.dispatchEvent(new Event('input'));
+    }
+
+    // Gen settings
+    applyPreset({
+        sampler:        s.sampler       || undefined,
+        schedule:       s.schedule      || undefined,
+        steps:          s.steps         ? Number(s.steps)          : undefined,
+        cfg:            s.cfg           ? Number(s.cfg)            : undefined,
+        seed:           s.seed !== ''   ? s.seed                   : undefined,
+        width:          s.width         ? Number(s.width)          : undefined,
+        height:         s.height        ? Number(s.height)         : undefined,
+        clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        hiresFix:       s.hiresEnabled  ? true                     : undefined,
+        hiresUpscaler:  s.hiresUpscaler || undefined,
+        hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
+        hiresDenoising: s.hiresDenoising? Number(s.hiresDenoising) : undefined,
+    });
+}
+
 // ── Open Modal ────────────────────────────────────────────────────────────────
 
 export function openCheckpointEditModal(asset) {
@@ -101,7 +150,7 @@ export function openCheckpointEditModal(asset) {
                 const metaJson = img.meta ? JSON.stringify(img.meta).replace(/"/g, '&quot;') : '';
                 const hasMeta  = !!img.meta;
                 return `<div class="cp-edit-civitai-thumb" data-url="${safeUrl}" data-meta-json="${metaJson}" title="${hasMeta ? 'Has metadata — click to auto-fill' : 'No metadata'}">
-                    <img src="${safeUrl}" alt="" loading="lazy">
+                    <img src="${safeUrl}" alt="" loading="lazy" onerror="this.closest('.cp-edit-civitai-thumb').style.display='none'">
                     ${hasMeta ? '<span class="cp-edit-has-meta">i</span>' : ''}
                 </div>`;
             }).join('');
@@ -193,6 +242,32 @@ function _collectSettings() {
         hiresSteps:    document.getElementById('checkpoint-edit-hires-steps')?.value   || '',
         hiresDenoising:document.getElementById('checkpoint-edit-hires-denoise')?.value  || '',
     };
+}
+
+function _sendTags() {
+    const s = _collectSettings();
+    const posEl = document.getElementById('positive-prompt');
+    const negEl = document.getElementById('negative-prompt');
+    if (posEl && s.positive) { posEl.value = s.positive; posEl.dispatchEvent(new Event('input')); }
+    if (negEl && s.negative) { negEl.value = s.negative; negEl.dispatchEvent(new Event('input')); }
+}
+
+function _sendGens() {
+    const s = _collectSettings();
+    applyPreset({
+        sampler:        s.sampler       || undefined,
+        schedule:       s.schedule      || undefined,
+        steps:          s.steps         ? Number(s.steps)          : undefined,
+        cfg:            s.cfg           ? Number(s.cfg)            : undefined,
+        seed:           s.seed !== ''   ? s.seed                   : undefined,
+        width:          s.width         ? Number(s.width)          : undefined,
+        height:         s.height        ? Number(s.height)         : undefined,
+        clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        hiresFix:       s.hiresEnabled  ? true                     : undefined,
+        hiresUpscaler:  s.hiresUpscaler || undefined,
+        hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
+        hiresDenoising: s.hiresDenoising? Number(s.hiresDenoising) : undefined,
+    });
 }
 
 function _collectAndApply() {

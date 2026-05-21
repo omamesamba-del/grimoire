@@ -554,35 +554,17 @@ class AssetService {
                 }
               }
 
-              // 2. Flexible matching (handle suffixes like " (1)")
+              // 2. Flexible matching for download duplicates like "name (1).png"
               if (!thumbnail) {
                 try {
                   const siblingFiles = fs.readdirSync(dir);
-                  // Pattern for name with suffixes
                   const basePattern = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                  // Matches "name (1).png" or "name.preview.png" or "name_preview.png"
-                  // Handling cases like "&" or " " in name
-                  const flexRegex = new RegExp(`^${basePattern}(\\s|\\.|_|-|\\().*\\.(${imgExts.map(e => e.slice(1)).join('|')})$`, 'i');
+                  const flexRegex = new RegExp(`^${basePattern}\\s*\\(\\d+\\)\\.(${imgExts.map(e => e.slice(1)).join('|')})$`, 'i');
                   const flexMatch = siblingFiles.find(f => flexRegex.test(f));
                   if (flexMatch) {
                     thumbnail = `thumb:///${encodeURIComponent(path.join(dir, flexMatch).replace(/\\/g, '/'))}`;
                   }
                 } catch (e) {}
-              }
-
-              // 3. Fallback: Any image that starts with the same 8 characters (to catch very messy names)
-              if (!thumbnail && name.length > 8) {
-                  try {
-                    const siblingFiles = fs.readdirSync(dir);
-                    const shortName = name.slice(0, 12).toLowerCase();
-                    const fuzzyMatch = siblingFiles.find(f => {
-                      const lowerF = f.toLowerCase();
-                      return lowerF.startsWith(shortName) && imgExts.some(ext => lowerF.endsWith(ext));
-                    });
-                    if (fuzzyMatch) {
-                        thumbnail = `thumb:///${encodeURIComponent(path.join(dir, fuzzyMatch).replace(/\\/g, '/'))}`;
-                    }
-                  } catch (e) {}
               }
 
               if (thumbnail) {
@@ -1476,6 +1458,25 @@ ipcMain.handle('assets:delete-file', async (event, { fullPath }) => {
   return { success: true, deletedFiles: deleted };
 });
 
+ipcMain.handle('civitai:delete-metadata', async (event, { fullPath }) => {
+  const dir      = path.dirname(fullPath);
+  const baseName = path.parse(fullPath).name;
+  const previewPatterns = ['.preview', '.sample', '_preview', '_thumb', '.view'];
+  const imgExts  = ['.png', '.jpg', '.jpeg', '.webp'];
+  const targets  = [baseName + '.civitai.info'];
+  for (const p of previewPatterns) {
+    for (const e of imgExts) targets.push(baseName + p + e);
+  }
+  const deleted = [];
+  for (const f of targets) {
+    const fp = path.join(dir, f);
+    if (fs.existsSync(fp)) {
+      try { fs.unlinkSync(fp); deleted.push(f); } catch (e) {}
+    }
+  }
+  return { success: true, deletedFiles: deleted };
+});
+
 // ── CivitAI Metadata Fetch ─────────────────────────────────────────────────
 
 function calcSHA256(filePath) {
@@ -1570,11 +1571,11 @@ ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => 
     log(`[CivitAI] Preview cleanup failed: ${e.message}`, 'WARN');
   }
 
-  // Download preview image (first available)
+  // Download preview image — try each image in order until one succeeds
   let savedThumb = null;
   const images = data.images || [];
-  const previewImg = images[0];
-  if (previewImg?.url) {
+  for (const previewImg of images) {
+    if (!previewImg?.url) continue;
     try {
       const imgUrl = previewImg.url;
       const rawExt = path.extname(imgUrl.split('?')[0]) || '.jpeg';
@@ -1585,7 +1586,9 @@ ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => 
         fs.writeFileSync(thumbPath, buf);
         savedThumb = thumbPath;
         log(`[CivitAI] Saved preview: ${path.basename(thumbPath)}`);
+        break;
       }
+      log(`[CivitAI] Preview download skipped (HTTP ${imgRes.status}): ${imgUrl}`, 'WARN');
     } catch (e) {
       log(`[CivitAI] Preview download failed: ${e.message}`, 'WARN');
     }

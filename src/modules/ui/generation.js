@@ -379,7 +379,7 @@ export function applyPreset(data) {
     set('gen-refiner-switch-num', data.refinerSwitchAt);
 }
 
-async function saveCurrentPreset() {
+export async function saveCurrentPreset() {
     const dialog = document.getElementById('save-gen-preset-dialog');
     const nameInput = document.getElementById('gen-preset-name-input');
     const folderSelect = document.getElementById('gen-preset-folder-select');

@@ -17,6 +17,7 @@ window.electronAPI = {
   createAssetFolder: (folderPath) => ipcRenderer.invoke('assets:create-folder', { folderPath }),
   getGenModels: () => ipcRenderer.invoke('gen:get-models'),
   fetchCivitaiMetadata: (fullPath, apiKey) => ipcRenderer.invoke('civitai:fetch-metadata', { fullPath, apiKey }),
+  deleteAssetMetadata:  (fullPath)         => ipcRenderer.invoke('civitai:delete-metadata', { fullPath }),
   searchDanbooru: (query) => ipcRenderer.invoke('danbooru:search', query),
   registerTagImage: (tagName, filePath) => ipcRenderer.invoke('tags:register-image', { tagName, filePath }),
   registerTagImageBuffer: (tagName, buffer, ext) => ipcRenderer.invoke('tags:register-image-buffer', { tagName, buffer, ext }),

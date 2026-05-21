@@ -9,6 +9,7 @@ import { moveWithConflictCheck } from './context-menu.js';
 import { i18n } from '../core/i18n.js';
 import { saveTagOrder } from '../tags/service.js';
 import { showInputDialog } from './modals.js';
+import { saveCurrentPreset } from './generation.js';
 import Sortable from 'sortablejs';
 
 // Track Sortable instances to destroy before re-render
@@ -34,6 +35,7 @@ const PROMOTE_THRESHOLD = 50; // px leftward to trigger promotion
 
 export function renderExplorer() {
     const explorer = document.getElementById('explorer-content');
+    const actions  = document.getElementById('explorer-actions');
     if (!explorer) return;
 
     // Destroy existing Sortable instances before clearing DOM
@@ -42,6 +44,7 @@ export function renderExplorer() {
     if (autoExpandTimer) { clearTimeout(autoExpandTimer); autoExpandTimer = null; }
 
     explorer.innerHTML = '';
+    if (actions) actions.innerHTML = '';
 
     if (State.currentMode === 'gen') {
         renderGenPresetsExplorer(explorer);
@@ -87,35 +90,47 @@ export function renderExplorer() {
         explorer.querySelectorAll('.nav-tree').forEach(el => initExplorerSortable(el, false));
         initExplorerSortable(explorer, true);
 
-        // Add Category Button at the Bottom
-        const addBtn = document.createElement('div');
-        addBtn.className = 'btn-add-explorer';
-        addBtn.innerHTML = `<span class="plus">＋</span><span data-i18n="explorer_add_category">Add Category</span>`;
-        addBtn.onclick = () => {
-            const btn = document.getElementById('btn-add-category');
-            if (btn) btn.click();
-        };
-        explorer.appendChild(addBtn);
+        // Add Category Button — fixed at bottom
+        if (actions) {
+            const addBtn = document.createElement('div');
+            addBtn.className = 'btn-add-explorer';
+            addBtn.innerHTML = `<span class="plus">＋</span><span data-i18n="explorer_add_category">Add Category</span>`;
+            addBtn.onclick = () => {
+                const btn = document.getElementById('btn-add-category');
+                if (btn) btn.click();
+            };
+            actions.appendChild(addBtn);
+        }
     } else {
         renderAssetExplorer(explorer);
 
-        const addFolderBtn = document.createElement('div');
-        addFolderBtn.className = 'btn-add-explorer';
-        addFolderBtn.innerHTML = `<span class="plus">＋</span><span>New Folder</span>`;
-        addFolderBtn.onclick = () => {
-            window.dispatchEvent(new CustomEvent('showContextMenu', {
-                detail: {
-                    event: { clientX: addFolderBtn.getBoundingClientRect().left + 20, clientY: addFolderBtn.getBoundingClientRect().top },
-                    target: { name: '', relPath: '' },
-                    type: 'asset-folder'
+        if (actions) {
+            const addFolderBtn = document.createElement('div');
+            addFolderBtn.className = 'btn-add-explorer';
+            addFolderBtn.innerHTML = `<span class="plus">＋</span><span>New Folder</span>`;
+            addFolderBtn.onclick = async () => {
+                const name = await showInputDialog('New Folder Name');
+                if (!name) return;
+                const cfg = await IPC.getConfig();
+                const basePath = State.currentMode === 'lora'       ? cfg.loraPath
+                               : State.currentMode === 'checkpoint' ? cfg.checkpointsPath
+                               :                                       cfg.embeddingsPath;
+                try {
+                    await IPC.createAssetFolder(`${basePath}\\${name.trim()}`);
+                    State.allAssets = await loadAssets();
+                    renderExplorer();
+                    renderAssetGrid();
+                } catch (e) {
+                    alert(`Failed to create folder: ${e.message}`);
                 }
-            }));
-        };
-        explorer.appendChild(addFolderBtn);
+            };
+            actions.appendChild(addFolderBtn);
+        }
     }
 }
 
 async function renderGenPresetsExplorer(container) {
+    const actions = document.getElementById('explorer-actions');
     container.innerHTML = '<div style="padding:0.5rem 0.8rem;color:var(--slate-500);font-size:0.78rem;">Loading…</div>';
     let tree;
     try {
@@ -139,17 +154,25 @@ async function renderGenPresetsExplorer(container) {
 
     renderPresetFolderTree(tree, container, 0, '');
 
-    // Add Folder button
-    const addBtn = document.createElement('div');
-    addBtn.className = 'btn-add-explorer';
-    addBtn.innerHTML = `<span class="plus">＋</span><span>New Folder</span>`;
-    addBtn.onclick = async () => {
-        const name = await showInputDialog('New Folder Name');
-        if (!name) return;
-        await IPC.createGenPresetFolder(name);
-        renderExplorer();
-    };
-    container.appendChild(addBtn);
+    // Save Preset + New Folder buttons — fixed at bottom
+    if (actions) {
+        const saveBtn = document.createElement('div');
+        saveBtn.className = 'btn-add-explorer';
+        saveBtn.innerHTML = `<span class="plus">💾</span><span>Save Preset</span>`;
+        saveBtn.onclick = () => saveCurrentPreset();
+        actions.appendChild(saveBtn);
+
+        const addBtn = document.createElement('div');
+        addBtn.className = 'btn-add-explorer';
+        addBtn.innerHTML = `<span class="plus">＋</span><span>New Folder</span>`;
+        addBtn.onclick = async () => {
+            const name = await showInputDialog('New Folder Name');
+            if (!name) return;
+            await IPC.createGenPresetFolder(name);
+            renderExplorer();
+        };
+        actions.appendChild(addBtn);
+    }
 }
 
 function renderPresetFolderTree(node, container, depth, parentPath) {
