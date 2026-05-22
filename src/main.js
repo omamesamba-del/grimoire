@@ -1196,7 +1196,19 @@ function setupEventListeners() {
 
     // Global Key Events: Delete
     document.addEventListener('keydown', async (e) => {
-        if (e.key !== 'Delete' || e.target.closest('input, textarea')) return;
+        if (e.key !== 'Delete') return;
+        const inPromptArea = e.target.id === 'positive-prompt' || e.target.id === 'negative-prompt';
+        const inOtherInput = !inPromptArea && !!e.target.closest('input, textarea');
+        if (inOtherInput) return;
+
+        // Chip selection: handle even if focus is on prompt textarea
+        if (State.selectedChips.size > 0) {
+            e.preventDefault();
+            performBatchRemoveFromPrompt(Array.from(State.selectedChips));
+            return;
+        }
+
+        if (inPromptArea) return; // let textarea handle normal Delete
 
         // Library tag-grid selection takes priority (it's the destructive case)
         if (State.selectedTags.size > 0) {
@@ -1204,10 +1216,6 @@ function setupEventListeners() {
             const confirmed = await showConfirmDialog(`Delete ${ids.length} selected items?`);
             if (confirmed) await performBatchDelete(ids);
             return;
-        }
-        // Prompt-chip selection — remove without confirmation
-        if (State.selectedChips.size > 0) {
-            performBatchRemoveFromPrompt(Array.from(State.selectedChips));
         }
     });
 
