@@ -547,7 +547,7 @@ export async function showImageInfo(filePath) {
             <button class="pinfo-icon-btn" id="btn-send-to-gen"
                 title="${i18n.t('btn_send_to_gen_img')}" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚙️</button>
             <button class="pinfo-icon-btn" id="btn-copy-positive"
-                title="${i18n.t('btn_copy_positive')}" ${!positive ? 'disabled' : ''}>📋</button>
+                title="${i18n.t('btn_copy_pnginfo')}" ${!raw ? 'disabled' : ''}>📋</button>
             <button class="pinfo-icon-btn" id="btn-register-to-tag"
                 title="${i18n.t('btn_register_to_tag_img')}">🔖</button>
             <button class="pinfo-icon-btn" id="btn-add-favorite"
@@ -615,7 +615,7 @@ export async function showImageInfo(filePath) {
         _sendToGen(params);
     });
     document.getElementById('btn-copy-positive')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(positive).then(() => {
+        navigator.clipboard.writeText(raw).then(() => {
             const btn = document.getElementById('btn-copy-positive');
             if (btn) { btn.textContent = '✓'; setTimeout(() => btn.textContent = '📋', 1500); }
         });
