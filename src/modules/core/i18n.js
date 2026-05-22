@@ -511,6 +511,7 @@ class I18n {
                 'asset_edit_set_thumb':      'サムネイルに設定',
 
                 // ── Checkpoint 編集ダイアログ ─────────────────────────────
+                'cp_edit_clear':             '🗑 クリア',
                 'cp_edit_send_tags':         'タグを送信',
                 'cp_edit_send_gens':         '生成設定を送信',
                 'cp_edit_apply':             '▶ 今すぐ適用',
@@ -1018,6 +1019,7 @@ class I18n {
                 'asset_edit_set_thumb':      'Set as Thumbnail',
 
                 // ── Checkpoint Edit Dialog ────────────────────────────────
+                'cp_edit_clear':             '🗑 Clear',
                 'cp_edit_send_tags':         'Send Tags',
                 'cp_edit_send_gens':         'Send Gen Settings',
                 'cp_edit_apply':             '▶ Apply Now',

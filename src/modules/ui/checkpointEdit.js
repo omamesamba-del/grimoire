@@ -37,6 +37,20 @@ export function initCheckpointEdit() {
         _sendGens();
     });
 
+    // Clear
+    document.getElementById('checkpoint-edit-clear')?.addEventListener('click', () => {
+        const ids = [
+            'checkpoint-edit-positive', 'checkpoint-edit-negative',
+            'checkpoint-edit-sampler', 'checkpoint-edit-schedule',
+            'checkpoint-edit-steps', 'checkpoint-edit-cfg', 'checkpoint-edit-seed',
+            'checkpoint-edit-width', 'checkpoint-edit-height', 'checkpoint-edit-clipskip',
+            'checkpoint-edit-hires-upscaler', 'checkpoint-edit-hires-steps', 'checkpoint-edit-hires-denoise',
+        ];
+        ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        const hires = document.getElementById('checkpoint-edit-hires-enabled');
+        if (hires) hires.checked = false;
+    });
+
     // Apply Now
     document.getElementById('checkpoint-edit-apply')?.addEventListener('click', () => {
         if (!_currentAsset) return;
