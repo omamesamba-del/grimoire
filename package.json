@@ -1,6 +1,6 @@
 {
   "name": "grimoire",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Prompt library & builder for Stable Diffusion / ComfyUI",
   "main": "dist-electron/main.js",
   "type": "module",
@@ -37,6 +37,9 @@
         "filter": [
           "**/*",
           "!config.json",
+          "!presets.json",
+          "!tags.json",
+          "!tags.json.bak",
           "!fav_image/**",
           "!tag_images/**",
           "!yaml_backups/**"
