@@ -849,6 +849,10 @@ function createWindow() {
   log(`Preload path: ${preloadPath}`);
   log(`Preload file exists: ${fs.existsSync(preloadPath)}`);
 
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'app', 'assets', 'icon.ico')
+    : path.join(process.cwd(), 'assets', 'icon.ico');
+
   win = new BrowserWindow({
     x: bounds.x,
     y: bounds.y,
@@ -856,6 +860,7 @@ function createWindow() {
     height: bounds.height,
     minWidth: 720,
     minHeight: 600,
+    icon: fs.existsSync(iconPath) ? iconPath : undefined,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#0a0f1e',

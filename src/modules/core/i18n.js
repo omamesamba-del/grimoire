@@ -8,7 +8,7 @@
  */
 class I18n {
     constructor() {
-        this.currentLang = localStorage.getItem('appLanguage') || (navigator.language.startsWith('ja') ? 'ja' : 'en');
+        this.currentLang = localStorage.getItem('appLanguage') || 'en';
         this.translations = {
             ja: {
                 // ── ペインタイトル ─────────────────────────────────────────
