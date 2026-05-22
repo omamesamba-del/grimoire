@@ -483,7 +483,7 @@ class I18n {
                 'ai_api_key_settings_hint':  ' で入力してください。',
 
                 // ── 画像ブラウザ追加 ─────────────────────────────────────
-                'btn_copy_positive':         '📋 コピー',
+                'btn_copy_positive':         '📋 ポジティブをコピー',
                 'btn_send_to_gen_img':       '⚙️ Gen に送る',
                 'btn_register_to_tag_img':   '🏷️ タグに登録',
                 'btn_add_favorite_img':      '★ お気に入り',
@@ -988,7 +988,7 @@ class I18n {
                 'ai_api_key_settings_hint':  '.',
 
                 // ── Image Browser additions ──────────────────────────────
-                'btn_copy_positive':         '📋 Copy',
+                'btn_copy_positive':         '📋 Copy Positive',
                 'btn_send_to_gen_img':       '⚙️ Send to Gen',
                 'btn_register_to_tag_img':   '🏷️ Register to Tag',
                 'btn_add_favorite_img':      '★ Favorite',
