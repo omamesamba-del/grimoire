@@ -241,6 +241,14 @@ export function renderPromptChips(containerId, inputId) {
             // No action needed
         }, State.selectedChips);
         container.dataset.marqueeInitialized = 'true';
+
+        // quick-add にフォーカスがある状態でチップエリアをクリックしたら blur する
+        container.addEventListener('mousedown', () => {
+            const active = document.activeElement;
+            if (active && (active.id === 'quick-add-positive' || active.id === 'quick-add-negative' || active.id === 'quick-add-comfy')) {
+                active.blur();
+            }
+        });
     }
 
     // --- Initialize Sortable for Chips ---
