@@ -20,6 +20,7 @@ import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode }
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
 import { initAiPrompt } from './modules/ui/ai-prompt.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
+import { initAssetEdit } from './modules/ui/assetEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
 import { renderAiHistory } from './modules/ui/ai-history.js';
 import { initHistory, undo, redo } from './modules/prompt/history.js';
@@ -68,6 +69,7 @@ async function initApp() {
         initStylePalette();
         initAiPrompt();
         initCheckpointEdit();
+        initAssetEdit();
 
         // 5. Keyboard Shortcuts
         const cfg0 = await IPC.getConfig();

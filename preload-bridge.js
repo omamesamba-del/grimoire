@@ -118,6 +118,7 @@ window.electronAPI = {
   // Checkpoint recommended settings
   saveCheckpointSettings: (fullPath, settings) => ipcRenderer.invoke('checkpoint:save-settings', { fullPath, settings }),
   fetchCheckpointImageBuffer: (url) => ipcRenderer.invoke('checkpoint:fetch-image-buffer', url),
+  setAssetThumbnail: (fullPath, imageUrl) => ipcRenderer.invoke('asset:set-thumbnail', { fullPath, imageUrl }),
 
   // Asset delete
   deleteAssetFile: (fullPath) => ipcRenderer.invoke('assets:delete-file', { fullPath }),

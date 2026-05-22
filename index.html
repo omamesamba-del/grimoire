@@ -1209,6 +1209,42 @@
     </div>
   </dialog>
 
+  <!-- Asset Edit Modal (LoRA / Embedding) -->
+  <dialog id="asset-edit-dialog" class="modal-dialog">
+    <div class="modal-content cp-edit-modal" style="min-width:520px;max-width:700px;width:min(700px,95vw);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h2 class="modal-title" style="margin:0;font-size:1rem;"><span id="asset-edit-type">LORA</span>: <span id="asset-edit-name">—</span></h2>
+        <button id="asset-edit-close" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.2rem;line-height:1;padding:2px 6px;">✕</button>
+      </div>
+
+      <!-- CivitAI sample images -->
+      <div id="asset-edit-images-section" style="margin-bottom:0.85rem;">
+        <div class="cp-edit-section-label"><span data-i18n="asset_edit_civitai_images">CivitAI Sample Images</span> <span style="opacity:0.6;" data-i18n="asset_edit_thumb_hint">(right-click to set as thumbnail)</span></div>
+        <div id="asset-edit-images" class="cp-edit-images-grid"></div>
+      </div>
+
+      <!-- Trigger words -->
+      <div style="margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;">
+          <span class="cp-edit-section-label" style="margin:0;" data-i18n="asset_edit_triggers">Trigger Words</span>
+          <button id="asset-edit-copy-triggers" class="cp-edit-copy-btn" data-i18n-title="asset_edit_copy_title" title="Copy trigger words" data-i18n="asset_edit_copy_btn">Copy</button>
+        </div>
+        <div id="asset-edit-triggers" class="asset-edit-triggers-text"></div>
+      </div>
+
+      <!-- Notes -->
+      <div style="margin-bottom:0.75rem;">
+        <label class="cp-edit-label" data-i18n="asset_edit_notes_label">Notes</label>
+        <textarea id="asset-edit-notes" class="cp-edit-textarea" rows="3" data-i18n="asset_edit_notes_ph" placeholder="Personal notes…"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+        <button id="asset-edit-save" class="btn-primary" data-i18n="btn_save">Save</button>
+        <button id="asset-edit-cancel" class="btn-secondary" data-i18n="btn_cancel">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Checkpoint Recommended Settings Editor -->
   <dialog id="checkpoint-edit-dialog" class="modal-dialog">
     <div class="modal-content cp-edit-modal" style="min-width:640px;max-width:820px;width:min(820px,95vw);">
@@ -1291,11 +1327,11 @@
       </details>
 
       <div class="modal-actions" style="margin-top:1rem;">
-        <button id="checkpoint-edit-cancel" class="btn-secondary">Cancel</button>
-        <button id="checkpoint-edit-send-tags" class="btn-secondary">Send Tags</button>
-        <button id="checkpoint-edit-send-gens" class="btn-secondary">Send Gen Settings</button>
-        <button id="checkpoint-edit-apply" class="btn-secondary">▶ Apply Now</button>
-        <button id="checkpoint-edit-save" class="btn-primary">💾 Save Settings</button>
+        <button id="checkpoint-edit-cancel" class="btn-secondary" data-i18n="btn_cancel">Cancel</button>
+        <button id="checkpoint-edit-send-tags" class="btn-secondary" data-i18n="cp_edit_send_tags">Send Tags</button>
+        <button id="checkpoint-edit-send-gens" class="btn-secondary" data-i18n="cp_edit_send_gens">Send Gen Settings</button>
+        <button id="checkpoint-edit-apply" class="btn-secondary" data-i18n="cp_edit_apply">▶ Apply Now</button>
+        <button id="checkpoint-edit-save" class="btn-primary" data-i18n="cp_edit_save">💾 Save Settings</button>
       </div>
     </div>
   </dialog>

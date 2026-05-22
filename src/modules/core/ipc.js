@@ -223,6 +223,11 @@ export const IPC = {
         return null;
     },
 
+    async setAssetThumbnail(fullPath, imageUrl) {
+        if (isElectron) return await window.electronAPI.setAssetThumbnail(fullPath, imageUrl);
+        return { success: false };
+    },
+
     /** Build a CivitAI model page URL using the configured domain.
      *  Auto mode uses civitai.com — the browser follows any redirect to civitai.red. */
     async civitaiPageUrl(modelId, versionId) {

@@ -496,6 +496,22 @@ class I18n {
 
                 // ── PNG ドロップ追加 ─────────────────────────────────────
                 'gen_png_drop_label':        '画像をドロップ / Drop image here',
+
+                // ── アセット編集ダイアログ ────────────────────────────────
+                'asset_edit_civitai_images': 'CivitAI サンプル画像',
+                'asset_edit_thumb_hint':     '（右クリックでサムネイルに設定）',
+                'asset_edit_triggers':       'トリガーワード',
+                'asset_edit_copy_btn':       'コピー',
+                'asset_edit_copy_title':     'トリガーワードをコピー',
+                'asset_edit_notes_label':    'メモ',
+                'asset_edit_notes_ph':       '個人メモ…',
+                'asset_edit_set_thumb':      'サムネイルに設定',
+
+                // ── Checkpoint 編集ダイアログ ─────────────────────────────
+                'cp_edit_send_tags':         'タグを送信',
+                'cp_edit_send_gens':         '生成設定を送信',
+                'cp_edit_apply':             '▶ 今すぐ適用',
+                'cp_edit_save':              '💾 設定を保存',
             },
 
             en: {
@@ -984,6 +1000,22 @@ class I18n {
 
                 // ── PNG Drop additions ────────────────────────────────────
                 'gen_png_drop_label':        'Drop image here',
+
+                // ── Asset Edit Dialog ─────────────────────────────────────
+                'asset_edit_civitai_images': 'CivitAI Sample Images',
+                'asset_edit_thumb_hint':     '(right-click to set as thumbnail)',
+                'asset_edit_triggers':       'Trigger Words',
+                'asset_edit_copy_btn':       'Copy',
+                'asset_edit_copy_title':     'Copy trigger words',
+                'asset_edit_notes_label':    'Notes',
+                'asset_edit_notes_ph':       'Personal notes…',
+                'asset_edit_set_thumb':      'Set as Thumbnail',
+
+                // ── Checkpoint Edit Dialog ────────────────────────────────
+                'cp_edit_send_tags':         'Send Tags',
+                'cp_edit_send_gens':         'Send Gen Settings',
+                'cp_edit_apply':             '▶ Apply Now',
+                'cp_edit_save':              '💾 Save Settings',
             }
         };
     }

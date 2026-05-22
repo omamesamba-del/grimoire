@@ -638,6 +638,7 @@ export function renderAssetGrid(query = '') {
             const assetIndex = i;
             const card = document.createElement('div');
             card.className = 'asset-card';
+            if (asset.fullPath) card.dataset.fullPath = asset.fullPath;
             if (asset.fullPath && State.selectedAssets.has(asset.fullPath)) {
                 card.classList.add('asset-selected');
             }
@@ -694,6 +695,19 @@ export function renderAssetGrid(query = '') {
                 editBtn.onclick = (ev) => {
                     ev.stopPropagation();
                     window.dispatchEvent(new CustomEvent('checkpoint:open-edit', { detail: asset }));
+                };
+                card.appendChild(editBtn);
+            }
+
+            // LoRA / Embedding edit button
+            if (mode === 'lora' || mode === 'embedding') {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-checkpoint-edit';
+                editBtn.title = 'Edit';
+                editBtn.textContent = '✏';
+                editBtn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('asset:open-edit', { detail: { ...asset, type: mode } }));
                 };
                 card.appendChild(editBtn);
             }
@@ -872,6 +886,16 @@ let popupTimer = null;
 let hideTimer  = null;
 // ポップアップが表示済みかを管理するフラグ
 let popupVisible = false;
+
+/** サムネイル更新イベントを受けてカードの表示を即時反映 */
+window.addEventListener('asset:thumbnail-updated', (e) => {
+    const asset = e.detail;
+    if (!asset?.fullPath || !asset?.thumbnail) return;
+    const card = document.querySelector(`.asset-card[data-full-path="${CSS.escape(asset.fullPath)}"]`);
+    if (!card) return;
+    const thumb = card.querySelector('.asset-thumb');
+    if (thumb) thumb.style.backgroundImage = `url("${asset.thumbnail}?t=${Date.now()}")`;
+});
 
 /** ポップアップ要素自体へのホバーリスナーを一度だけ設定（DOM準備後に呼ぶこと） */
 export function initPopupHoverListeners() {

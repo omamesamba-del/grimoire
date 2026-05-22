@@ -1587,7 +1587,7 @@ ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => 
       const imgRes = await net.fetch(imgUrl, { headers });
       if (imgRes.ok) {
         const buf = Buffer.from(await imgRes.arrayBuffer());
-        const thumbPath = path.join(dir, baseName + '.preview' + rawExt);
+        const thumbPath = path.join(dir, baseName + '.preview.png');
         fs.writeFileSync(thumbPath, buf);
         savedThumb = thumbPath;
         log(`[CivitAI] Saved preview: ${path.basename(thumbPath)}`);
@@ -1947,6 +1947,24 @@ ipcMain.handle('checkpoint:save-settings', (event, { fullPath, settings }) => {
   fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), 'utf8');
   log(`[Checkpoint] Saved settings: ${path.basename(filePath)}`);
   return { success: true };
+});
+
+// ── Asset: set thumbnail from CivitAI image URL ──────────────────────────────
+ipcMain.handle('asset:set-thumbnail', async (event, { fullPath, imageUrl }) => {
+  try {
+    const dir      = path.dirname(fullPath);
+    const baseName = path.parse(fullPath).name;
+    const res = await net.fetch(imageUrl);
+    if (!res.ok) return { success: false, error: `HTTP ${res.status}` };
+    const buf       = Buffer.from(await res.arrayBuffer());
+    const thumbPath = path.join(dir, baseName + '.preview.png');
+    fs.writeFileSync(thumbPath, buf);
+    log(`[Asset] Thumbnail saved: ${path.basename(thumbPath)}`);
+    return { success: true, thumbPath };
+  } catch (e) {
+    log(`[Asset] set-thumbnail failed: ${e.message}`, 'WARN');
+    return { success: false, error: e.message };
+  }
 });
 
 // ── Checkpoint: fetch remote image as base64 (for PNG parsing) ─

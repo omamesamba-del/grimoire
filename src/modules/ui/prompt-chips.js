@@ -222,7 +222,7 @@ export function renderPromptChips(containerId, inputId) {
 
         // Middle-click: Remove tag
         chip.addEventListener('auxclick', (e) => {
-            if (e.button === 1) { e.preventDefault(); removeTagAtIndex(index, inputId); }
+            if (e.button === 1) { e.preventDefault(); hideAssetPopup(); removeTagAtIndex(index, inputId); }
         });
 
         // Right-click: Chip context menu

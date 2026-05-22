@@ -4211,6 +4211,35 @@ dialog::backdrop {
   line-height: 1.5;
   pointer-events: none;
 }
+.asset-edit-thumb {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: context-menu;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+.asset-edit-thumb:hover { border-color: #0ea5e9; }
+.asset-edit-thumb img { width:100%;height:100%;object-fit:cover;display:block; }
+.asset-edit-triggers-text {
+  font-size: 0.8rem;
+  color: var(--slate-300);
+  line-height: 1.5;
+  word-break: break-all;
+}
+.cp-edit-copy-btn {
+  font-size: 0.72rem;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--slate-700);
+  color: var(--slate-300);
+  border: 1px solid var(--slate-600);
+  cursor: pointer;
+}
+.cp-edit-copy-btn:hover { background: var(--slate-600); }
 .cp-edit-label {
   display: block;
   font-size: 0.76rem;
