@@ -424,7 +424,7 @@ class I18n {
                 'style_edit_del_title':          '削除',
 
                 // ── コンテキストメニュー（アセットカード） ─────────────────
-                'menu_asset_send_settings':      '⚡ 推奨設定を送信',
+                'menu_asset_send_settings':      '⚡ 推奨設定を適用',
                 'menu_asset_edit_settings':      '✏️ 推奨設定を編集',
                 'menu_asset_fetch_civitai':      '🔍 情報を取得 (CivitAI)',
                 'menu_asset_open_civitai_page':  '🌐 CivitAIのページを開く',
@@ -931,7 +931,7 @@ class I18n {
                 'style_edit_del_title':          'Delete',
 
                 // ── Context Menu (Asset Card) ────────────────────────────
-                'menu_asset_send_settings':      '⚡ Send Recommended Settings',
+                'menu_asset_send_settings':      '⚡ Apply Recommended Settings',
                 'menu_asset_edit_settings':      '✏️ Edit Recommended Settings',
                 'menu_asset_fetch_civitai':      '🔍 Fetch Info (CivitAI)',
                 'menu_asset_open_civitai_page':  '🌐 Open CivitAI Page',
