@@ -6,7 +6,7 @@ import { parsePrompt, stringifyPrompt, addToPrompt, resolveRandomChips } from '.
 import { openAddTagModal, showInputDialog } from './modals.js';
 import { MarqueeSelector } from './selection.js';
 import Sortable from 'sortablejs';
-import { hasActiveStyle, applyStyleToValue } from './style-palette.js';
+import { hasActiveStyle, applyStyleToValue, closeIfAutoClose } from './style-palette.js';
 import { i18n } from '../core/i18n.js';
 
 /**
@@ -429,6 +429,7 @@ function showChipMenu(x, y, ctx) {
                 tagsList[ctx.index].name = applyStyleToValue(tagsList[ctx.index].name);
                 ctx.input.value = stringifyPrompt(tagsList);
                 ctx.input.dispatchEvent(new Event('input'));
+                closeIfAutoClose();
             }
         });
     }

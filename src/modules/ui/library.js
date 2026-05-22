@@ -11,7 +11,7 @@ import { MarqueeSelector } from './selection.js';
 import { i18n } from '../core/i18n.js';
 import { IPC } from '../core/ipc.js';
 import Sortable, { MultiDrag } from 'sortablejs';
-import { hasActiveStyle, applyStyleToValue } from './style-palette.js';
+import { hasActiveStyle, applyStyleToValue, closeIfAutoClose } from './style-palette.js';
 import { PALETTE_CSS_VAR } from '../core/palette.js';
 import { applyPbSettingsFromAsset } from './checkpointEdit.js';
 
@@ -514,7 +514,8 @@ function handleTagClick(e, tag, el) {
         let finalName = tag.name;
         if (hasActiveStyle() && State.pendingStyle.modeAEnabled) {
             finalValue = applyStyleToValue(tag.value);
-            finalName = finalValue; // use composed string as display name too
+            finalName = finalValue;
+            closeIfAutoClose();
         }
         addToPrompt(finalValue, null, finalName);
         State.lastSelectedTagId = tag.id;

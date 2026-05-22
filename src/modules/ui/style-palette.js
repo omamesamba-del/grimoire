@@ -165,6 +165,16 @@ export function hasActiveStyle() {
     return State.pendingStyle.custom.trim() !== '';
 }
 
+export function closeIfAutoClose() {
+    if (localStorage.getItem('styleCloseOnApply') !== 'true') return;
+    const dropdown = document.getElementById('style-palette-dropdown');
+    if (dropdown && !dropdown.classList.contains('sp-hidden')) {
+        dropdown.classList.add('sp-hidden');
+        localStorage.setItem('stylePaletteCollapsed', '1');
+        _setModeA(false);
+    }
+}
+
 export function applyStyleToValue(tagValue) {
     const prefix = getStylePrefix();
     return prefix ? `${prefix} ${tagValue}` : tagValue;
@@ -232,6 +242,15 @@ export function initStylePalette() {
         qaChk.checked = localStorage.getItem('styleApplyQuickAdd') !== 'false';
         qaChk.addEventListener('change', () => {
             localStorage.setItem('styleApplyQuickAdd', qaChk.checked ? 'true' : 'false');
+        });
+    }
+
+    // Close-on-apply checkbox (persist in localStorage)
+    const cocChk = document.getElementById('style-close-on-apply');
+    if (cocChk) {
+        cocChk.checked = localStorage.getItem('styleCloseOnApply') === 'true';
+        cocChk.addEventListener('change', () => {
+            localStorage.setItem('styleCloseOnApply', cocChk.checked ? 'true' : 'false');
         });
     }
 

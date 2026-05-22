@@ -23,7 +23,7 @@ import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
 import { renderAiHistory } from './modules/ui/ai-history.js';
 import { initHistory, undo, redo } from './modules/prompt/history.js';
-import { initStylePalette, hasActiveStyle, applyStyleToValue } from './modules/ui/style-palette.js';
+import { initStylePalette, hasActiveStyle, applyStyleToValue, closeIfAutoClose } from './modules/ui/style-palette.js';
 import { recordTagUsage } from './modules/core/tagHistory.js';
 import { initShortcuts, loadShortcutOverrides } from './modules/core/shortcuts.js';
 import Sortable, { MultiDrag } from 'sortablejs';
@@ -1082,6 +1082,7 @@ function setupEventListeners() {
                     const paletteOpen = spDropdown && !spDropdown.classList.contains('sp-hidden');
                     const applyStyle = paletteOpen && qaChk?.checked && hasActiveStyle();
                     addToPrompt(applyStyle ? applyStyleToValue(val) : val, `${p}-prompt`);
+                    if (applyStyle) closeIfAutoClose();
                     qa.value = '';
                     hideAutocomplete();
                 }
@@ -1411,8 +1412,10 @@ function setupGlobalAutocomplete() {
                     // スペース先行ワード + サジェストを結合して1チップ
                     const prefix = spaceWords.map(s => s.trim()).filter(Boolean).join(' ');
                     const combined = prefix ? `${prefix} ${tagVal}` : tagVal;
-                    const finalVal = paletteOpen2 && qaChk?.checked && hasActiveStyle() ? applyStyleToValue(combined) : combined;
+                    const styleApplied2 = paletteOpen2 && qaChk?.checked && hasActiveStyle();
+                    const finalVal = styleApplied2 ? applyStyleToValue(combined) : combined;
                     addToPrompt(finalVal, `${p}-prompt`);
+                    if (styleApplied2) closeIfAutoClose();
                     recordTagUsage(item.value);
                     el.value = '';
                     el.focus();

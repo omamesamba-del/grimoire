@@ -1,6 +1,6 @@
 {
   "name": "grimoire",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Prompt library & builder for Stable Diffusion / ComfyUI",
   "main": "dist-electron/main.js",
   "type": "module",
