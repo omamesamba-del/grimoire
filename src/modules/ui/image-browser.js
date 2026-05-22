@@ -541,6 +541,20 @@ export async function showImageInfo(filePath) {
     }).join('');
 
     panel.innerHTML = `
+        <div class="pinfo-actions">
+            <button class="pinfo-icon-btn btn-primary" id="btn-send-to-tags"
+                title="${i18n.t('btn_send_to_tags')}" ${!positive ? 'disabled' : ''}>🏷️</button>
+            <button class="pinfo-icon-btn" id="btn-send-to-gen"
+                title="Send to Gen" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚙️</button>
+            <button class="pinfo-icon-btn" id="btn-copy-positive"
+                title="${i18n.t('btn_copy_positive')}" ${!positive ? 'disabled' : ''}>📋</button>
+            <button class="pinfo-icon-btn" id="btn-register-to-tag"
+                title="${i18n.t('btn_register_to_tag_img')}">🔖</button>
+            <button class="pinfo-icon-btn" id="btn-add-favorite"
+                title="${_isInFavFolder(filePath) ? i18n.t('btn_already_favorite') : i18n.t('btn_add_favorite_img')}"
+                ${_isInFavFolder(filePath) ? 'disabled' : ''}>⭐</button>
+        </div>
+
         <div class="image-preview-wrap">
             <img class="image-preview" src="thumb:///${encodeURIComponent(filePath.replace(/\\/g, '/'))}"
                  alt="${_esc(fname)}" onerror="this.style.opacity='0.3'">
@@ -572,20 +586,6 @@ export async function showImageInfo(filePath) {
         </div>` : ''}
 
         ${!raw ? `<div class="pinfo-no-meta">${i18n.t('images_no_meta')}</div>` : ''}
-
-        <div class="pinfo-actions">
-            <button class="pinfo-icon-btn btn-primary" id="btn-send-to-tags"
-                title="${i18n.t('btn_send_to_tags')}" ${!positive ? 'disabled' : ''}>🏷️</button>
-            <button class="pinfo-icon-btn" id="btn-send-to-gen"
-                title="Send to Gen" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚙️</button>
-            <button class="pinfo-icon-btn" id="btn-copy-positive"
-                title="${i18n.t('btn_copy_positive')}" ${!positive ? 'disabled' : ''}>📋</button>
-            <button class="pinfo-icon-btn" id="btn-register-to-tag"
-                title="${i18n.t('btn_register_to_tag_img')}">🔖</button>
-            <button class="pinfo-icon-btn" id="btn-add-favorite"
-                title="${_isInFavFolder(filePath) ? i18n.t('btn_already_favorite') : i18n.t('btn_add_favorite_img')}"
-                ${_isInFavFolder(filePath) ? 'disabled' : ''}>⭐</button>
-        </div>
     `;
 
     panel.querySelector('.pinfo-model-btn')?.addEventListener('click', (e) => {
