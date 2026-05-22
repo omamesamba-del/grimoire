@@ -44,8 +44,11 @@ export function setupContextMenu() {
         // Show/hide items based on mode and available metadata
         if (isAssetCard) {
             const isCheckpoint = State.currentMode === 'checkpoint';
+            const hasPbSettings = !!(target?.pbSettings && Object.keys(target.pbSettings).length > 0);
+            const sendItem = document.getElementById('menu-asset-send-settings');
             const editItem = document.getElementById('menu-asset-edit-settings');
             const editSep  = document.getElementById('menu-asset-edit-settings-sep');
+            if (sendItem) sendItem.style.display = (isCheckpoint && hasPbSettings) ? '' : 'none';
             if (editItem) editItem.style.display = isCheckpoint ? '' : 'none';
             if (editSep)  editSep.style.display  = isCheckpoint ? '' : 'none';
             const openPageItem = document.getElementById('menu-asset-open-civitai-page');
@@ -168,6 +171,12 @@ export function setupContextMenu() {
     };
 
     // --- Asset Card handlers ---
+    document.getElementById('menu-asset-send-settings').onclick = () => {
+        const asset = State.contextTarget;
+        if (!asset) return;
+        window.dispatchEvent(new CustomEvent('checkpoint:apply-settings', { detail: asset }));
+    };
+
     document.getElementById('menu-asset-edit-settings').onclick = () => {
         const asset = State.contextTarget;
         if (!asset) return;
