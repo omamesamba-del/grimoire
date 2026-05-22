@@ -10,7 +10,12 @@
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder --win portable"
   },
-  "keywords": ["stable-diffusion", "comfyui", "prompt", "ai-art"],
+  "keywords": [
+    "stable-diffusion",
+    "comfyui",
+    "prompt",
+    "ai-art"
+  ],
   "author": "",
   "license": "MIT",
   "build": {
@@ -29,7 +34,13 @@
       {
         "from": "data",
         "to": "data",
-        "filter": ["**/*", "!config.json", "!fav_image/**", "!tag_images/**", "!yaml_backups/**"]
+        "filter": [
+          "**/*",
+          "!config.json",
+          "!fav_image/**",
+          "!tag_images/**",
+          "!yaml_backups/**"
+        ]
       },
       {
         "from": "tag",
@@ -40,10 +51,12 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "icon": "src/assets/icon.ico"
+      "icon": "assets/icon.ico"
     },
     "portable": {
       "artifactName": "grimoire.exe"
@@ -52,6 +65,7 @@
   "devDependencies": {
     "electron": "^34.0.0",
     "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.1",
     "vite": "^6.0.0",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.0"
