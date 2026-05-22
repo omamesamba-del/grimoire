@@ -545,7 +545,7 @@ export async function showImageInfo(filePath) {
             <button class="pinfo-icon-btn btn-primary" id="btn-send-to-tags"
                 title="${i18n.t('btn_send_to_tags')}" ${!positive ? 'disabled' : ''}>🏷️</button>
             <button class="pinfo-icon-btn" id="btn-send-to-gen"
-                title="${i18n.t('btn_send_to_gen_img')}" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚙️</button>
+                title="${i18n.t('btn_send_to_gen_img')}" ${!params || !Object.keys(params).length ? 'disabled' : ''}>⚡</button>
             <button class="pinfo-icon-btn" id="btn-copy-positive"
                 title="${i18n.t('btn_copy_pnginfo')}" ${!raw ? 'disabled' : ''}>📋</button>
             <button class="pinfo-icon-btn" id="btn-register-to-tag"
