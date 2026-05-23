@@ -100,9 +100,10 @@ export function initShortcuts(handlers) {
         // When settings is open, only 'anywhere' shortcuts are allowed
         const settingsOpen = openDialogs.some(d => d.id === 'settings-modal');
 
-        const active    = document.activeElement;
-        const inInput   = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
-        const inPrompt  = inInput && active.classList.contains('prompt-textarea');
+        const active      = document.activeElement;
+        const inInput     = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+        const inPrompt    = inInput && active.classList.contains('prompt-textarea');
+        const inQuickAdd  = inInput && active.id && active.id.startsWith('quick-add');
 
         for (const sc of DEFAULT_SHORTCUTS) {
             const keyStr = getEffectiveKey(sc.id);
@@ -115,7 +116,7 @@ export function initShortcuts(handlers) {
 
             // Context gating
             if (ctx === 'noInput' && inInput) continue;
-            if (ctx === 'prompt'  && inInput && !inPrompt) continue;
+            if (ctx === 'prompt'  && inInput && !inPrompt && !inQuickAdd) continue;
             // 'anywhere' always passes
 
             const handler = handlers[sc.id];

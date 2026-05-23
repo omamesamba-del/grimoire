@@ -62,6 +62,8 @@ class I18n {
                 'btn_bulk_star':            '★ まとめてお気に入り',
                 'btn_bulk_delete':          '🗑 まとめて削除',
                 'btn_hud_register':         '📌 タグを登録',
+                'btn_hud_disable':          '🚫 まとめて無効',
+                'btn_hud_enable':           '✅ まとめて有効',
 
                 // ── プレースホルダー ────────────────────────────────────────
                 'quick_add_placeholder':        'Quick-Add...',
@@ -319,6 +321,8 @@ class I18n {
                 'chip_menu_edit':            '✏️ 編集',
                 'chip_menu_insert_break':    '↵ 改行を挿入',
                 'chip_menu_delete':          '🗑️ 削除',
+                'chip_menu_disable':         '🚫 無効にする',
+                'chip_menu_enable':          '✅ 有効にする',
                 'chip_menu_register_tag':    '📌 タグを登録',
                 'chip_menu_set_weight':      '⚖️ 重量を設定',
                 'chip_weight_dialog':        '重量を設定 (0.01 〜 2.0)',
@@ -570,6 +574,8 @@ class I18n {
                 'btn_bulk_star':            '★ Bulk Star',
                 'btn_bulk_delete':          '🗑 Bulk Delete',
                 'btn_hud_register':         '📌 Register as Tag',
+                'btn_hud_disable':          '🚫 Disable All',
+                'btn_hud_enable':           '✅ Enable All',
 
                 // ── Placeholders ─────────────────────────────────────────────
                 'quick_add_placeholder':        'Quick-Add...',
@@ -827,6 +833,8 @@ class I18n {
                 'chip_menu_edit':            '✏️ Edit',
                 'chip_menu_insert_break':    '↵ Insert Line Break',
                 'chip_menu_delete':          '🗑️ Delete',
+                'chip_menu_disable':         '🚫 Disable',
+                'chip_menu_enable':          '✅ Enable',
                 'chip_menu_register_tag':    '📌 Register as Tag',
                 'chip_menu_set_weight':      '⚖️ Set Weight',
                 'chip_weight_dialog':        'Set Weight (0.01 – 2.0)',

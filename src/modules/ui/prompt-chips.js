@@ -378,10 +378,12 @@ function showChipMenu(x, y, ctx) {
     menu.id = 'chip-context-menu';
     menu.className = 'chip-ctx-menu';
 
+    const isChipDisabled = (ctx.isNeg ? State.disabledTagsNegative : State.disabledTagsPositive).has(ctx.tag.name);
     const items = [
         { label: i18n.t('chip_menu_edit'), action: () => { startInlineEdit(ctx.chip, ctx.tag, ctx.index, ctx.input); } },
         { label: i18n.t('chip_menu_insert_break'), action: () => { insertBreakAfter(ctx.index, ctx.input); } },
         { label: i18n.t('chip_menu_delete'), action: () => { removeTagAtIndex(ctx.index, ctx.inputId); } },
+        { label: isChipDisabled ? i18n.t('chip_menu_enable') : i18n.t('chip_menu_disable'), action: () => { toggleTagDisabled(ctx.tag.name, ctx.isNeg); } },
         { label: i18n.t('chip_menu_register_tag'), action: () => {
             const catId = State.currentCategoryId || (State.allTags[0]?.id ?? '');
             openAddTagModal(catId, State.currentGroupName || '', null);

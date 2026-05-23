@@ -1075,7 +1075,7 @@ function setupEventListeners() {
         const qa = document.getElementById(`quick-add-${p}`);
         if (!qa) return;
         qa.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 const val = qa.value.trim();
                 if (val) {
@@ -1099,7 +1099,7 @@ function setupEventListeners() {
     const qaComfy = document.getElementById('quick-add-comfy');
     if (qaComfy) {
         qaComfy.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 const val = qaComfy.value.trim();
                 if (val) {
@@ -1224,6 +1224,8 @@ function setupEventListeners() {
         const hud = document.getElementById('selection-hud');
         const countEl = document.getElementById('hud-count-val');
         const starBtn = document.getElementById('btn-hud-star');
+        const disableBtn = document.getElementById('btn-hud-disable');
+        const enableBtn = document.getElementById('btn-hud-enable');
         if (!hud) return;
         const tagCount = State.selectedTags.size;
         const chipCount = State.selectedChips.size;
@@ -1231,8 +1233,10 @@ function setupEventListeners() {
         const count = tagCount > 0 ? tagCount : chipCount;
         hud.classList.toggle('active', count > 0);
         if (countEl) countEl.textContent = count;
-        // チップモード時はスターボタンを非表示
+        // チップモード時はスター非表示・無効/有効ボタンを表示
         if (starBtn) starBtn.style.display = isChipMode ? 'none' : '';
+        if (disableBtn) disableBtn.style.display = isChipMode ? '' : 'none';
+        if (enableBtn) enableBtn.style.display = isChipMode ? '' : 'none';
     };
     window.addEventListener('selection-changed', updateSelectionHud);
 
@@ -1281,6 +1285,20 @@ function setupEventListeners() {
             if (confirmed) await performBatchDelete(ids);
         }
     });
+
+    // Selection HUD: Bulk Disable / Enable（チップ選択モード）
+    const batchSetChipsDisabled = (disabled) => {
+        document.querySelectorAll('.prompt-chip.selected').forEach(chipEl => {
+            const name = chipEl.dataset.name;
+            const isNeg = !!chipEl.closest('#negative-chips');
+            const set = isNeg ? State.disabledTagsNegative : State.disabledTagsPositive;
+            if (disabled) set.add(name); else set.delete(name);
+        });
+        renderPromptChips('positive-chips', 'positive-prompt');
+        renderPromptChips('negative-chips', 'negative-prompt');
+    };
+    document.getElementById('btn-hud-disable')?.addEventListener('click', () => batchSetChipsDisabled(true));
+    document.getElementById('btn-hud-enable')?.addEventListener('click', () => batchSetChipsDisabled(false));
 
     // Clear / Newline / Copy Actions
     const clearPrompt = (inputId) => {
