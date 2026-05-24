@@ -13,7 +13,7 @@ import { IPC } from '../core/ipc.js';
 import Sortable, { MultiDrag } from 'sortablejs';
 import { hasActiveStyle, applyStyleToValue, closeIfAutoClose } from './style-palette.js';
 import { PALETTE_CSS_VAR } from '../core/palette.js';
-import { applyPbSettingsFromAsset } from './checkpointEdit.js';
+import { applyPbSettingsFromAsset, applyGenSettingsFromAsset } from './checkpointEdit.js';
 
 // Track Sortable instances to destroy them before re-rendering
 const tagGridSortables = [];
@@ -827,6 +827,7 @@ export function renderAssetGrid(query = '') {
                             ckptInput.value = basename;
                             ckptInput.dispatchEvent(new Event('input'));
                         }
+                        applyGenSettingsFromAsset(asset);
                     } else {
                         let val;
                         if (mode === 'lora') val = `<lora:${asset.name}:1.0>`;

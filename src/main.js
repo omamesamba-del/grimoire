@@ -1543,6 +1543,7 @@ function performBatchRemoveFromPrompt(names) {
 
 // ── Mode scroll preservation ───────────────────────────────────
 const _modeScrolls = {};
+const _modeAssetFilters = {};
 let _assetRenderTimer = null;
 
 function _libScrollEl(mode) {
@@ -1569,7 +1570,11 @@ function _restoreScrollPositions(mode) {
 }
 
 export function switchMode(mode) {
-    _saveScrollPositions(State.currentMode);
+    const _prevMode = State.currentMode;
+    _saveScrollPositions(_prevMode);
+    if (_prevMode === 'lora' || _prevMode === 'embedding' || _prevMode === 'checkpoint') {
+        _modeAssetFilters[_prevMode] = State.currentAssetFilter;
+    }
     State.currentMode = mode;
     syncSliderToMode(mode);
     syncCatFilterVisibility(mode);
@@ -1629,12 +1634,16 @@ export function switchMode(mode) {
     }
     State._prevSearchMode = mode;
 
-    // Reset filters — asset modes default to favorites if any exist, otherwise show all
+    // Restore last folder position per mode, or default to favorites/all on first visit
     if (mode === 'lora' || mode === 'embedding' || mode === 'checkpoint') {
-        const favSet = mode === 'lora'       ? State.loraFavorites
-                     : mode === 'embedding'  ? State.embeddingFavorites
-                     :                         State.checkpointFavorites;
-        State.currentAssetFilter = favSet.size > 0 ? '__favorites__' : null;
+        if (_modeAssetFilters[mode] !== undefined) {
+            State.currentAssetFilter = _modeAssetFilters[mode];
+        } else {
+            const favSet = mode === 'lora'       ? State.loraFavorites
+                         : mode === 'embedding'  ? State.embeddingFavorites
+                         :                         State.checkpointFavorites;
+            State.currentAssetFilter = favSet.size > 0 ? '__favorites__' : null;
+        }
     } else {
         State.currentAssetFilter = null;
     }

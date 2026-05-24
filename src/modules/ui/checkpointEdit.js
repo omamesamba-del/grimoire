@@ -142,6 +142,27 @@ export function applyPbSettingsFromAsset(asset) {
     });
 }
 
+// ── Apply only gen settings on checkpoint click (no prompt change) ────────────
+
+export function applyGenSettingsFromAsset(asset) {
+    const s = asset?.pbSettings;
+    if (!s) return;
+    applyPreset({
+        sampler:        s.sampler       || undefined,
+        schedule:       s.schedule      || undefined,
+        steps:          s.steps         ? Number(s.steps)          : undefined,
+        cfg:            s.cfg           ? Number(s.cfg)            : undefined,
+        seed:           s.seed !== ''   ? s.seed                   : undefined,
+        width:          s.width         ? Number(s.width)          : undefined,
+        height:         s.height        ? Number(s.height)         : undefined,
+        clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        hiresFix:       s.hiresEnabled  ? true                     : undefined,
+        hiresUpscaler:  s.hiresUpscaler || undefined,
+        hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
+        hiresDenoising: s.hiresDenoising? Number(s.hiresDenoising) : undefined,
+    });
+}
+
 // ── Open Modal ────────────────────────────────────────────────────────────────
 
 export function openCheckpointEditModal(asset) {
@@ -211,7 +232,9 @@ export function applyCheckpointSettings(asset) {
     }
 
     // Gen data via applyPreset
+    const basename = (asset.relPath || asset.name || '').replace(/\\/g, '/').split('/').pop();
     applyPreset({
+        checkpoint:    basename                                   || undefined,
         sampler:       s.sampler       || undefined,
         schedule:      s.schedule      || undefined,
         steps:         s.steps         ? Number(s.steps)         : undefined,
