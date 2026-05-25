@@ -73,6 +73,10 @@ async function initApp() {
 
         // 5. Keyboard Shortcuts
         const cfg0 = await IPC.getConfig();
+        if (cfg0.language) {
+            localStorage.setItem('appLanguage', cfg0.language);
+            i18n.setLanguage(cfg0.language);
+        }
         State.assetPaths = {
             lora:       cfg0.loraPath       || '',
             embedding:  cfg0.embeddingsPath || '',

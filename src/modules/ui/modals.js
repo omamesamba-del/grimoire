@@ -231,6 +231,7 @@ export function setupModals() {
                 allowMultipleInstances: document.getElementById('setting-allow-multi-instance')?.checked || false,
                 danbooruUnderscoreToSpace: document.getElementById('setting-danbooru-underscore')?.checked ?? true,
                 shortcuts: collectShortcutOverrides(),
+                language: langSelect?.value || 'en',
             };
             await IPC.saveConfig(config);
             loadShortcutOverrides(config.shortcuts);

@@ -29,7 +29,8 @@ export class ConfigService {
       yamlAutoSave: false,
       allowMultipleInstances: false,
       danbooruUnderscoreToSpace: true,
-      shortcuts: {}
+      shortcuts: {},
+      language: 'en'
     };
     
     // Ensure data directory exists
