@@ -253,6 +253,8 @@ async function initApp() {
             // Send button label
             const sendMainBtn = document.getElementById('btn-send-main');
             if (sendMainBtn) sendMainBtn.textContent = i18n.t('btn_generate');
+            // Category filter "All" option
+            refreshSearchCatFilter();
         });
     } catch (err) {
         console.error('[PBv5] CRITICAL INIT ERROR:', err);
