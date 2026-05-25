@@ -1734,11 +1734,12 @@ ipcMain.handle('prompt-presets:get-list', () => {
   } catch (_) { return []; }
 });
 
-ipcMain.handle('prompt-presets:save', (e, { name, positive, negative, gen }) => {
+ipcMain.handle('prompt-presets:save', (e, { name, positive, negative, gen, suffix }) => {
   const dir = getPromptPresetsDir();
   const safeName = name.replace(/[<>:"/\\|?*]/g, '_');
   const data = { positive, negative };
-  if (gen) data.gen = gen;
+  if (gen)    data.gen    = gen;
+  if (suffix) data.suffix = suffix;
   fs.writeFileSync(path.join(dir, `${safeName}.json`), JSON.stringify(data, null, 2), 'utf-8');
   return { success: true };
 });

@@ -893,6 +893,84 @@ body.app-loading #image-info-panel {
 .pane-content .prompt-section:nth-of-type(2).active-area .chip-container { border-color: rgba(129,140,248,0.5); }
 .pane-content .prompt-section:nth-of-type(3).active-area .chip-container { border-color: rgba(244,63,94,0.5); }
 
+/* Positive + Suffix unified wrapper */
+.positive-chips-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.pane-content .prompt-section:nth-of-type(2).active-area .positive-chips-wrapper { border-color: rgba(129,140,248,0.5); }
+.positive-chips-wrapper:has(.sortable-ghost) { border-color: var(--accent-primary) !important; background: rgba(99,102,241,0.08) !important; }
+.chip-container-main {
+  flex: 4 1 0%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-width: 0;
+  min-height: 0;
+  padding-bottom: 0;
+}
+/* ID selectors to beat .chip-container specificity */
+#positive-chips {
+  flex: 4 1 0% !important;
+  min-height: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding-bottom: 0 !important;
+}
+#positive-suffix-chips {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding-top: 0 !important;
+}
+.suffix-divider {
+  height: 1px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+.chip-container-suffix {
+  flex: 1 1 0%;
+  min-height: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-width: 0;
+  padding-top: 0;
+  position: relative;
+}
+.chip-container-suffix:not(:has(.prompt-chip))::after {
+  content: 'Suffix';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.25;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+/* Suffix off state */
+.suffix-hidden .suffix-divider,
+.suffix-hidden .chip-container-suffix { display: none; }
+.chip-container-main.suffix-hidden-solo { flex: 1 1 0; }
+/* Toggle button active state */
+#toggle-suffix-btn { opacity: 0.45; font-size: 0.6rem; letter-spacing: 0.03em; }
+#toggle-suffix-btn.active { opacity: 1; color: var(--accent-primary); }
+.prompt-section.collapsed .suffix-divider,
+.prompt-section.collapsed .chip-container-suffix { display: none; }
+
 .prompt-chip {
   display: flex;
   align-items: center;

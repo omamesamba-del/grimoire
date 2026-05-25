@@ -34,6 +34,7 @@ export function renderPromptChips(containerId, inputId) {
     if (!container || !input) return;
 
     const isNeg = inputId === 'negative-prompt';
+    const isSuffix = containerId === 'positive-suffix-chips';
     const currentDisabled = isNeg ? State.disabledTagsNegative : State.disabledTagsPositive;
     const tags = parsePrompt(input.value);
     
@@ -229,7 +230,7 @@ export function renderPromptChips(containerId, inputId) {
         chip.oncontextmenu = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            showChipMenu(e.clientX, e.clientY, { chip, tag, index, input, inputId, isNeg });
+            showChipMenu(e.clientX, e.clientY, { chip, tag, index, input, inputId, isNeg, isSuffix });
         };
 
         container.appendChild(chip);
@@ -257,12 +258,35 @@ export function renderPromptChips(containerId, inputId) {
 
         Sortable.create(container, {
             animation: 150,
-            group: { name: 'prompt-chips', pull: true, put: true },
+            group: { name: 'prompt-chips', pull: true, put: ['prompt-chips', 'tags'] },
             ghostClass: 'sortable-ghost',
             filter: '.chip-edit-input',
             onStart: () => {
                 // ドラッグ開始時点の選択チップを DOM 順で記録
                 _dragStartSel = Array.from(container.querySelectorAll('.prompt-chip.selected'));
+            },
+            onAdd: (evt) => {
+                // Library tag button dropped onto chip container
+                if (!evt.item.classList.contains('tag-btn')) return;
+                const tagValue = evt.item.dataset.tagValue;
+                const tagName  = evt.item.dataset.tagName;
+                const dropIdx  = evt.newIndex;
+                evt.item.remove(); // remove the cloned button
+                if (!tagValue) return;
+                const tags = parsePrompt(input.value);
+                const rawIncoming = tagValue.split(',').map(t => t.trim()).filter(Boolean);
+                const incomingObjs = parsePrompt(rawIncoming.join(', '));
+                const existingLower = tags.filter(t => t.type !== 'break').map(t => t.name.toLowerCase());
+                const allPresent = incomingObjs.every(inc => existingLower.includes(inc.name.toLowerCase()));
+                if (allPresent) {
+                    const incomingLower = incomingObjs.map(inc => inc.name.toLowerCase());
+                    input.value = stringifyPrompt(tags.filter(t => t.type === 'break' || !incomingLower.includes(t.name.toLowerCase())));
+                } else {
+                    const toInsert = incomingObjs.filter(inc => !existingLower.includes(inc.name.toLowerCase()));
+                    tags.splice(dropIdx, 0, ...toInsert);
+                    input.value = stringifyPrompt(tags);
+                }
+                input.dispatchEvent(new Event('input'));
             },
             onEnd: (evt) => {
                 const isCrossPane = evt.from !== evt.to;
@@ -280,12 +304,15 @@ export function renderPromptChips(containerId, inputId) {
                 _dragStartSel = [];
 
                 if (isCrossPane) {
-                    const srcInput = document.getElementById(
-                        evt.from.id === 'positive-chips' ? 'positive-prompt' : 'negative-prompt'
-                    );
-                    const dstInput = document.getElementById(
-                        evt.to.id === 'positive-chips' ? 'positive-prompt' : 'negative-prompt'
-                    );
+                    const _containerToInput = {
+                        'positive-chips':        'positive-prompt',
+                        'negative-chips':        'negative-prompt',
+                        'positive-suffix-chips': 'positive-suffix-prompt',
+                    };
+                    // Library drags are handled by onAdd — skip here
+                    if (!_containerToInput[evt.from.id]) return;
+                    const srcInput = document.getElementById(_containerToInput[evt.from.id]);
+                    const dstInput = document.getElementById(_containerToInput[evt.to.id] || 'positive-prompt');
                     const readTags = (el) =>
                         Array.from(el.querySelectorAll('.prompt-chip'))
                             .map(c => JSON.parse(c.dataset.tagData));
@@ -379,11 +406,26 @@ function showChipMenu(x, y, ctx) {
     menu.className = 'chip-ctx-menu';
 
     const isChipDisabled = (ctx.isNeg ? State.disabledTagsNegative : State.disabledTagsPositive).has(ctx.tag.name);
+    const _moveChip = (fromInputId, toInputId, tag, index) => {
+        const fromEl = document.getElementById(fromInputId);
+        const toEl   = document.getElementById(toInputId);
+        if (!fromEl || !toEl) return;
+        const fromTags = parsePrompt(fromEl.value);
+        fromTags.splice(index, 1);
+        fromEl.value = stringifyPrompt(fromTags);
+        toEl.value = toEl.value
+            ? toEl.value.trimEnd() + ', ' + stringifyPrompt([tag]).trim()
+            : stringifyPrompt([tag]).trim();
+        fromEl.dispatchEvent(new Event('input'));
+        toEl.dispatchEvent(new Event('input'));
+    };
     const items = [
         { label: i18n.t('chip_menu_edit'), action: () => { startInlineEdit(ctx.chip, ctx.tag, ctx.index, ctx.input); } },
         { label: i18n.t('chip_menu_insert_break'), action: () => { insertBreakAfter(ctx.index, ctx.input); } },
         { label: i18n.t('chip_menu_delete'), action: () => { removeTagAtIndex(ctx.index, ctx.inputId); } },
         { label: isChipDisabled ? i18n.t('chip_menu_enable') : i18n.t('chip_menu_disable'), action: () => { toggleTagDisabled(ctx.tag.name, ctx.isNeg); } },
+        ...(!ctx.isNeg && !ctx.isSuffix ? [{ label: i18n.t('chip_menu_move_to_suffix'), action: () => _moveChip('positive-prompt', 'positive-suffix-prompt', ctx.tag, ctx.index) }] : []),
+        ...(ctx.isSuffix ? [{ label: i18n.t('chip_menu_move_to_main'), action: () => _moveChip('positive-suffix-prompt', 'positive-prompt', ctx.tag, ctx.index) }] : []),
         { label: i18n.t('chip_menu_register_tag'), action: () => {
             const catId = State.currentCategoryId || (State.allTags[0]?.id ?? '');
             openAddTagModal(catId, State.currentGroupName || '', null);

@@ -588,11 +588,12 @@ function setupEventListeners() {
     document.getElementById('btn-prompt-preset-save')?.addEventListener('click', async () => {
         const name = presetInput?.value.trim();
         if (!name) { presetInput?.focus(); return; }
-        const pos = document.getElementById('positive-prompt')?.value || '';
-        const neg = document.getElementById('negative-prompt')?.value || '';
+        const pos    = document.getElementById('positive-prompt')?.value || '';
+        const neg    = document.getElementById('negative-prompt')?.value || '';
+        const suffix = document.getElementById('positive-suffix-prompt')?.value || '';
         // Gen 設定が初期化済みなら gen payload も一緒に保存
         const gen = State._genInitialized ? getGenPayload() : null;
-        await IPC.savePromptPreset(name, pos, neg, gen);
+        await IPC.savePromptPreset(name, pos, neg, gen, suffix);
         await refreshPresetList();
         presetInput.value = name;
     });
@@ -606,6 +607,8 @@ function setupEventListeners() {
         const negEl = document.getElementById('negative-prompt');
         if (posEl) { posEl.value = data.positive || ''; posEl.dispatchEvent(new Event('input')); }
         if (negEl) { negEl.value = data.negative || ''; negEl.dispatchEvent(new Event('input')); }
+        const suffixEl = document.getElementById('positive-suffix-prompt');
+        if (suffixEl) { suffixEl.value = data.suffix || ''; suffixEl.dispatchEvent(new Event('input')); }
         // Gen 設定が含まれていれば適用
         if (data.gen && State._genInitialized) applyPreset(data.gen);
     });
@@ -741,6 +744,55 @@ function setupEventListeners() {
         showToast(i18n.t('toast_webui_imported'), 'success');
     };
 
+    // ── Suffix on/off ─────────────────────────────────────────────────────────
+    let suffixEnabled = localStorage.getItem('suffixEnabled') !== 'false';
+
+    const applySuffixState = () => {
+        const wrapper = document.querySelector('.positive-chips-wrapper');
+        if (wrapper) wrapper.classList.toggle('suffix-hidden', !suffixEnabled);
+        const btn = document.getElementById('toggle-suffix-btn');
+        if (btn) btn.classList.toggle('active', suffixEnabled);
+        localStorage.setItem('suffixEnabled', suffixEnabled);
+    };
+
+    const toggleSuffix = () => { suffixEnabled = !suffixEnabled; applySuffixState(); };
+
+    document.getElementById('toggle-suffix-btn')?.addEventListener('click', toggleSuffix);
+    applySuffixState();
+
+    // Right-click on chip area → show menu with Toggle Suffix
+    const showChipAreaMenu = (x, y) => {
+        document.getElementById('chip-area-ctx-menu')?.remove();
+        const menu = document.createElement('div');
+        menu.id = 'chip-area-ctx-menu';
+        menu.className = 'chip-ctx-menu';
+        const item = document.createElement('div');
+        item.className = 'chip-ctx-item';
+        item.textContent = suffixEnabled ? i18n.t('suffix_menu_hide') : i18n.t('suffix_menu_show');
+        item.addEventListener('mousedown', (e) => { e.preventDefault(); menu.remove(); toggleSuffix(); });
+        menu.appendChild(item);
+        document.body.appendChild(menu);
+        const rect = menu.getBoundingClientRect();
+        menu.style.left = Math.min(x, window.innerWidth  - rect.width  - 8) + 'px';
+        menu.style.top  = Math.min(y, window.innerHeight - rect.height - 8) + 'px';
+        setTimeout(() => document.addEventListener('mousedown', () => menu.remove(), { once: true }), 0);
+    };
+
+    ['positive-chips', 'positive-suffix-chips'].forEach(id => {
+        document.getElementById(id)?.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.prompt-chip')) return;
+            e.preventDefault();
+            showChipAreaMenu(e.clientX, e.clientY);
+        });
+    });
+
+    const getPositiveWithSuffix = () => {
+        const main   = getActivePrompt('positive-prompt');
+        if (!suffixEnabled) return main;
+        const suffix = getActivePrompt('positive-suffix-prompt');
+        return suffix ? (main ? main.trimEnd() + ', ' + suffix : suffix) : main;
+    };
+
     const sendToWebUI = async () => {
         const mainBtn = document.getElementById('btn-send-main');
         const arrowBtn = document.getElementById('btn-send-main-arrow');
@@ -751,7 +803,7 @@ function setupEventListeners() {
             if (webuiGenerateOnly) {
                 result = await IPC.sendToWebUI({ mode: 'generate-only', trigger: true });
             } else {
-                const pos = getActivePrompt('positive-prompt');
+                const pos = getPositiveWithSuffix();
                 const neg = getActivePrompt('negative-prompt');
                 result = await IPC.sendToWebUI({ positive: pos, negative: neg, mode: webuiSendMode, trigger: webuiSendTrigger, gen: webuiSendGen ? getGenPayload() : null });
             }
@@ -764,7 +816,7 @@ function setupEventListeners() {
                 await IPC.resetWebuiBusy();
                 const retry = webuiGenerateOnly
                     ? await IPC.sendToWebUI({ mode: 'generate-only', trigger: true })
-                    : await IPC.sendToWebUI({ positive: getActivePrompt('positive-prompt'), negative: getActivePrompt('negative-prompt'), mode: webuiSendMode, trigger: webuiSendTrigger, gen: webuiSendGen ? getGenPayload() : null });
+                    : await IPC.sendToWebUI({ positive: getPositiveWithSuffix(), negative: getActivePrompt('negative-prompt'), mode: webuiSendMode, trigger: webuiSendTrigger, gen: webuiSendGen ? getGenPayload() : null });
                 if (retry?.success) {
                     const msg = (webuiGenerateOnly || webuiSendTrigger)
                               ? i18n.t('toast_webui_generated')
@@ -1148,6 +1200,13 @@ function setupEventListeners() {
         }
     });
 
+    // Suffix chips (positive only)
+    const suffixInput = document.getElementById('positive-suffix-prompt');
+    if (suffixInput) {
+        suffixInput.addEventListener('input', () => renderPromptChips('positive-suffix-chips', 'positive-suffix-prompt'));
+        renderPromptChips('positive-suffix-chips', 'positive-suffix-prompt');
+    }
+
 
     // Global Key Events: F2 (Rename highlighted explorer item)
     document.addEventListener('keydown', async (e) => {
@@ -1315,6 +1374,7 @@ function setupEventListeners() {
     document.getElementById('clear-all')?.addEventListener('click', () => {
         clearPrompt('positive-prompt');
         clearPrompt('negative-prompt');
+        clearPrompt('positive-suffix-prompt');
     });
     document.getElementById('clear-positive-inline')?.addEventListener('click', () => clearPrompt('positive-prompt'));
     document.getElementById('clear-negative-inline')?.addEventListener('click', () => clearPrompt('negative-prompt'));

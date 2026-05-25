@@ -284,8 +284,8 @@ export const IPC = {
         if (isElectron) return await window.electronAPI.getPromptPresetList();
         return ['Mock Preset'];
     },
-    async savePromptPreset(name, positive, negative, gen) {
-        if (isElectron) return await window.electronAPI.savePromptPreset(name, positive, negative, gen);
+    async savePromptPreset(name, positive, negative, gen, suffix) {
+        if (isElectron) return await window.electronAPI.savePromptPreset(name, positive, negative, gen, suffix);
         return { success: true };
     },
     async loadPromptPreset(name) {

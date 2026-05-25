@@ -329,7 +329,12 @@ class I18n {
                 'chip_menu_apply_style':     '🎨 スタイルを適用',
                 'chip_menu_emb_comfy':       '🔀 ComfyUI表記に変換 (embedding:name)',
                 'chip_menu_emb_webui':       '🔀 WebUI表記に変換 (name)',
+                'chip_menu_move_to_suffix':  '⬇ サフィックスへ移動',
+                'chip_menu_move_to_main':    '⬆ メインへ移動',
+                'suffix_menu_hide':          'Suffix を非表示',
+                'suffix_menu_show':          'Suffix を表示',
                 'chip_no_trigger_words':     'トリガーワードなし',
+                'label_suffix_chips':        'Suffix',
 
                 // ── ライブラリ ────────────────────────────────────────────
                 'btn_clear_freq':            '🗑 よく使うをすべてクリア',
@@ -841,7 +846,12 @@ class I18n {
                 'chip_menu_apply_style':     '🎨 Apply Style',
                 'chip_menu_emb_comfy':       '🔀 Convert to ComfyUI notation (embedding:name)',
                 'chip_menu_emb_webui':       '🔀 Convert to WebUI notation (name)',
+                'chip_menu_move_to_suffix':  '⬇ Move to Suffix',
+                'chip_menu_move_to_main':    '⬆ Move to Main',
+                'suffix_menu_hide':          'Hide Suffix',
+                'suffix_menu_show':          'Show Suffix',
                 'chip_no_trigger_words':     'No trigger words',
+                'label_suffix_chips':        'Suffix',
 
                 // ── Library ──────────────────────────────────────────────
                 'btn_clear_freq':            '🗑 Clear All Frequent Tags',

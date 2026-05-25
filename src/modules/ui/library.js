@@ -87,13 +87,14 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
         // Initialize Sortable for root direct-tag view (deepest group level has no sections)
         if (!targetContainer && !State.isFavoriteView && !State.isFrequentView) {
             const sortableInst = Sortable.create(tagGrid, {
-                group: 'tags',
+                group: { name: 'tags', pull: 'clone', put: false },
                 animation: 150,
                 multiDrag: true,
                 selectedClass: 'selected',
                 multiDragKey: 'ctrl',
                 ghostClass: 'sortable-ghost',
                 onEnd: async (evt) => {
+                    if (!evt.to.dataset.groupId) return; // dropped to chip container — handled by onAdd
                     const { from, to, newIndex, items } = evt;
                     const movedItems = items.length > 0 ? items : [evt.item];
                     const movedTagIds = movedItems.map(el => el.dataset.id);
@@ -226,7 +227,7 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
         // --- Initialize Sortable for this grid ---
         if (!State.isFavoriteView) {
             const sortableInst = Sortable.create(nodeGrid, {
-                group: 'tags',
+                group: { name: 'tags', pull: 'clone', put: false },
                 animation: 150,
                 multiDrag: true,
                 selectedClass: 'selected',
@@ -408,6 +409,8 @@ function createTagButton(tag, color = null) {
     }
 
     btn.dataset.id = tag.id;
+    btn.dataset.tagValue = tag.value;
+    btn.dataset.tagName  = tag.name;
     
     // Initial selection state
     if (State.selectedTags.has(tag.id)) {

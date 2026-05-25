@@ -612,9 +612,15 @@
                 <span class="btn-icon-action" id="insert-newline-positive" title="Insert Newline">↵</span>
                 <span class="btn-icon-action" id="clear-positive-inline" title="Clear Positive">🗑️</span>
                 <span class="btn-icon-action" id="copy-positive" title="Copy Positive">📋</span>
+                <span class="btn-icon-action" id="toggle-suffix-btn" title="Toggle Suffix">SFX</span>
               </div>
             </div>
-            <div id="positive-chips" class="chip-container"></div>
+            <div class="positive-chips-wrapper">
+              <div id="positive-chips" class="chip-container chip-container-main"></div>
+              <div class="suffix-divider"></div>
+              <div id="positive-suffix-chips" class="chip-container chip-container-suffix"></div>
+            </div>
+            <textarea id="positive-suffix-prompt" style="display:none"></textarea>
           </div>
 
           <!-- 2. Negative Chips Area -->

@@ -85,7 +85,7 @@ window.electronAPI = {
 
   // Prompt Presets
   getPromptPresetList: () => ipcRenderer.invoke('prompt-presets:get-list'),
-  savePromptPreset: (name, positive, negative, gen) => ipcRenderer.invoke('prompt-presets:save', { name, positive, negative, gen }),
+  savePromptPreset: (name, positive, negative, gen, suffix) => ipcRenderer.invoke('prompt-presets:save', { name, positive, negative, gen, suffix }),
   loadPromptPreset: (name) => ipcRenderer.invoke('prompt-presets:load', { name }),
   deletePromptPreset: (name) => ipcRenderer.invoke('prompt-presets:delete', { name }),
 
