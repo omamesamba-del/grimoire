@@ -706,7 +706,7 @@ export function getFavoriteTree(nodes) {
 }
 
 /**
- * Returns flat list of tags sorted by usage frequency (top 30 used)
+ * Returns flat list of tags sorted by usage frequency (top 60 used)
  */
 export function getFrequentTree(nodes) {
     const allTags = [];
@@ -724,7 +724,7 @@ export function getFrequentTree(nodes) {
             const cb = State.tagUsageCount.get(b.name) || 0;
             return cb - ca;
         })
-        .slice(0, 30);
+        .slice(0, 60);
 }
 
 /**

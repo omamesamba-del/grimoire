@@ -450,28 +450,41 @@ function collectFolders(node, prefix) {
 }
 
 export function getGenPayload() {
-    const all = _collectAll();
+    // Gen UI is lazily initialized on first visit to gen mode.
+    // If not yet initialized, read saved settings directly from localStorage
+    // so callers in other modes (tag, lora, etc.) still get correct values.
+    let all;
+    if (!State._genInitialized) {
+        _loadSendMask();
+        try {
+            const saved = localStorage.getItem(GEN_STORAGE_KEY);
+            all = saved ? JSON.parse(saved) : _collectAll();
+        } catch (_) { all = _collectAll(); }
+    } else {
+        all = _collectAll();
+    }
     const m = k => _sendMask[k] !== false;
+    const str = v => (v || null);  // empty string → null so bridge skips the field
     return {
-        checkpoint:        m('checkpoint')  ? all.checkpoint        : null,
-        vae:               m('vae')         ? all.vae               : null,
-        clipSkip:          m('clipSkip')    ? all.clipSkip          : null,
-        sampler:           m('sampler')     ? all.sampler           : null,
-        schedule:          m('schedule')    ? all.schedule          : null,
-        steps:             m('steps')       ? all.steps             : null,
-        width:             m('resolution')  ? all.width             : null,
-        height:            m('resolution')  ? all.height            : null,
-        batchCount:        m('batch')       ? all.batchCount        : null,
-        batchSize:         m('batch')       ? all.batchSize         : null,
-        cfg:               m('cfg')         ? all.cfg               : null,
-        seed:              m('seed')        ? all.seed              : null,
-        hiresFix:          m('hires')       ? all.hiresFix          : null,
-        hiresUpscaler:     m('hires')       ? all.hiresUpscaler     : null,
-        hiresSteps:        m('hires')       ? all.hiresSteps        : null,
-        hiresDenoising:    m('hires')       ? all.hiresDenoising    : null,
-        hiresUpscaleBy:    m('hires')       ? all.hiresUpscaleBy    : null,
-        refiner:           m('refiner')     ? all.refiner           : null,
-        refinerCheckpoint: m('refiner')     ? all.refinerCheckpoint : null,
-        refinerSwitchAt:   m('refiner')     ? all.refinerSwitchAt   : null,
+        checkpoint:        m('checkpoint')  ? str(all.checkpoint)        : null,
+        vae:               m('vae')         ? str(all.vae)               : null,
+        clipSkip:          m('clipSkip')    ? all.clipSkip               : null,
+        sampler:           m('sampler')     ? str(all.sampler)           : null,
+        schedule:          m('schedule')    ? str(all.schedule)          : null,
+        steps:             m('steps')       ? all.steps                  : null,
+        width:             m('resolution')  ? all.width                  : null,
+        height:            m('resolution')  ? all.height                 : null,
+        batchCount:        m('batch')       ? all.batchCount             : null,
+        batchSize:         m('batch')       ? all.batchSize              : null,
+        cfg:               m('cfg')         ? all.cfg                    : null,
+        seed:              m('seed')        ? all.seed                   : null,
+        hiresFix:          m('hires')       ? all.hiresFix               : null,
+        hiresUpscaler:     m('hires')       ? str(all.hiresUpscaler)     : null,
+        hiresSteps:        m('hires')       ? all.hiresSteps             : null,
+        hiresDenoising:    m('hires')       ? all.hiresDenoising         : null,
+        hiresUpscaleBy:    m('hires')       ? all.hiresUpscaleBy         : null,
+        refiner:           m('refiner')     ? all.refiner                : null,
+        refinerCheckpoint: m('refiner')     ? str(all.refinerCheckpoint) : null,
+        refinerSwitchAt:   m('refiner')     ? all.refinerSwitchAt        : null,
     };
 }

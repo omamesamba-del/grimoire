@@ -386,11 +386,12 @@ function toggleTagDisabled(name, isNeg) {
     const set = isNeg ? State.disabledTagsNegative : State.disabledTagsPositive;
     if (set.has(name)) set.delete(name);
     else set.add(name);
-    
+
     renderPromptChips(
-        isNeg ? 'negative-chips' : 'positive-chips', 
+        isNeg ? 'negative-chips' : 'positive-chips',
         isNeg ? 'negative-prompt' : 'positive-prompt'
     );
+    if (!isNeg) renderPromptChips('positive-suffix-chips', 'positive-suffix-prompt');
 }
 
 function removeTagAtIndex(index, inputId) {
