@@ -40,3 +40,6 @@ todo.md
 docs/notes.md
 docs/todo.md
 civitai.md
+
+# Sample presets (local only)
+prompt_presets/
