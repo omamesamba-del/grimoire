@@ -902,7 +902,7 @@ async function sendToTags(positive, negative) {
     if (btn) {
         btn.textContent = i18n.t('toast_tags_sent');
         btn.disabled = true;
-        setTimeout(() => { btn.textContent = i18n.t('btn_send_to_tags'); btn.disabled = false; }, 2000);
+        setTimeout(() => { btn.textContent = '🏷️'; btn.disabled = false; }, 2000);
     }
 }
 
