@@ -350,8 +350,10 @@ function startInlineEdit(chip, tag, index, input) {
     editInput.select();
 
     const commit = () => {
-        const newName = editInput.value.trim();
+        if (!chip.classList.contains('editing')) return;
         chip.classList.remove('editing');
+        document.removeEventListener('mousedown', onDocMouseDown);
+        const newName = editInput.value.trim();
         if (newName && newName !== tag.name) {
             const tagsList = parsePrompt(input.value);
             if (tagsList[index]) {
@@ -362,13 +364,22 @@ function startInlineEdit(chip, tag, index, input) {
         input.dispatchEvent(new Event('input'));
     };
 
+    const onDocMouseDown = (e) => {
+        if (e.target !== editInput) commit();
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+
     editInput.onkeydown = (e) => {
         if (e.key === 'Enter') { e.preventDefault(); commit(); }
-        if (e.key === 'Escape') { e.preventDefault(); chip.classList.remove('editing'); input.dispatchEvent(new Event('input')); }
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            if (!chip.classList.contains('editing')) return;
+            chip.classList.remove('editing');
+            document.removeEventListener('mousedown', onDocMouseDown);
+            input.dispatchEvent(new Event('input'));
+        }
         e.stopPropagation();
     };
-
-    editInput.onblur = commit;
 }
 
 function toggleTagDisabled(name, isNeg) {

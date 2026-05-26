@@ -18,6 +18,7 @@ export const DEFAULT_SHORTCUTS = [
     // ── Builder ──────────────────────────────────────────────────
     { id: 'prompt.undo',         label: 'sc_label_undo',           defaultKey: 'Ctrl+Z',           group: 'sc_group_builder', context: 'prompt'  },
     { id: 'prompt.redo',         label: 'sc_label_redo',           defaultKey: 'Ctrl+Y',           group: 'sc_group_builder', context: 'prompt'  },
+    { id: 'prompt.redo.alt',     label: 'sc_label_redo',           defaultKey: 'Ctrl+Shift+Z',     group: 'sc_group_builder', context: 'prompt'  },
     { id: 'builder.send_webui',  label: 'sc_label_send_webui',     defaultKey: 'Ctrl+Enter',       group: 'sc_group_builder', context: 'prompt'  },
     { id: 'builder.send_comfy',  label: 'sc_label_send_comfy',     defaultKey: 'Ctrl+Shift+Enter', group: 'sc_group_builder', context: 'prompt'  },
     { id: 'builder.save_preset', label: 'sc_label_save_preset',    defaultKey: 'Ctrl+S',           group: 'sc_group_builder', context: 'noInput' },

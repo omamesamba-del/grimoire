@@ -92,6 +92,7 @@ async function initApp() {
             'mode.ai':             () => window.dispatchEvent(new CustomEvent('app:switch-mode', { detail: 'ai' })),
             'prompt.undo':         () => undo(),
             'prompt.redo':         () => redo(),
+            'prompt.redo.alt':     () => redo(),
             'builder.send_webui':  () => window.dispatchEvent(new CustomEvent('builder:send', { detail: 'webui' })),
             'builder.send_comfy':  () => window.dispatchEvent(new CustomEvent('builder:send', { detail: 'comfy' })),
             'builder.save_preset': () => document.getElementById('btn-prompt-preset-save')?.click(),
@@ -1361,6 +1362,7 @@ function setupEventListeners() {
         });
         renderPromptChips('positive-chips', 'positive-prompt');
         renderPromptChips('negative-chips', 'negative-prompt');
+        renderPromptChips('positive-suffix-chips', 'positive-suffix-prompt');
     };
     document.getElementById('btn-hud-disable')?.addEventListener('click', () => batchSetChipsDisabled(true));
     document.getElementById('btn-hud-enable')?.addEventListener('click', () => batchSetChipsDisabled(false));
@@ -1597,12 +1599,17 @@ async function performBatchDelete(ids) {
 }
 
 function performBatchRemoveFromPrompt(names) {
-    const area = document.getElementById(State.lastFocusedAreaId) || document.getElementById('positive-prompt');
-    if (!area) return;
-    const tags = parsePrompt(area.value);
-    const filtered = tags.filter(t => !names.includes(t.name));
-    area.value = stringifyPrompt(filtered);
-    area.dispatchEvent(new Event('input'));
+    const areaIds = ['positive-prompt', 'negative-prompt', 'positive-suffix-prompt'];
+    areaIds.forEach(id => {
+        const area = document.getElementById(id);
+        if (!area) return;
+        const tags = parsePrompt(area.value);
+        const filtered = tags.filter(t => !names.includes(t.name));
+        if (filtered.length !== tags.length) {
+            area.value = stringifyPrompt(filtered);
+            area.dispatchEvent(new Event('input'));
+        }
+    });
     State.selectedChips.clear();
     window.dispatchEvent(new CustomEvent('selection-changed'));
 }
