@@ -24,7 +24,7 @@ class I18n {
 
                 // ── Explorer ──────────────────────────────────────────────
                 'explorer_add_category':    'カテゴリを追加',
-                'explorer_groups_title':    'Groups',
+                'explorer_groups_title':    'Explorer',
                 'explorer_ai_history_title':'生成履歴',
 
                 // ── ライブラリタイトル（JS用） ──────────────────────────────
@@ -331,6 +331,13 @@ class I18n {
                 'chip_menu_emb_webui':       '🔀 WebUI表記に変換 (name)',
                 'chip_menu_move_to_suffix':  '⬇ サフィックスへ移動',
                 'chip_menu_move_to_main':    '⬆ メインへ移動',
+                'chip_menu_set_color':       '🎨 チップの色を設定',
+                'chip_menu_reset_color':     '↺ チップの色をリセット',
+                'chip_menu_insert_sep':      '▬ セパレーターを挿入',
+                'ph_title':                  'プロンプト履歴',
+                'ph_empty':                  '履歴がありません',
+                'ph_restore':                '復元',
+                'ph_clear_all':              'すべて削除',
                 'suffix_menu_hide':          'Suffix を非表示',
                 'suffix_menu_show':          'Suffix を表示',
                 'chip_no_trigger_words':     'トリガーワードなし',
@@ -541,7 +548,7 @@ class I18n {
 
                 // ── Explorer ────────────────────────────────────────────────
                 'explorer_add_category':    'Add Category',
-                'explorer_groups_title':    'Groups',
+                'explorer_groups_title':    'Explorer',
                 'explorer_ai_history_title':'Generation History',
 
                 // ── Library titles (JS) ──────────────────────────────────────
@@ -848,6 +855,13 @@ class I18n {
                 'chip_menu_emb_webui':       '🔀 Convert to WebUI notation (name)',
                 'chip_menu_move_to_suffix':  '⬇ Move to Suffix',
                 'chip_menu_move_to_main':    '⬆ Move to Main',
+                'chip_menu_set_color':       '🎨 Set Chip Color',
+                'chip_menu_reset_color':     '↺ Reset Chip Color',
+                'chip_menu_insert_sep':      '▬ Insert Separator',
+                'ph_title':                  'Prompt History',
+                'ph_empty':                  'No history yet',
+                'ph_restore':                'Restore',
+                'ph_clear_all':              'Clear All',
                 'suffix_menu_hide':          'Hide Suffix',
                 'suffix_menu_show':          'Show Suffix',
                 'chip_no_trigger_words':     'No trigger words',

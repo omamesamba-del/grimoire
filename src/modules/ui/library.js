@@ -344,7 +344,7 @@ function createTagButton(tag, color = null) {
     btn.appendChild(listThumb);
 
     btn.appendChild(Object.assign(document.createElement('span'), { className: 'tag-name', textContent: tag.name }));
-    
+
     // Attach Premium Popup
     attachPopupEvents(btn, {
         name: tag.name,
@@ -520,7 +520,8 @@ function handleTagClick(e, tag, el) {
             finalName = finalValue;
             closeIfAutoClose();
         }
-        addToPrompt(finalValue, null, finalName);
+        const srcCatId = (State.isFavoriteView || State.isFrequentView) ? null : State.currentCategoryId;
+        addToPrompt(finalValue, null, finalName, srcCatId);
         State.lastSelectedTagId = tag.id;
 
         // Update usage badge live

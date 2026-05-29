@@ -50,6 +50,11 @@ export const State = {
     isFrequentView: false,
     viewMode: 'grid', // 'grid' | 'list'
 
+    // Tag color source map: tag name → catId (recorded at add time)
+    tagColorMap: new Map(),
+    // Manual chip color overrides: tag name → hex color string
+    chipColorOverride: new Map(),
+
     // Style Palette
     pendingStyle: {
         colorMods: [],    // string[] selected color modifier values (dark/light/two-tone…)
@@ -72,6 +77,14 @@ export function saveUiState() {
     localStorage.setItem('tagUsageCount', JSON.stringify([...State.tagUsageCount.entries()]));
 }
 
+export function saveTagColorMap() {
+    localStorage.setItem('tagColorMap', JSON.stringify([...State.tagColorMap.entries()]));
+}
+
+export function saveChipColorOverride() {
+    localStorage.setItem('chipColorOverride', JSON.stringify([...State.chipColorOverride.entries()]));
+}
+
 /**
  * Initialize state from localStorage
  */
@@ -86,6 +99,16 @@ export function initUiState() {
         State.tagUsageCount = new Map(JSON.parse(localStorage.getItem('tagUsageCount') || '[]'));
     } catch {
         State.tagUsageCount = new Map();
+    }
+    try {
+        State.tagColorMap = new Map(JSON.parse(localStorage.getItem('tagColorMap') || '[]'));
+    } catch {
+        State.tagColorMap = new Map();
+    }
+    try {
+        State.chipColorOverride = new Map(JSON.parse(localStorage.getItem('chipColorOverride') || '[]'));
+    } catch {
+        State.chipColorOverride = new Map();
     }
 }
 

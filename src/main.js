@@ -19,6 +19,7 @@ import { initImageBrowser, renderImageExplorer, refreshImageBrowserView } from '
 import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode } from './modules/ui/generation.js';
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
 import { initAiPrompt } from './modules/ui/ai-prompt.js';
+import { recordHistory, openHistoryPanel } from './modules/ui/promptHistory.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
 import { initAssetEdit } from './modules/ui/assetEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
@@ -806,6 +807,7 @@ function setupEventListeners() {
             } else {
                 const pos = getPositiveWithSuffix();
                 const neg = getActivePrompt('negative-prompt');
+                recordHistory(pos, neg, 'webui');
                 result = await IPC.sendToWebUI({ positive: pos, negative: neg, mode: webuiSendMode, trigger: webuiSendTrigger, gen: webuiSendGen ? getGenPayload() : null });
             }
             if (result?.success) {
@@ -965,6 +967,7 @@ function setupEventListeners() {
                 showToast(i18n.t('toast_no_slots'), 'error');
                 return;
             }
+            recordHistory(Object.values(slotTexts).join('\n---\n'), '', 'comfy');
             let lastResult;
             for (let i = 0; i < entries.length; i++) {
                 const [slot, text] = entries[i];
@@ -1098,6 +1101,21 @@ function setupEventListeners() {
     document.getElementById('btn-send-main')?.addEventListener('click', () => {
         State.isComfyMode ? sendToComfy() : sendToWebUI();
     });
+
+    document.getElementById('btn-prompt-history')?.addEventListener('click', () => openHistoryPanel());
+
+    // Mode nav: drag-to-reorder with localStorage persistence
+    const modeTabsList = document.getElementById('mode-tabs-list');
+    if (modeTabsList) {
+        Sortable.create(modeTabsList, {
+            animation: 150,
+            dataIdAttr: 'data-mode',
+            store: {
+                get: (s) => (localStorage.getItem('modeNavOrder') || '').split('|').filter(Boolean),
+                set: (s) => localStorage.setItem('modeNavOrder', s.toArray().join('|')),
+            },
+        });
+    }
 
     // Keyboard shortcuts: Ctrl+Enter → WebUI, Ctrl+Shift+Enter → ComfyUI (regardless of current toggle)
     window.addEventListener('builder:send', (e) => {

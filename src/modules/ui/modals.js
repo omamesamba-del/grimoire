@@ -64,7 +64,7 @@ export function showConfirmDialog(message) {
     });
 }
 
-export function showInputDialog(title, defaultValue = '') {
+export function showInputDialog(title, defaultValue = '', { allowEmpty = false } = {}) {
     return new Promise((resolve) => {
         const dialog = document.getElementById('input-dialog');
         const titleEl = document.getElementById('input-dialog-title');
@@ -86,10 +86,11 @@ export function showInputDialog(title, defaultValue = '') {
             resolve(value);
         };
 
-        confirmBtn.onclick = () => finish(field.value.trim() || null);
+        const confirm = () => finish(allowEmpty ? field.value.trim() : (field.value.trim() || null));
+        confirmBtn.onclick = confirm;
         cancelBtn.onclick = () => finish(null);
         dialog.onkeydown = (e) => {
-            if (e.key === 'Enter' && e.target === field) { e.preventDefault(); finish(field.value.trim() || null); }
+            if (e.key === 'Enter' && e.target === field) { e.preventDefault(); confirm(); }
             if (e.key === 'Escape') { e.preventDefault(); finish(null); }
         };
     });

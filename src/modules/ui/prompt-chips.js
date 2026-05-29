@@ -1,13 +1,20 @@
 /**
  * Prompt Chip UI Component for v4
  */
-import { State } from '../core/state.js';
+import { State, saveChipColorOverride } from '../core/state.js';
 import { parsePrompt, stringifyPrompt, addToPrompt, resolveRandomChips } from '../prompt/engine.js';
 import { openAddTagModal, showInputDialog } from './modals.js';
 import { MarqueeSelector } from './selection.js';
 import Sortable from 'sortablejs';
 import { hasActiveStyle, applyStyleToValue, closeIfAutoClose } from './style-palette.js';
 import { i18n } from '../core/i18n.js';
+
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `${r}, ${g}, ${b}`;
+}
 
 /**
  * Returns selected chips as properly formatted strings (e.g. <lora:name:1.0>),
@@ -49,15 +56,61 @@ export function renderPromptChips(containerId, inputId) {
             br.dataset.tagData = JSON.stringify({ name: 'BR', type: 'break', weight: null });
             br.title = i18n.t('chip_break_title');
             br.innerHTML = '<span class="chip-text">↵</span>';
-            br.oncontextmenu = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                removeTagAtIndex(index, inputId);
-            };
+            br.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+            br.addEventListener('auxclick', (e) => { if (e.button === 1) { e.preventDefault(); removeTagAtIndex(index, inputId); } });
             container.appendChild(br);
             const flexBreak = document.createElement('div');
             flexBreak.className = 'chip-flex-break';
             container.appendChild(flexBreak);
+            return;
+        }
+
+        // ── セパレーター ────────────────────────────────────────
+        if (tag.type === 'separator') {
+            const sep = document.createElement('div');
+            sep.className = 'chip-separator';
+            sep.dataset.index = index;
+            if (tag.name) {
+                const lbl = document.createElement('span');
+                lbl.className = 'chip-separator-label';
+                lbl.textContent = tag.name;
+                sep.appendChild(lbl);
+            }
+            sep.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+            sep.addEventListener('auxclick', (e) => { if (e.button === 1) { e.preventDefault(); removeTagAtIndex(index, inputId); } });
+            sep.addEventListener('dblclick', () => {
+                const editEl = document.createElement('input');
+                editEl.type = 'text';
+                editEl.className = 'sep-label-edit';
+                editEl.value = tag.name;
+                sep.innerHTML = '';
+                sep.appendChild(editEl);
+                editEl.focus();
+                editEl.select();
+                const commit = () => {
+                    const tagsList = parsePrompt(input.value);
+                    if (tagsList[index]) { tagsList[index].name = editEl.value.trim(); input.value = stringifyPrompt(tagsList); }
+                    input.dispatchEvent(new Event('input'));
+                };
+                editEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') input.dispatchEvent(new Event('input')); e.stopPropagation(); });
+                editEl.addEventListener('blur', commit);
+            });
+            container.appendChild(sep);
+            return;
+        }
+
+        // ── Wildcard チップ ─────────────────────────────────────
+        if (tag.type === 'wildcard') {
+            const chip = document.createElement('div');
+            chip.className = 'prompt-chip type-wildcard';
+            chip.dataset.index = index;
+            chip.dataset.name = tag.name;
+            chip.dataset.tagData = JSON.stringify(tag);
+            chip.innerHTML = `<span class="chip-text">${tag.name}</span>`;
+            chip.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+            chip.addEventListener('auxclick', (e) => { if (e.button === 1) { e.preventDefault(); removeTagAtIndex(index, inputId); } });
+            chip.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); removeTagAtIndex(index, inputId); };
+            container.appendChild(chip);
             return;
         }
 
@@ -100,23 +153,33 @@ export function renderPromptChips(containerId, inputId) {
         let catClass = '';
         if (State.allTags) {
             const tagName = tag.name;
-            const nodeMatches = (n) => {
-                if (n.type !== 'tag') return false;
-                if (n.name === tagName) return true;
-                if (!n.value) return false;
-                return n.value.split(',').map(v => v.trim()).includes(tagName);
-            };
-            const findInTree = (nodes) => {
-                for (const n of nodes) {
-                    if (nodeMatches(n)) return true;
-                    if (n.children && findInTree(n.children)) return true;
-                }
-                return false;
-            };
-            for (const cat of State.allTags) {
-                if (cat.children && findInTree(cat.children)) {
-                    catClass = `cat-${cat.color || cat.id}`;
-                    break;
+
+            // Use recorded source category if available
+            const recordedCatId = State.tagColorMap?.get(tagName);
+            if (recordedCatId) {
+                const recordedCat = State.allTags.find(c => c.id === recordedCatId);
+                if (recordedCat) catClass = `cat-${recordedCat.color || recordedCat.id}`;
+            }
+
+            if (!catClass) {
+                const nodeMatches = (n) => {
+                    if (n.type !== 'tag') return false;
+                    if (n.name === tagName) return true;
+                    if (!n.value) return false;
+                    return n.value.split(',').map(v => v.trim()).includes(tagName);
+                };
+                const findInTree = (nodes) => {
+                    for (const n of nodes) {
+                        if (nodeMatches(n)) return true;
+                        if (n.children && findInTree(n.children)) return true;
+                    }
+                    return false;
+                };
+                for (const cat of State.allTags) {
+                    if (cat.children && findInTree(cat.children)) {
+                        catClass = `cat-${cat.color || cat.id}`;
+                        break;
+                    }
                 }
             }
         }
@@ -128,6 +191,15 @@ export function renderPromptChips(containerId, inputId) {
         const embClass = isEmbedding ? 'type-embedding' : (tag.type ? 'type-' + tag.type : '');
         const appliedCatClass = (isEmbedding || isLoraType) ? '' : catClass;
         chip.className = `prompt-chip ${embClass} ${isDisabled ? 'is-disabled' : ''} ${appliedCatClass} ${appliedCatClass ? 'cat-colored' : ''} ${isSelected ? 'selected' : ''}`;
+
+        // Manual color override (highest priority)
+        const overrideColor = State.chipColorOverride?.get(tag.name);
+        if (overrideColor) {
+            chip.style.setProperty('--cat-accent', overrideColor);
+            chip.style.setProperty('--cat-accent-rgb', hexToRgb(overrideColor));
+            chip.classList.add('cat-colored');
+        }
+
         chip.dataset.index = index;
         chip.dataset.name = tag.name;
         chip.dataset.tagData = JSON.stringify(tag);
@@ -161,13 +233,16 @@ export function renderPromptChips(containerId, inputId) {
 
             const cancelHide = () => clearTimeout(hideTimer);
 
+            let _lastChipMouseEvent = null;
             chip.addEventListener('mouseenter', (e) => {
                 cancelHide();
-                hoverTimer = setTimeout(() => showAssetPopup(e, tag, assetType), 400);
+                _lastChipMouseEvent = e;
+                hoverTimer = setTimeout(() => showAssetPopup(_lastChipMouseEvent, tag, assetType), 400);
             });
             chip.addEventListener('mousemove', (e) => {
-                if (document.getElementById('chip-asset-popup')?.classList.contains('visible')) {
-                    positionAssetPopup(e);
+                // 表示前のみ追従、表示後は固定してポップアップ内をクリックしやすくする
+                if (!document.getElementById('chip-asset-popup')?.classList.contains('visible')) {
+                    _lastChipMouseEvent = e;
                 }
             });
             chip.addEventListener('mouseleave', () => {
@@ -180,20 +255,25 @@ export function renderPromptChips(containerId, inputId) {
             chip._assetPopupScheduleHide = scheduleHide;
         }
 
-        // Interaction: Wheel to change weight
+        // Interaction: Ctrl+Wheel to change weight (bulk if chips are selected)
         chip.onwheel = (e) => {
+            if (!e.ctrlKey) return;
             e.preventDefault();
             const delta = e.deltaY < 0 ? 0.1 : -0.1;
-            const currentWeight = tag.weight !== null ? tag.weight : 1.0;
-            const newWeight = Math.max(0.1, Math.min(2.0, currentWeight + delta));
-
             const tagsList = parsePrompt(input.value);
-            if (tagsList[index]) {
-                tagsList[index].weight = parseFloat(newWeight.toFixed(1)); // 0.1 step
-                input.value = stringifyPrompt(tagsList);
-                // Trigger input event to sync and re-render
-                input.dispatchEvent(new Event('input'));
+            if (State.selectedChips.size > 0 && State.selectedChips.has(tag.name)) {
+                tagsList.forEach(t => {
+                    if (State.selectedChips.has(t.name)) {
+                        const cur = t.weight !== null ? t.weight : 1.0;
+                        t.weight = parseFloat(Math.max(0.1, Math.min(2.0, cur + delta)).toFixed(1));
+                    }
+                });
+            } else if (tagsList[index]) {
+                const cur = tagsList[index].weight !== null ? tagsList[index].weight : 1.0;
+                tagsList[index].weight = parseFloat(Math.max(0.1, Math.min(2.0, cur + delta)).toFixed(1));
             }
+            input.value = stringifyPrompt(tagsList);
+            input.dispatchEvent(new Event('input'));
         };
 
         // Interaction: Single-click to edit inline, Ctrl+click to select, Double-click to toggle disabled
@@ -221,7 +301,8 @@ export function renderPromptChips(containerId, inputId) {
             toggleTagDisabled(tag.name, isNeg);
         };
 
-        // Middle-click: Remove tag
+        // Middle-click: Remove tag (preventDefault on mousedown suppresses Chromium autoscroll)
+        chip.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
         chip.addEventListener('auxclick', (e) => {
             if (e.button === 1) { e.preventDefault(); hideAssetPopup(); removeTagAtIndex(index, inputId); }
         });
@@ -461,6 +542,14 @@ function showChipMenu(x, y, ctx) {
                 ctx.input.dispatchEvent(new Event('input'));
             }
         }},
+        { label: i18n.t('chip_menu_insert_sep'), action: async () => {
+            const label = await showInputDialog('Separator label (optional)', '', { allowEmpty: true });
+            if (label === null) return;
+            const tagsList = parsePrompt(ctx.input.value);
+            tagsList.splice(ctx.index + 1, 0, { name: label || '', type: 'separator', weight: null });
+            ctx.input.value = stringifyPrompt(tagsList);
+            ctx.input.dispatchEvent(new Event('input'));
+        }},
     ];
 
     // Embedding notation toggle
@@ -505,6 +594,74 @@ function showChipMenu(x, y, ctx) {
         item.addEventListener('mousedown', (e) => { e.preventDefault(); closeChipMenu(); action(); });
         menu.appendChild(item);
     });
+
+    // Color palette section
+    const PALETTE_COLORS = [
+        '#ef4444','#f97316','#eab308','#22c55e',
+        '#14b8a6','#3b82f6','#8b5cf6','#ec4899',
+        '#f43f5e','#64748b','#a16207','#ffffff',
+    ];
+    const applyColor = (color) => {
+        const targets = (State.selectedChips.size > 0 && State.selectedChips.has(ctx.tag.name))
+            ? [...State.selectedChips]
+            : [ctx.tag.name];
+        targets.forEach(name => State.chipColorOverride.set(name, color));
+        saveChipColorOverride();
+        ctx.input.dispatchEvent(new Event('input'));
+    };
+    const hasOverride = State.chipColorOverride.has(ctx.tag.name);
+
+    const sep = document.createElement('div');
+    sep.className = 'chip-ctx-sep';
+    menu.appendChild(sep);
+
+    const paletteRow = document.createElement('div');
+    paletteRow.className = 'chip-ctx-palette';
+    PALETTE_COLORS.forEach(color => {
+        const swatch = document.createElement('div');
+        swatch.className = 'chip-ctx-swatch';
+        swatch.style.background = color;
+        if (color === '#ffffff') swatch.style.border = '1px solid #475569';
+        swatch.title = color;
+        swatch.addEventListener('mousedown', (e) => { e.preventDefault(); closeChipMenu(); applyColor(color); });
+        paletteRow.appendChild(swatch);
+    });
+    menu.appendChild(paletteRow);
+
+    // Custom color picker — full-width button below palette
+    const customBtn = document.createElement('div');
+    customBtn.className = 'chip-ctx-custom-btn';
+    customBtn.textContent = '+ Custom…';
+    customBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        closeChipMenu();
+        const picker = document.createElement('input');
+        picker.type = 'color';
+        picker.value = State.chipColorOverride.get(ctx.tag.name) || '#6366f1';
+        picker.style.display = 'none';
+        document.body.appendChild(picker);
+        picker.addEventListener('change', () => { applyColor(picker.value); picker.remove(); });
+        picker.addEventListener('blur', () => picker.remove());
+        picker.click();
+    });
+    menu.appendChild(customBtn);
+
+    if (hasOverride) {
+        const resetItem = document.createElement('div');
+        resetItem.className = 'chip-ctx-item';
+        resetItem.textContent = i18n.t('chip_menu_reset_color');
+        resetItem.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            closeChipMenu();
+            const targets = (State.selectedChips.size > 0 && State.selectedChips.has(ctx.tag.name))
+                ? [...State.selectedChips]
+                : [ctx.tag.name];
+            targets.forEach(name => State.chipColorOverride.delete(name));
+            saveChipColorOverride();
+            ctx.input.dispatchEvent(new Event('input'));
+        });
+        menu.appendChild(resetItem);
+    }
 
     document.body.appendChild(menu);
 

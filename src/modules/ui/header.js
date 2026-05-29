@@ -102,7 +102,11 @@ function applySearch(query) {
         return;
     }
 
-    const q = query.toLowerCase();
+    // スペース区切りで AND 検索
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const matchesTag = (c) => terms.every(t =>
+        c.name.toLowerCase().includes(t) || (c.value && c.value.toLowerCase().includes(t))
+    );
 
     // Determine search scope: selected category or all
     const selectedCatId = document.getElementById('search-cat-filter')?.value || '';
@@ -118,12 +122,9 @@ function applySearch(query) {
             const nodeColor = inheritedColor || node.color || null;
             const nodePath  = path.length ? [...path, node.name] : [node.name];
 
-            // Direct tag children that match the query
+            // Direct tag children that match all terms (AND)
             const matchingTags = (node.children || []).filter(c =>
-                c.type === 'tag' && (
-                    c.name.toLowerCase().includes(q) ||
-                    (c.value && c.value.toLowerCase().includes(q))
-                )
+                c.type === 'tag' && matchesTag(c)
             );
             if (matchingTags.length > 0) {
                 sections.push({

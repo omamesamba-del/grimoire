@@ -2,13 +2,13 @@
  * Prompt Engine for v4
  * Handles parsing, stringification, and chip collection management.
  */
-import { State, incrementTagUsage } from '../core/state.js';
+import { State, incrementTagUsage, saveTagColorMap } from '../core/state.js';
 
 export function parsePrompt(text) {
     if (!text) return [];
 
-    // [@...@] must be matched BEFORE [tag] so it isn't swallowed by the square-bracket rule
-    const regex = /(\[@[^\]@]*@\])|(<lora:[^>]+>)|(\([^:)]+:[^)]+\))|(\([^)]+\))|(\[[^\]]+\])|(\n+)|([^,\n]+)/g;
+    // [@...@] and [=...=] must be matched BEFORE [tag] so they aren't swallowed by the square-bracket rule
+    const regex = /(\[@[^\]@]*@\])|(\[=[^\]]*=\])|(__.+?__)|(<lora:[^>]+>)|(\([^:)]+:[^)]+\))|(\([^)]+\))|(\[[^\]]+\])|(\n+)|([^,\n]+)/g;
     const matches = text.match(regex) || [];
 
     return matches.map(m => {
@@ -20,6 +20,17 @@ export function parsePrompt(text) {
         if (chunk.startsWith('[@') && chunk.endsWith('@]')) {
             const scope = chunk.slice(2, -2);
             return { name: chunk, type: 'random', scope, weight: null };
+        }
+
+        // Match __wildcard__ — passed through as-is
+        if (chunk.startsWith('__') && chunk.endsWith('__') && chunk.length > 4) {
+            return { name: chunk, type: 'wildcard', weight: null };
+        }
+
+        // Match [=label=] — separator chip (UI-only, stripped on send)
+        if (chunk.startsWith('[=') && chunk.endsWith('=]')) {
+            const label = chunk.slice(2, -2);
+            return { name: label, type: 'separator', weight: null };
         }
 
         // Match <lora:name:weight> or <lora:name>
@@ -58,6 +69,10 @@ export function stringifyPrompt(tags) {
         let str = '';
         if (tag.type === 'break') {
             str = '\n';
+        } else if (tag.type === 'separator') {
+            str = `[=${tag.name}=]`;
+        } else if (tag.type === 'wildcard') {
+            str = tag.name;
         } else if (tag.type === 'random') {
             str = `[@${tag.scope}@]`;
         } else if (tag.type === 'lora') {
@@ -87,7 +102,7 @@ export function stringifyPrompt(tags) {
     return result;
 }
 
-export function addToPrompt(tag, targetId = null, label = null) {
+export function addToPrompt(tag, targetId = null, label = null, catId = null) {
     if (!tag) return;
     const tagStr = String(tag);
     const area = document.getElementById(targetId) || document.getElementById(State.lastFocusedAreaId) || document.getElementById('positive-prompt');
@@ -122,10 +137,15 @@ export function addToPrompt(tag, targetId = null, label = null) {
         } else {
             // Track usage by label (once per tag click) if label provided, otherwise per token
             let tracked = false;
+            let colorMapDirty = false;
             incomingObjs.forEach(inc => {
                 const idx = currentPrompt.findIndex(t => t.type !== 'break' && t.name.toLowerCase() === inc.name.toLowerCase());
                 if (idx === -1) {
                     currentPrompt.push(inc);
+                    // 再追加時は disabled 状態をリセット
+                    const isNegArea = area.id === 'negative-prompt';
+                    (isNegArea ? State.disabledTagsNegative : State.disabledTagsPositive).delete(inc.name);
+                    if (catId) { State.tagColorMap.set(inc.name, catId); colorMapDirty = true; }
                     if (label) {
                         if (!tracked) { incrementTagUsage(label); tracked = true; }
                     } else {
@@ -136,6 +156,7 @@ export function addToPrompt(tag, targetId = null, label = null) {
                     currentPrompt[idx] = inc;
                 }
             });
+            if (colorMapDirty) saveTagColorMap();
         }
     }
 
@@ -153,7 +174,7 @@ export function getActivePrompt(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return '';
     const disabled = isNeg ? State.disabledTagsNegative : State.disabledTagsPositive;
-    const tags = parsePrompt(input.value).filter(t => t.type === 'break' || !disabled.has(t.name));
+    const tags = parsePrompt(input.value).filter(t => t.type !== 'separator' && (t.type === 'break' || !disabled.has(t.name)));
     const resolved = resolveRandomChips(tags, State.allTags);
     return stringifyPrompt(resolved);
 }

@@ -90,16 +90,6 @@
           </div>
         </div>
 
-        <!-- Mode Tabs -->
-        <div class="mode-tabs-header">
-          <button class="mode-tab active" data-mode="tags"       title="Tags">      <span class="tab-icon">🏷️</span><span class="tab-label">Tags</span></button>
-          <button class="mode-tab"        data-mode="lora"       title="LoRA">      <span class="tab-icon">L</span>  <span class="tab-label">LoRA</span></button>
-          <button class="mode-tab"        data-mode="embedding"  title="Embedding"> <span class="tab-icon">E</span>  <span class="tab-label">Embedding</span></button>
-          <button class="mode-tab"        data-mode="checkpoint" title="Checkpoint"><span class="tab-icon">C</span>  <span class="tab-label">Checkpoint</span></button>
-          <button class="mode-tab"        data-mode="gen"        title="Gen">       <span class="tab-icon">⚡</span> <span class="tab-label">Gen</span></button>
-          <button class="mode-tab"        data-mode="images"     title="Images">    <span class="tab-icon">🖼️</span><span class="tab-label">Images</span></button>
-          <button class="mode-tab"        data-mode="ai"         title="AI">        <span class="tab-icon">✨</span> <span class="tab-label">AI</span></button>
-        </div>
       </div>
 
       <!-- Center: draggable + search -->
@@ -120,18 +110,33 @@
           <div class="mode-switch-track"><div class="mode-switch-thumb"></div></div>
           <span class="mode-label">COMFY</span>
         </div>
-        <button id="btn-toggle-layout-titlebar" class="titlebar-icon-btn" data-i18n-title="sc_label_toggle_layout" title="Toggle Layout">⬛</button>
-        <button id="btn-settings" class="titlebar-icon-btn" data-i18n-title="settings_title" title="Settings">⚙</button>
       </div>
       <div class="header-right"></div>
     </header>
 
     <!-- Main Workspace (3-Column Layout) -->
     <main class="workspace-container" id="workspace-container">
+
+      <!-- 0. Vertical Mode Nav -->
+      <nav class="mode-nav" id="mode-nav">
+        <div id="mode-tabs-list">
+          <button class="mode-tab active" data-mode="tags"       title="Tags">🏷️</button>
+          <button class="mode-tab"        data-mode="lora"       title="LoRA">L</button>
+          <button class="mode-tab"        data-mode="embedding"  title="Embedding">E</button>
+          <button class="mode-tab"        data-mode="checkpoint" title="Checkpoint">C</button>
+          <button class="mode-tab"        data-mode="gen"        title="Gen">⚡</button>
+          <button class="mode-tab"        data-mode="images"     title="Images">🖼️</button>
+          <button class="mode-tab"        data-mode="ai"         title="AI">✨</button>
+        </div>
+        <div class="mode-nav-spacer"></div>
+        <button id="btn-toggle-layout-titlebar" class="mode-nav-btn" data-i18n-title="sc_label_toggle_layout" title="Toggle Layout">⬛</button>
+        <button id="btn-settings"               class="mode-nav-btn" data-i18n-title="settings_title"         title="Settings">⚙</button>
+      </nav>
+
       <!-- 1. Explorer Pane (Left) -->
       <section class="pane explorer-pane" id="explorer">
         <div class="pane-header">
-          <span class="pane-title">Groups</span>
+          <span class="pane-title">Explorer</span>
           <div class="header-actions">
             <div class="btn-add-inline" id="btn-reload-data" title="Reload data from disk">↺</div>
             <div class="btn-add-inline" id="btn-add-category" title="Add New Group">＋</div>
@@ -577,6 +582,7 @@
                 <button class="builder-btn-send builder-split-main" id="btn-send-main" data-i18n="btn_generate" title="送信（右クリックまたは▾でオプション）">▶ Send</button>
                 <button class="builder-btn-send builder-split-arrow" id="btn-send-main-arrow" title="送信オプション">▾</button>
               </div>
+              <button class="builder-btn-history" id="btn-prompt-history" title="Prompt History">🕐</button>
             </div>
             <button class="builder-btn-clear" id="clear-all" data-i18n="btn_clear_all">Clear</button>
           </div>
