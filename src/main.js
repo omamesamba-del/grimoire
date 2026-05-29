@@ -20,6 +20,7 @@ import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode }
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
 import { initAiPrompt } from './modules/ui/ai-prompt.js';
 import { recordHistory, openHistoryPanel } from './modules/ui/promptHistory.js';
+import { loadTemplates, renderTemplateExplorer, renderTemplateFillPanel, openTemplateModal, exitInputMode } from './modules/ui/templateMode.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
 import { initAssetEdit } from './modules/ui/assetEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
@@ -1104,6 +1105,10 @@ function setupEventListeners() {
 
     document.getElementById('btn-prompt-history')?.addEventListener('click', () => openHistoryPanel());
 
+    // Templates: load on startup, wire add button
+    loadTemplates();
+    document.getElementById('btn-add-template')?.addEventListener('click', () => openTemplateModal());
+
     // Mode nav: drag-to-reorder with localStorage persistence
     const modeTabsList = document.getElementById('mode-tabs-list');
     if (modeTabsList) {
@@ -1111,8 +1116,16 @@ function setupEventListeners() {
             animation: 150,
             dataIdAttr: 'data-mode',
             store: {
-                get: (s) => (localStorage.getItem('modeNavOrder') || '').split('|').filter(Boolean),
-                set: (s) => localStorage.setItem('modeNavOrder', s.toArray().join('|')),
+                get: (s) => {
+                    const stored = (localStorage.getItem('modeNavOrder') || '').split('|').filter(Boolean);
+                    // template は常に末尾に固定
+                    const without = stored.filter(id => id !== 'template');
+                    return [...without, 'template'];
+                },
+                set: (s) => {
+                    const order = s.toArray().filter(id => id !== 'template');
+                    localStorage.setItem('modeNavOrder', [...order, 'template'].join('|'));
+                },
             },
         });
     }
@@ -1698,6 +1711,7 @@ export function switchMode(mode) {
             gen:        i18n.t('lib_title_gen'),
             images:    i18n.t('lib_title_images'),
             ai:        i18n.t('lib_title_ai'),
+            template:  i18n.t('lib_title_template'),
         };
         libraryTitle.textContent = titles[mode] ?? mode;
     }
@@ -1713,6 +1727,7 @@ export function switchMode(mode) {
             images:     i18n.t('search_placeholder_images'),
             gen:        '',
             ai:         '',
+            template:   '',
         };
         searchInput.placeholder = placeholders[mode] ?? 'Search…';
         // Clear search value when switching modes
@@ -1740,14 +1755,26 @@ export function switchMode(mode) {
     }
     
     // Manage tab classes for CSS consistency
-    const genContainer = document.getElementById('generation-container');
-    const imagesContainer = document.getElementById('images-container');
-    const aiContainer = document.getElementById('ai-container');
-    if (tagsContainer) tagsContainer.classList.toggle('active', mode === 'tags');
-    if (assetsContainer) assetsContainer.classList.toggle('active', mode === 'lora' || mode === 'embedding' || mode === 'checkpoint');
-    if (genContainer) genContainer.classList.toggle('active', mode === 'gen');
-    if (imagesContainer) imagesContainer.classList.toggle('active', mode === 'images');
-    if (aiContainer) aiContainer.classList.toggle('active', mode === 'ai');
+    const genContainer      = document.getElementById('generation-container');
+    const imagesContainer   = document.getElementById('images-container');
+    const aiContainer       = document.getElementById('ai-container');
+    const templateContainer = document.getElementById('template-container');
+    if (tagsContainer)      tagsContainer.classList.toggle('active', mode === 'tags');
+    if (assetsContainer)    assetsContainer.classList.toggle('active', mode === 'lora' || mode === 'embedding' || mode === 'checkpoint');
+    if (genContainer)       genContainer.classList.toggle('active', mode === 'gen');
+    if (imagesContainer)    imagesContainer.classList.toggle('active', mode === 'images');
+    if (aiContainer)        aiContainer.classList.toggle('active', mode === 'ai');
+    if (templateContainer)  templateContainer.classList.toggle('active', mode === 'template');
+
+    // Template mode: toggle explorer pane content
+    const explorerContent         = document.getElementById('explorer-content');
+    const templateExplorerContent = document.getElementById('template-explorer-content');
+    if (explorerContent)         explorerContent.style.display         = mode === 'template' ? 'none' : '';
+    if (templateExplorerContent) templateExplorerContent.style.display = mode === 'template' ? 'flex' : 'none';
+    if (mode === 'template') {
+        renderTemplateExplorer();
+        renderTemplateFillPanel();
+    }
 
     // Mode-Specific Element Visibility
     const sliderGroup = document.querySelector('.slider-group');
@@ -1784,6 +1811,9 @@ export function switchMode(mode) {
                 if (ex) ex.scrollTop = _modeScrolls['images_ex'] ?? 0;
             });
         }
+    } else if (mode === 'template') {
+        if (sliderGroup) sliderGroup.style.display = 'none';
+        if (fetchAllBtn) fetchAllBtn.style.display = 'none';
     } else if (mode === 'ai') {
         if (sliderGroup) sliderGroup.style.display = 'none';
         if (fetchAllBtn) fetchAllBtn.style.display = 'none';

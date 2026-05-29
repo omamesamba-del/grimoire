@@ -335,7 +335,29 @@ export const IPC = {
     async deleteAssetMetadata(fullPath) {
         if (isElectron) return await window.electronAPI.deleteAssetMetadata(fullPath);
         return { success: true, deletedFiles: [] };
-    }
+    },
+
+    // Templates
+    async loadTemplates() {
+        if (isElectron) return await window.electronAPI.loadTemplates();
+        return [];
+    },
+    async upsertTemplate(tmpl) {
+        if (isElectron) return await window.electronAPI.upsertTemplate(tmpl);
+        return [];
+    },
+    async removeTemplate(id) {
+        if (isElectron) return await window.electronAPI.removeTemplate(id);
+        return [];
+    },
+    async addTemplateHistory(id, values) {
+        if (isElectron) return await window.electronAPI.addTemplateHistory(id, values);
+        return [];
+    },
+    async setTemplateThumbnail(id, buffer) {
+        if (isElectron) return await window.electronAPI.setTemplateThumbnail(id, buffer);
+        return { success: true, path: null };
+    },
 };
 
 // Window controls

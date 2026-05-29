@@ -4,6 +4,7 @@
 import { State, toggleAssetFavorite, removeTagUsage, resetTagUsage } from '../core/state.js';
 import { saveTagOrder } from '../tags/service.js';
 import { addToPrompt } from '../prompt/engine.js';
+import { isTemplateInputMode, activeSlotEl } from './templateMode.js';
 import { searchAssets, loadAssets } from '../assets/service.js';
 import { openAddTagModal, openAddGroupModal } from './modals.js';
 import { findNodeContext, renderExplorer, getFrequentTree, getFavoriteTree } from './explorer.js';
@@ -519,6 +520,14 @@ function handleTagClick(e, tag, el) {
             finalValue = applyStyleToValue(tag.value);
             finalName = finalValue;
             closeIfAutoClose();
+        }
+        // Template input mode: route tag to active slot input
+        if (isTemplateInputMode && activeSlotEl) {
+            const cur = activeSlotEl.value;
+            activeSlotEl.value = cur ? `${cur}, ${tag.value || tag.name}` : (tag.value || tag.name);
+            activeSlotEl.dispatchEvent(new Event('input'));
+            State.lastSelectedTagId = tag.id;
+            return;
         }
         const srcCatId = (State.isFavoriteView || State.isFrequentView) ? null : State.currentCategoryId;
         addToPrompt(finalValue, null, finalName, srcCatId);

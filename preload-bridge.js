@@ -122,4 +122,11 @@ window.electronAPI = {
 
   // Asset delete
   deleteAssetFile: (fullPath) => ipcRenderer.invoke('assets:delete-file', { fullPath }),
+
+  // Templates
+  loadTemplates:        ()             => ipcRenderer.invoke('template:load'),
+  upsertTemplate:       (tmpl)         => ipcRenderer.invoke('template:upsert', tmpl),
+  removeTemplate:       (id)           => ipcRenderer.invoke('template:remove', id),
+  addTemplateHistory:   (id, values)   => ipcRenderer.invoke('template:add-history', { id, values }),
+  setTemplateThumbnail: (id, buffer)   => ipcRenderer.invoke('template:set-thumbnail', { id, buffer }),
 };

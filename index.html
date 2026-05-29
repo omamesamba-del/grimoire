@@ -127,6 +127,7 @@
           <button class="mode-tab"        data-mode="gen"        title="Gen">⚡</button>
           <button class="mode-tab"        data-mode="images"     title="Images">🖼️</button>
           <button class="mode-tab"        data-mode="ai"         title="AI">✨</button>
+          <button class="mode-tab"        data-mode="template"   title="Templates">📋</button>
         </div>
         <div class="mode-nav-spacer"></div>
         <button id="btn-toggle-layout-titlebar" class="mode-nav-btn" data-i18n-title="sc_label_toggle_layout" title="Toggle Layout">⬛</button>
@@ -145,6 +146,11 @@
         </div>
         <div class="pane-content" id="explorer-content">
           <!-- Group tree will be rendered here -->
+        </div>
+        <!-- Template mode explorer list -->
+        <div class="pane-content" id="template-explorer-content" style="display:none; flex-direction:column; gap:0;">
+          <div id="template-explorer-list" class="tmpl-card-list"></div>
+          <button id="btn-add-template" class="tmpl-add-btn">＋ Add Template</button>
         </div>
         <div class="explorer-actions" id="explorer-actions"></div>
       </section>
@@ -349,6 +355,11 @@
                 <div id="ai-result-text" class="ai-result-text"></div>
               </div>
             </div>
+          </div>
+
+          <!-- Template Mode View -->
+          <div id="template-container" class="tab-content">
+            <div id="template-fill-panel" class="tmpl-fill-panel"></div>
           </div>
 
           <!-- Generation Settings View (visible in Generation mode) -->
@@ -593,6 +604,16 @@
             <span>🖼️</span>
             <p data-i18n="image_info_placeholder">画像を選択すると生成情報が表示されます</p>
           </div>
+        </div>
+
+        <!-- Template Input Mode panel (shown instead of normal builder) -->
+        <div id="template-input-panel" style="display:none; flex-direction:column; height:100%; overflow:hidden;">
+          <div class="tmpl-inp-header">
+            <span class="tmpl-inp-title" id="tmpl-inp-title"></span>
+            <button id="btn-tmpl-input-done" class="tmpl-inp-done-btn">✓ 完了</button>
+          </div>
+          <div class="tmpl-inp-hint">スロットをクリックしてフォーカス → タグを選択して挿入</div>
+          <div id="tmpl-inp-slots" class="tmpl-inp-slots"></div>
         </div>
 
         <div class="pane-content" id="builder-pane-content">
