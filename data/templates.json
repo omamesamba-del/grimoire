@@ -1,0 +1,17 @@
+[
+  {
+    "id": "597e4a4c-0ed1-49eb-9ff0-0fe5e7a25a0f",
+    "name": "test",
+    "positive": "{quality}{camera}{character}{outfit}{pose}{background}{negative}",
+    "negative": "",
+    "thumbnail": null,
+    "history": [
+      {
+        "ts": 1780062657725,
+        "values": {
+          "quality": "gyaru, curvy, dark-skinned female, oiled skin, narrow waist, wide hips, large breasts, skindentation, mole under eye, tsurime, purple eyes, makeup, purple hair, glossy hair, shiny hair, wavy hair, deep side part, vulgarity, naughty expression, tongue out"
+        }
+      }
+    ]
+  }
+]

@@ -4,7 +4,7 @@
 import { State, toggleAssetFavorite, removeTagUsage, resetTagUsage } from '../core/state.js';
 import { saveTagOrder } from '../tags/service.js';
 import { addToPrompt } from '../prompt/engine.js';
-import { isTemplateInputMode, activeSlotEl } from './templateMode.js';
+import { isSlotMode, activeSlotEl } from './slotMode.js';
 import { searchAssets, loadAssets } from '../assets/service.js';
 import { openAddTagModal, openAddGroupModal } from './modals.js';
 import { findNodeContext, renderExplorer, getFrequentTree, getFavoriteTree } from './explorer.js';
@@ -521,8 +521,8 @@ function handleTagClick(e, tag, el) {
             finalName = finalValue;
             closeIfAutoClose();
         }
-        // Template input mode: route tag to active slot input
-        if (isTemplateInputMode && activeSlotEl) {
+        // Slot mode: route tag to active slot input
+        if (isSlotMode && activeSlotEl) {
             const cur = activeSlotEl.value;
             activeSlotEl.value = cur ? `${cur}, ${tag.value || tag.name}` : (tag.value || tag.name);
             activeSlotEl.dispatchEvent(new Event('input'));

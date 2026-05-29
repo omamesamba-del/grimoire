@@ -721,88 +721,40 @@ body.theme-light .mode-nav-btn:hover { background: rgba(0,0,0,0.05); color: #1e2
 .ph-delete-btn { font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border-color); background: none; color: var(--slate-500); cursor: pointer; transition: color 0.15s, background 0.15s; }
 .ph-delete-btn:hover { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.4); }
 
-/* ── Template Mode ───────────────────────────────────────────── */
-/* Explorer card list */
-.tmpl-card-list { display: flex; flex-direction: column; gap: 4px; padding: 8px; overflow-y: auto; flex: 1; }
-.tmpl-card { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--slate-800); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-.tmpl-card:hover { background: var(--slate-700); border-color: var(--glow-primary); }
-.tmpl-card.active { background: rgba(99,102,241,0.15); border-color: var(--glow-primary); }
-.tmpl-thumb { width: 36px; height: 36px; border-radius: 4px; background: var(--slate-700); background-size: cover; background-position: center; flex-shrink: 0; }
-.tmpl-name { font-size: 0.82rem; color: var(--slate-200); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tmpl-add-btn { margin: 0 8px 8px; padding: 6px; border-radius: 6px; border: 1px dashed var(--border-color); background: none; color: var(--slate-500); font-size: 0.8rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
-.tmpl-add-btn:hover { color: var(--slate-200); border-color: var(--glow-primary); }
+/* ── Slot Mode ───────────────────────────────────────────────── */
+.builder-btn-slot-toggle { height: 26px; padding: 0 8px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--slate-800); color: var(--slate-400); font-size: 0.9rem; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.builder-btn-slot-toggle:hover { background: var(--slate-700); color: var(--slate-200); }
+.builder-btn-slot-toggle.active { background: rgba(99,102,241,0.2); border-color: var(--glow-primary); color: var(--accent-primary); }
 
-/* Fill panel */
-.tmpl-fill-panel { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; overflow-y: auto; height: 100%; }
-.tmpl-empty { color: var(--slate-500); font-size: 0.85rem; text-align: center; padding: 2rem; }
-.tmpl-panel-header { display: flex; align-items: center; gap: 0.5rem; }
-.tmpl-panel-title { font-size: 0.9rem; font-weight: 600; color: var(--slate-200); }
-.tmpl-preview-wrap { background: var(--slate-900); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem 0.75rem; }
-.tmpl-preview-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-500); margin-bottom: 2px; }
-.tmpl-preview-text { font-size: 0.75rem; color: var(--slate-400); line-height: 1.4; word-break: break-word; }
-.tmpl-form { display: flex; flex-direction: column; gap: 0.5rem; }
-.tmpl-field { display: flex; flex-direction: column; gap: 3px; }
-.tmpl-field-label { font-size: 0.72rem; font-weight: 600; color: var(--slate-400); display: flex; align-items: center; gap: 4px; }
-.tmpl-neg-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 3px; background: rgba(244,63,94,0.2); color: #f43f5e; border: 1px solid rgba(244,63,94,0.4); }
-.tmpl-field-input-row { display: flex; align-items: center; gap: 4px; }
-.tmpl-field-input { flex: 1; background: var(--slate-900); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-200); font-size: 0.82rem; padding: 5px 8px; outline: none; transition: border-color 0.15s; }
-.tmpl-field-input:focus { border-color: var(--glow-primary); }
-.tmpl-field-clear { background: none; border: none; color: var(--slate-600); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
-.tmpl-field-clear:hover { color: #f87171; background: rgba(239,68,68,0.1); }
-.tmpl-footer { display: flex; gap: 0.5rem; align-items: center; }
-.tmpl-mode-select { flex: 1; background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-300); font-size: 0.8rem; padding: 4px 8px; outline: none; cursor: pointer; }
-.tmpl-apply-btn { padding: 6px 16px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
-.tmpl-apply-btn:hover { opacity: 0.85; }
-.tmpl-history { border-top: 1px solid var(--border-color); padding-top: 0.5rem; display: flex; flex-direction: column; gap: 4px; }
-.tmpl-history-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--slate-500); letter-spacing: 0.05em; }
-.tmpl-history-row { display: flex; gap: 0.5rem; align-items: baseline; padding: 3px 0; cursor: pointer; border-radius: 4px; }
-.tmpl-history-row:hover { background: var(--slate-800); }
-.tmpl-history-time { font-size: 0.65rem; color: var(--slate-500); flex-shrink: 0; }
-.tmpl-history-preview { font-size: 0.75rem; color: var(--slate-400); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#slot-mode-panel { background: var(--pane-bg); }
+.slot-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.slot-panel-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-400); }
+.slot-panel-icon-btn { background: none; border: none; color: var(--slate-500); font-size: 1rem; cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+.slot-panel-icon-btn:hover { color: var(--slate-200); background: rgba(255,255,255,0.06); }
+.slot-panel-hint { padding: 0.3rem 0.8rem; font-size: 0.7rem; color: var(--slate-600); flex-shrink: 0; }
+.slot-panel-slots { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.6rem 0.8rem; overflow-y: auto; flex: 1; }
+.slot-item { display: flex; flex-direction: column; gap: 3px; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--slate-900); transition: border-color 0.15s; }
+.slot-item.active { border-color: var(--glow-primary); background: rgba(99,102,241,0.05); }
+.slot-item-label { font-size: 0.68rem; font-weight: 600; color: var(--slate-500); display: flex; align-items: center; gap: 4px; }
+.slot-neg-badge { font-size: 0.58rem; padding: 1px 3px; border-radius: 3px; background: rgba(244,63,94,0.2); color: #f43f5e; border: 1px solid rgba(244,63,94,0.4); }
+.slot-item-row { display: flex; align-items: center; gap: 4px; }
+.slot-item-input { flex: 1; background: transparent; border: none; outline: none; color: var(--slate-200); font-size: 0.82rem; padding: 1px 0; }
+.slot-item-input::placeholder { color: var(--slate-600); }
+.slot-item-clear { background: none; border: none; color: var(--slate-600); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+.slot-item-clear:hover { color: #f87171; background: rgba(239,68,68,0.1); }
+.slot-panel-footer { display: flex; gap: 0.5rem; align-items: center; padding: 0.6rem 0.8rem; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+.slot-apply-mode-select { flex: 1; background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-300); font-size: 0.8rem; padding: 4px 8px; outline: none; cursor: pointer; }
+.slot-apply-btn { padding: 5px 14px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+.slot-apply-btn:hover { opacity: 0.85; }
 
-/* Context menu */
-.tmpl-ctx-menu { position: fixed; z-index: 9999; background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 8px; padding: 4px; min-width: 140px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-.tmpl-ctx-item { padding: 7px 12px; border-radius: 5px; font-size: 0.82rem; color: var(--slate-200); cursor: pointer; white-space: nowrap; }
-.tmpl-ctx-item:hover { background: rgba(99,102,241,0.2); color: #fff; }
-
-/* Add/Edit modal */
-.tmpl-modal-overlay { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); }
-.tmpl-modal { background: var(--slate-900); border: 1px solid var(--border-color); border-radius: 10px; width: min(480px, 90vw); box-shadow: 0 20px 60px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; }
-.tmpl-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; font-weight: 600; color: var(--slate-200); }
-.tmpl-modal-close { background: none; border: none; color: var(--slate-500); font-size: 1rem; cursor: pointer; }
-.tmpl-modal-close:hover { color: var(--slate-200); }
-.tmpl-modal-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.tmpl-modal-label { font-size: 0.75rem; font-weight: 600; color: var(--slate-400); }
-.tmpl-hint { font-size: 0.65rem; color: var(--slate-500); font-weight: 400; margin-left: 4px; }
-.tmpl-modal-input { background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-200); font-size: 0.85rem; padding: 6px 10px; outline: none; }
-.tmpl-modal-input:focus { border-color: var(--glow-primary); }
-.tmpl-modal-textarea { background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-200); font-size: 0.82rem; padding: 6px 10px; outline: none; resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.5; }
-.tmpl-modal-textarea:focus { border-color: var(--glow-primary); }
-.tmpl-modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); }
-.tmpl-modal-cancel { padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--slate-800); color: var(--slate-300); font-size: 0.82rem; cursor: pointer; }
-.tmpl-modal-save { padding: 6px 14px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.tmpl-modal-save:hover { opacity: 0.85; }
-/* Template Input Mode (builder pane) */
-.tmpl-inp-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-.tmpl-inp-title { font-size: 0.9rem; font-weight: 600; color: var(--slate-200); }
-.tmpl-inp-done-btn { padding: 5px 14px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.tmpl-inp-done-btn:hover { opacity: 0.85; }
-.tmpl-inp-hint { padding: 0.4rem 1rem; font-size: 0.72rem; color: var(--slate-500); flex-shrink: 0; }
-.tmpl-inp-slots { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.75rem 1rem; overflow-y: auto; flex: 1; }
-.tmpl-inp-slot-item { display: flex; flex-direction: column; gap: 4px; padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--slate-900); transition: border-color 0.15s; }
-.tmpl-inp-slot-item.active { border-color: var(--glow-primary); background: rgba(99,102,241,0.05); }
-.tmpl-inp-slot-label { font-size: 0.72rem; font-weight: 600; color: var(--slate-400); display: flex; align-items: center; gap: 4px; }
-.tmpl-inp-slot-row { display: flex; align-items: center; gap: 4px; }
-.tmpl-inp-slot-input { background: transparent; border: none; outline: none; color: var(--slate-200); font-size: 0.85rem; padding: 2px 0; flex: 1; }
-.tmpl-inp-slot-input::placeholder { color: var(--slate-600); }
-.tmpl-inp-slot-clear { background: none; border: none; color: var(--slate-600); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
-.tmpl-inp-slot-clear:hover { color: #f87171; background: rgba(239,68,68,0.1); }
-.tmpl-input-mode-btn { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--slate-800); color: var(--slate-300); font-size: 0.82rem; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-.tmpl-input-mode-btn:hover { background: rgba(99,102,241,0.15); border-color: var(--glow-primary); color: #fff; }
-
-.tmpl-snippet-row { display: flex; flex-wrap: wrap; gap: 4px; }
-.tmpl-snippet-btn { padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--slate-800); color: var(--slate-400); font-size: 0.72rem; cursor: pointer; transition: background 0.12s, color 0.12s; }
-.tmpl-snippet-btn:hover { background: rgba(99,102,241,0.2); color: #fff; border-color: var(--glow-primary); }
+/* Slot settings dialog (reuses spe-* classes from style palette) */
+.slot-settings-add-row { display: flex; gap: 0.4rem; align-items: center; padding-top: 0.5rem; border-top: 1px solid var(--border-color); }
+.slot-settings-new-input { flex: 1; background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-200); font-size: 0.82rem; padding: 5px 8px; outline: none; }
+.slot-settings-new-input:focus { border-color: var(--glow-primary); }
+.slot-settings-new-area { background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-300); font-size: 0.8rem; padding: 4px 6px; outline: none; }
+.slot-settings-add-btn { padding: 5px 10px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+.slot-settings-name-input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 0.8rem; min-width: 60px; }
+.slot-settings-area-sel { background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 4px; color: var(--slate-300); font-size: 0.72rem; padding: 2px 4px; outline: none; }
 
 /* ── ComfyUI Slots Panel ─────────────────────────────────────── */
 #comfy-slots-panel {

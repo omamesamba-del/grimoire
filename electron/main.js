@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 import { ConfigService } from './services/configService.js';
 import { PresetService } from './services/presetService.js';
-import { TemplateService } from './services/templateService.js';
 
 // 高リフレッシュレートモニターでのチラツキ防止
 app.disableHardwareAcceleration();
@@ -101,7 +100,6 @@ if (!fs.existsSync(tagImagesDir)) {
 
 const configService    = new ConfigService(dataDir);
 const presetService    = new PresetService(dataDir);
-const templateService  = new TemplateService(dataDir);
 
 // First-run in packaged mode: auto-set tagsPath to the tag/ folder next to the exe
 if (app.isPackaged) {
@@ -1397,15 +1395,6 @@ ipcMain.handle('preset:delete', (event, { name }) => {
   return result;
 });
 
-// Template handlers
-ipcMain.handle('template:load',    () => templateService.load());
-ipcMain.handle('template:upsert',  (_, tmpl) => templateService.upsert(tmpl));
-ipcMain.handle('template:remove',  (_, id)   => templateService.remove(id));
-ipcMain.handle('template:add-history', (_, { id, values }) => templateService.addHistory(id, values));
-ipcMain.handle('template:set-thumbnail', (_, { id, buffer }) => {
-  const dest = templateService.setThumbnail(id, buffer);
-  return { success: true, path: dest };
-});
 
 // Dialogs
 ipcMain.handle('dialog:select-directory', async () => {

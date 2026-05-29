@@ -127,7 +127,6 @@
           <button class="mode-tab"        data-mode="gen"        title="Gen">⚡</button>
           <button class="mode-tab"        data-mode="images"     title="Images">🖼️</button>
           <button class="mode-tab"        data-mode="ai"         title="AI">✨</button>
-          <button class="mode-tab"        data-mode="template"   title="Templates">📋</button>
         </div>
         <div class="mode-nav-spacer"></div>
         <button id="btn-toggle-layout-titlebar" class="mode-nav-btn" data-i18n-title="sc_label_toggle_layout" title="Toggle Layout">⬛</button>
@@ -146,11 +145,6 @@
         </div>
         <div class="pane-content" id="explorer-content">
           <!-- Group tree will be rendered here -->
-        </div>
-        <!-- Template mode explorer list -->
-        <div class="pane-content" id="template-explorer-content" style="display:none; flex-direction:column; gap:0;">
-          <div id="template-explorer-list" class="tmpl-card-list"></div>
-          <button id="btn-add-template" class="tmpl-add-btn">＋ Add Template</button>
         </div>
         <div class="explorer-actions" id="explorer-actions"></div>
       </section>
@@ -357,10 +351,6 @@
             </div>
           </div>
 
-          <!-- Template Mode View -->
-          <div id="template-container" class="tab-content">
-            <div id="template-fill-panel" class="tmpl-fill-panel"></div>
-          </div>
 
           <!-- Generation Settings View (visible in Generation mode) -->
           <div id="generation-container" class="tab-content">
@@ -595,6 +585,7 @@
               </div>
               <button class="builder-btn-history" id="btn-prompt-history" title="Prompt History">🕐</button>
             </div>
+            <button class="builder-btn-slot-toggle" id="btn-slot-mode-toggle" title="スロットモード">⊞</button>
             <button class="builder-btn-clear" id="clear-all" data-i18n="btn_clear_all">Clear</button>
           </div>
         </div>
@@ -606,14 +597,22 @@
           </div>
         </div>
 
-        <!-- Template Input Mode panel (shown instead of normal builder) -->
-        <div id="template-input-panel" style="display:none; flex-direction:column; height:100%; overflow:hidden;">
-          <div class="tmpl-inp-header">
-            <span class="tmpl-inp-title" id="tmpl-inp-title"></span>
-            <button id="btn-tmpl-input-done" class="tmpl-inp-done-btn">✓ 完了</button>
+
+        <!-- Slot Mode panel -->
+        <div id="slot-mode-panel" style="display:none; flex-direction:column; height:100%; overflow:hidden;">
+          <div class="slot-panel-header">
+            <span class="slot-panel-title">スロットモード</span>
+            <button id="btn-slot-settings" class="slot-panel-icon-btn" title="スロット設定">⚙</button>
           </div>
-          <div class="tmpl-inp-hint">スロットをクリックしてフォーカス → タグを選択して挿入</div>
-          <div id="tmpl-inp-slots" class="tmpl-inp-slots"></div>
+          <div class="slot-panel-hint">スロットをクリック → タグを選択して挿入</div>
+          <div id="slot-panel-slots" class="slot-panel-slots"></div>
+          <div class="slot-panel-footer">
+            <select id="slot-apply-mode" class="slot-apply-mode-select">
+              <option value="overwrite">上書き</option>
+              <option value="append">追記</option>
+            </select>
+            <button id="btn-slot-apply" class="slot-apply-btn">適用</button>
+          </div>
         </div>
 
         <div class="pane-content" id="builder-pane-content">

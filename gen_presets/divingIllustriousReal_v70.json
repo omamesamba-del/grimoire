@@ -1,0 +1,22 @@
+{
+  "checkpoint": "divingIllustriousReal_v70.safetensors",
+  "vae": "Automatic",
+  "clipSkip": 2,
+  "sampler": "DPM++ 2M",
+  "schedule": "Karras",
+  "steps": 15,
+  "width": 869,
+  "height": 1152,
+  "batchCount": 1,
+  "batchSize": 1,
+  "cfg": 5.5,
+  "seed": -1,
+  "hiresFix": false,
+  "hiresUpscaler": null,
+  "hiresSteps": 0,
+  "hiresDenoising": 0.25,
+  "hiresUpscaleBy": 2,
+  "refiner": false,
+  "refinerCheckpoint": "None",
+  "refinerSwitchAt": 0.8
+}
