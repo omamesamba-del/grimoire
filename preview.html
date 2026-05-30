@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Grimoire Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #cbd5e1;
+      font-family: sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+    }
+    #toolbar button {
+      -webkit-app-region: no-drag;
+      background: none;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    #toolbar button:hover { background: #1e293b; color: #fff; }
+    #filename { font-size: 0.72rem; color: #475569; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #timestamp { font-size: 0.7rem; color: #334155; flex-shrink: 0; }
+    #img-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    #preview-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: none;
+      cursor: zoom-in;
+    }
+    #preview-img.zoomed {
+      max-width: none;
+      max-height: none;
+      width: auto;
+      height: auto;
+      cursor: zoom-out;
+      overflow: auto;
+    }
+    #waiting {
+      color: #334155;
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 2;
+    }
+    #waiting .icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <span id="filename">待機中…</span>
+    <span id="timestamp"></span>
+    <button id="btn-open-folder" title="フォルダを開く">📁</button>
+    <button id="btn-always-top" title="最前面固定">📌</button>
+  </div>
+  <div id="img-container">
+    <div id="waiting">
+      <span class="icon">🖼️</span>
+      生成された画像が自動で表示されます
+    </div>
+    <img id="preview-img" alt="preview">
+    <div id="flash"></div>
+  </div>
+
+  <script>
+    const { ipcRenderer, shell } = require('electron');
+
+    let currentPath = null;
+    let alwaysOnTop = true;
+    const img = document.getElementById('preview-img');
+    const waiting = document.getElementById('waiting');
+    const filenameEl = document.getElementById('filename');
+    const timestampEl = document.getElementById('timestamp');
+    const flash = document.getElementById('flash');
+
+    ipcRenderer.on('preview:new-image', (_, filePath) => {
+      currentPath = filePath;
+      img.src = 'file:///' + filePath.replace(/\\/g, '/') + '?t=' + Date.now();
+      img.style.display = 'block';
+      waiting.style.display = 'none';
+      img.classList.remove('zoomed');
+      filenameEl.textContent = filePath.split(/[\\/]/).pop();
+      timestampEl.textContent = new Date().toLocaleTimeString();
+
+      // flash effect
+      flash.style.opacity = '1';
+      setTimeout(() => { flash.style.opacity = '0'; }, 150);
+    });
+
+    img.addEventListener('click', () => {
+      img.classList.toggle('zoomed');
+      img.style.cursor = img.classList.contains('zoomed') ? 'zoom-out' : 'zoom-in';
+    });
+
+    document.getElementById('btn-open-folder').addEventListener('click', () => {
+      if (currentPath) shell.showItemInFolder(currentPath);
+    });
+
+    document.getElementById('btn-always-top').addEventListener('click', () => {
+      alwaysOnTop = !alwaysOnTop;
+      ipcRenderer.send('preview:set-always-on-top', alwaysOnTop);
+      document.getElementById('btn-always-top').style.color = alwaysOnTop ? '#6366f1' : '';
+    });
+
+    // 初期状態：最前面固定ON
+    ipcRenderer.send('preview:set-always-on-top', true);
+    document.getElementById('btn-always-top').style.color = '#6366f1';
+  </script>
+</body>
+</html>
