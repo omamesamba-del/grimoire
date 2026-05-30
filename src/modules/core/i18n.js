@@ -315,6 +315,16 @@ class I18n {
                 'comfy_slot_placeholder':    '{name} のテキスト…',
                 'drag_to_reorder':           'ドラッグして並べ替え',
 
+                // ── スロットモード デフォルト名 ───────────────────────────
+                'slot_name_quality':         '品質',
+                'slot_name_camera':          'カメラ',
+                'slot_name_background':      '背景',
+                'slot_name_character':       'キャラクター',
+                'slot_name_outfit':          '服装',
+                'slot_name_expression':      '表情',
+                'slot_name_pose':            'ポーズ',
+                'slot_name_negative':        'ネガティブ',
+
                 // ── プロンプトチップ ──────────────────────────────────────
                 'chip_break_title':          '改行 (右クリックで削除)',
                 'chip_random_title':         'クリックで今すぐランダム解決 / 右クリックで削除',
@@ -853,6 +863,16 @@ class I18n {
                 'comfy_slot_send_title':     'Send to "{name}"',
                 'comfy_slot_placeholder':    '{name} text…',
                 'drag_to_reorder':           'Drag to reorder',
+
+                // ── Slot Mode default names ──────────────────────────────
+                'slot_name_quality':         'Quality',
+                'slot_name_camera':          'Camera',
+                'slot_name_background':      'Background',
+                'slot_name_character':       'Character',
+                'slot_name_outfit':          'Outfit',
+                'slot_name_expression':      'Expression',
+                'slot_name_pose':            'Pose',
+                'slot_name_negative':        'Negative',
 
                 // ── Prompt Chips ─────────────────────────────────────────
                 'chip_break_title':          'Line break (right-click to delete)',

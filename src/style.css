@@ -726,26 +726,19 @@ body.theme-light .mode-nav-btn:hover { background: rgba(0,0,0,0.05); color: #1e2
 .builder-btn-slot-toggle:hover { background: var(--slate-700); color: var(--slate-200); }
 .builder-btn-slot-toggle.active { background: rgba(99,102,241,0.2); border-color: var(--glow-primary); color: var(--accent-primary); }
 
-#slot-mode-panel { background: var(--pane-bg); }
-.slot-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-.slot-panel-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-400); }
-.slot-panel-icon-btn { background: none; border: none; color: var(--slate-500); font-size: 1rem; cursor: pointer; padding: 2px 4px; border-radius: 4px; }
-.slot-panel-icon-btn:hover { color: var(--slate-200); background: rgba(255,255,255,0.06); }
-.slot-panel-hint { padding: 0.3rem 0.8rem; font-size: 0.7rem; color: var(--slate-600); flex-shrink: 0; }
-.slot-panel-slots { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.6rem 0.8rem; overflow-y: auto; flex: 1; }
-.slot-item { display: flex; flex-direction: column; gap: 3px; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--slate-900); transition: border-color 0.15s; }
-.slot-item.active { border-color: var(--glow-primary); background: rgba(99,102,241,0.05); }
-.slot-item-label { font-size: 0.68rem; font-weight: 600; color: var(--slate-500); display: flex; align-items: center; gap: 4px; }
+/* ── Slot Mode (inline in builder pane) ─────────────────────── */
+#slot-positive-area { flex-direction: column; gap: 3px; }
+.slot-section { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; transition: border-color 0.15s; }
+.slot-section.slot-active { border-color: var(--glow-primary); }
+.slot-section-summary { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; cursor: pointer; list-style: none; -webkit-user-select: none; user-select: none; font-size: 0.72rem; font-weight: 600; color: var(--slate-400); background: var(--slate-900); }
+.slot-section-summary::-webkit-details-marker { display: none; }
+.slot-section-summary::before { content: '▶'; font-size: 0.6rem; margin-right: 5px; transition: transform 0.15s; }
+details.slot-section[open] > .slot-section-summary::before { transform: rotate(90deg); }
+.slot-section-name { display: flex; align-items: center; gap: 5px; flex: 1; }
 .slot-neg-badge { font-size: 0.58rem; padding: 1px 3px; border-radius: 3px; background: rgba(244,63,94,0.2); color: #f43f5e; border: 1px solid rgba(244,63,94,0.4); }
-.slot-item-row { display: flex; align-items: center; gap: 4px; }
-.slot-item-input { flex: 1; background: transparent; border: none; outline: none; color: var(--slate-200); font-size: 0.82rem; padding: 1px 0; }
-.slot-item-input::placeholder { color: var(--slate-600); }
-.slot-item-clear { background: none; border: none; color: var(--slate-600); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+.slot-item-clear { background: none; border: none; color: var(--slate-600); font-size: 0.75rem; cursor: pointer; padding: 1px 4px; border-radius: 3px; line-height: 1; }
 .slot-item-clear:hover { color: #f87171; background: rgba(239,68,68,0.1); }
-.slot-panel-footer { display: flex; gap: 0.5rem; align-items: center; padding: 0.6rem 0.8rem; border-top: 1px solid var(--border-color); flex-shrink: 0; }
-.slot-apply-mode-select { flex: 1; background: var(--slate-800); border: 1px solid var(--border-color); border-radius: 5px; color: var(--slate-300); font-size: 0.8rem; padding: 4px 8px; outline: none; cursor: pointer; }
-.slot-apply-btn { padding: 5px 14px; border-radius: 5px; border: none; background: var(--accent-primary); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
-.slot-apply-btn:hover { opacity: 0.85; }
+.slot-chips-container { min-height: 28px; padding: 4px 8px; cursor: text; background: var(--slate-950, var(--slate-900)); }
 
 /* Slot settings dialog (reuses spe-* classes from style palette) */
 .slot-settings-add-row { display: flex; gap: 0.4rem; align-items: center; padding-top: 0.5rem; border-top: 1px solid var(--border-color); }

@@ -598,22 +598,6 @@
         </div>
 
 
-        <!-- Slot Mode panel -->
-        <div id="slot-mode-panel" style="display:none; flex-direction:column; height:100%; overflow:hidden;">
-          <div class="slot-panel-header">
-            <span class="slot-panel-title">スロットモード</span>
-            <button id="btn-slot-settings" class="slot-panel-icon-btn" title="スロット設定">⚙</button>
-          </div>
-          <div class="slot-panel-hint">スロットをクリック → タグを選択して挿入</div>
-          <div id="slot-panel-slots" class="slot-panel-slots"></div>
-          <div class="slot-panel-footer">
-            <select id="slot-apply-mode" class="slot-apply-mode-select">
-              <option value="overwrite">上書き</option>
-              <option value="append">追記</option>
-            </select>
-            <button id="btn-slot-apply" class="slot-apply-btn">適用</button>
-          </div>
-        </div>
 
         <div class="pane-content" id="builder-pane-content">
           <!-- ComfyUI Slots Panel (ComfyUI mode only) -->
@@ -639,6 +623,7 @@
                 <span class="btn-icon-action" id="clear-positive-inline" title="Clear Positive">🗑️</span>
                 <span class="btn-icon-action" id="copy-positive" title="Copy Positive">📋</span>
                 <span class="btn-icon-action" id="toggle-suffix-btn" title="Toggle Suffix">SFX</span>
+                <span class="btn-icon-action" id="btn-slot-settings" title="スロット設定" style="display:none">⚙</span>
               </div>
             </div>
             <div class="positive-chips-wrapper">
@@ -647,6 +632,7 @@
               <div id="positive-suffix-chips" class="chip-container chip-container-suffix"></div>
             </div>
             <textarea id="positive-suffix-prompt" style="display:none"></textarea>
+            <div id="slot-positive-area" style="display:none"></div>
           </div>
 
           <!-- 2. Negative Chips Area -->

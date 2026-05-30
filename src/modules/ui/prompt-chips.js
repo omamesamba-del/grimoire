@@ -35,7 +35,14 @@ export function getSelectedChipsOrdered() {
         });
 }
 
+const _containerToInputMap = {
+    'positive-chips':        'positive-prompt',
+    'negative-chips':        'negative-prompt',
+    'positive-suffix-chips': 'positive-suffix-prompt',
+};
+
 export function renderPromptChips(containerId, inputId) {
+    _containerToInputMap[containerId] = inputId;
     const container = document.getElementById(containerId);
     const input = document.getElementById(inputId);
     if (!container || !input) return;
@@ -70,6 +77,7 @@ export function renderPromptChips(containerId, inputId) {
             const sep = document.createElement('div');
             sep.className = 'chip-separator';
             sep.dataset.index = index;
+            sep.dataset.tagData = JSON.stringify(tag);
             if (tag.name) {
                 const lbl = document.createElement('span');
                 lbl.className = 'chip-separator-label';
@@ -385,17 +393,12 @@ export function renderPromptChips(containerId, inputId) {
                 _dragStartSel = [];
 
                 if (isCrossPane) {
-                    const _containerToInput = {
-                        'positive-chips':        'positive-prompt',
-                        'negative-chips':        'negative-prompt',
-                        'positive-suffix-chips': 'positive-suffix-prompt',
-                    };
                     // Library drags are handled by onAdd — skip here
-                    if (!_containerToInput[evt.from.id]) return;
-                    const srcInput = document.getElementById(_containerToInput[evt.from.id]);
-                    const dstInput = document.getElementById(_containerToInput[evt.to.id] || 'positive-prompt');
+                    if (!_containerToInputMap[evt.from.id]) return;
+                    const srcInput = document.getElementById(_containerToInputMap[evt.from.id]);
+                    const dstInput = document.getElementById(_containerToInputMap[evt.to.id] || 'positive-prompt');
                     const readTags = (el) =>
-                        Array.from(el.querySelectorAll('.prompt-chip'))
+                        Array.from(el.querySelectorAll('.prompt-chip, .chip-separator'))
                             .map(c => JSON.parse(c.dataset.tagData));
                     const srcTags = readTags(evt.from);
                     const dstTags = readTags(evt.to);
@@ -404,7 +407,7 @@ export function renderPromptChips(containerId, inputId) {
                     srcInput.dispatchEvent(new Event('input'));
                     dstInput.dispatchEvent(new Event('input'));
                 } else {
-                    const newTags = Array.from(container.querySelectorAll('.prompt-chip'))
+                    const newTags = Array.from(container.querySelectorAll('.prompt-chip, .chip-separator'))
                         .map(el => JSON.parse(el.dataset.tagData));
                     input.value = stringifyPrompt(newTags);
                     input.dispatchEvent(new Event('input'));

@@ -20,7 +20,7 @@ import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode }
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
 import { initAiPrompt } from './modules/ui/ai-prompt.js';
 import { recordHistory, openHistoryPanel } from './modules/ui/promptHistory.js';
-import { toggleSlotMode, exitSlotMode, applySlots, openSlotSettings } from './modules/ui/slotMode.js';
+import { toggleSlotMode, exitSlotMode, applySlots, openSlotSettings, isSlotMode, activeSlotEl } from './modules/ui/slotMode.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
 import { initAssetEdit } from './modules/ui/assetEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
@@ -1517,6 +1517,9 @@ function setupGlobalAutocomplete() {
                 // quick-add inputs: add tag to prompt and clear
                 if (el.id === 'quick-add-positive' || el.id === 'quick-add-negative') {
                     const p = el.id === 'quick-add-positive' ? 'positive' : 'negative';
+                    const targetId = (p === 'positive' && isSlotMode && activeSlotEl)
+                        ? activeSlotEl.id
+                        : `${p}-prompt`;
                     const chk = document.getElementById('setting-danbooru-underscore');
                     const convert = chk ? chk.checked : true;
                     const tagVal = convert ? item.value.replaceAll('_', ' ') : item.value;
@@ -1534,7 +1537,7 @@ function setupGlobalAutocomplete() {
                     for (const token of commaTokens.slice(0, -1).map(s => s.trim()).filter(Boolean)) {
                         const tv = convert ? token.replaceAll('_', ' ') : token;
                         const tf = paletteOpen2 && qaChk?.checked && hasActiveStyle() ? applyStyleToValue(tv) : tv;
-                        addToPrompt(tf, `${p}-prompt`);
+                        addToPrompt(tf, targetId);
                         recordTagUsage(token);
                     }
                     // スペース先行ワード + サジェストを結合して1チップ
@@ -1542,7 +1545,7 @@ function setupGlobalAutocomplete() {
                     const combined = prefix ? `${prefix} ${tagVal}` : tagVal;
                     const styleApplied2 = paletteOpen2 && qaChk?.checked && hasActiveStyle();
                     const finalVal = styleApplied2 ? applyStyleToValue(combined) : combined;
-                    addToPrompt(finalVal, `${p}-prompt`);
+                    addToPrompt(finalVal, targetId);
                     if (styleApplied2) closeIfAutoClose();
                     recordTagUsage(item.value);
                     el.value = '';
