@@ -145,11 +145,10 @@ export function renderPromptChips(containerId, inputId) {
                 input.dispatchEvent(new Event('input'));
             });
 
-            chip.oncontextmenu = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                removeTagAtIndex(index, inputId);
-            };
+            chip.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+            chip.addEventListener('auxclick', (e) => {
+                if (e.button === 1) { e.preventDefault(); removeTagAtIndex(index, inputId); }
+            });
 
             container.appendChild(chip);
             return;

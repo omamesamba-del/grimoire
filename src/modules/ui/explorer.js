@@ -110,17 +110,25 @@ export function renderExplorer() {
             addFolderBtn.innerHTML = `<span class="plus">＋</span><span>New Folder</span>`;
             addFolderBtn.onclick = async () => {
                 const name = await showInputDialog('New Folder Name');
+
                 if (!name) return;
                 const cfg = await IPC.getConfig();
                 const basePath = State.currentMode === 'lora'       ? cfg.loraPath
                                : State.currentMode === 'checkpoint' ? cfg.checkpointsPath
                                :                                       cfg.embeddingsPath;
+
+                if (!basePath) {
+                    alert('フォルダーパスが設定されていません。設定から対象フォルダーを指定してください。');
+                    return;
+                }
                 try {
-                    await IPC.createAssetFolder(`${basePath}\\${name.trim()}`);
+                    const fullPath = basePath.replace(/[\\/]+$/, '') + '\\' + name.trim();
+                    await IPC.createAssetFolder(fullPath);
                     State.allAssets = await loadAssets();
                     renderExplorer();
                     renderAssetGrid();
                 } catch (e) {
+                    console.error('[NewFolder] error:', e);
                     alert(`Failed to create folder: ${e.message}`);
                 }
             };
@@ -168,8 +176,12 @@ async function renderGenPresetsExplorer(container) {
         addBtn.onclick = async () => {
             const name = await showInputDialog('New Folder Name');
             if (!name) return;
-            await IPC.createGenPresetFolder(name);
-            renderExplorer();
+            try {
+                await IPC.createGenPresetFolder(name);
+                renderExplorer();
+            } catch (e) {
+                alert(`Failed to create folder: ${e.message}`);
+            }
         };
         actions.appendChild(addBtn);
     }
@@ -303,19 +315,29 @@ function renderAssetExplorer(container) {
     const key = State.currentMode === 'lora' ? 'loras'
               : State.currentMode === 'checkpoint' ? 'checkpoints'
               : 'embeddings';
-    const assets = State.allAssets[key] || [];
+    const folderKey = State.currentMode === 'lora' ? 'loraFolders'
+                    : State.currentMode === 'checkpoint' ? 'checkpointFolders'
+                    : 'embeddingFolders';
+    const assets  = State.allAssets[key] || [];
+    const folders = State.allAssets[folderKey] || [];
     const tree = {};
+
+    const ensurePath = (parts, root) => {
+        let current = root;
+        for (const p of parts) {
+            if (!current[p]) current[p] = { _children: {} };
+            current = current[p]._children;
+        }
+    };
 
     assets.forEach(asset => {
         const parts = (asset.relPath || '').split('/');
-        if (parts.length > 1) {
-            let current = tree;
-            for (let i = 0; i < parts.length - 1; i++) {
-                const p = parts[i];
-                if (!current[p]) current[p] = { _children: {} };
-                current = current[p]._children;
-            }
-        }
+        if (parts.length > 1) ensurePath(parts.slice(0, -1), tree);
+    });
+
+    folders.forEach(relFolder => {
+        const parts = relFolder.split('/').filter(Boolean);
+        if (parts.length) ensurePath(parts, tree);
     });
 
     renderAssetFolders(tree, container, 0, '');

@@ -100,6 +100,13 @@ window.electronAPI = {
   // Updates
   checkForUpdates: () => ipcRenderer.invoke('app:check-updates'),
 
+  // User Data Path
+  getUserDataPath: () => ipcRenderer.invoke('app:get-userdata-path'),
+  setUserDataPath: (p) => ipcRenderer.invoke('app:set-userdata-path', p),
+
+  // Preview Window
+  openPreviewWindow: () => ipcRenderer.invoke('preview:open'),
+
   // Shell
   openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
   showItemInFolder: (filePath) => ipcRenderer.invoke('shell:show-item-in-folder', filePath),

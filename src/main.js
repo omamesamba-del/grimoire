@@ -20,7 +20,7 @@ import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode }
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
 import { initAiPrompt } from './modules/ui/ai-prompt.js';
 import { recordHistory, openHistoryPanel } from './modules/ui/promptHistory.js';
-import { toggleSlotMode, exitSlotMode, applySlots, openSlotSettings, isSlotMode, activeSlotEl } from './modules/ui/slotMode.js';
+import { toggleSlotMode, exitSlotMode, applySlots, openSlotSettings, isSlotMode, activeSlotEl, reloadSlots } from './modules/ui/slotMode.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
 import { initAssetEdit } from './modules/ui/assetEdit.js';
 import { initGenPngDrop } from './modules/ui/genPngDrop.js';
@@ -614,6 +614,7 @@ function setupEventListeners() {
         if (suffixEl) { suffixEl.value = data.suffix || ''; suffixEl.dispatchEvent(new Event('input')); }
         // Gen 設定が含まれていれば適用
         if (data.gen && State._genInitialized) applyPreset(data.gen);
+        reloadSlots();
     });
 
     document.getElementById('btn-prompt-preset-delete')?.addEventListener('click', async () => {
@@ -1107,6 +1108,7 @@ function setupEventListeners() {
 
     // Slot mode
     document.getElementById('btn-slot-mode-toggle')?.addEventListener('click', () => toggleSlotMode());
+    document.getElementById('btn-open-preview')?.addEventListener('click', () => IPC.openPreviewWindow?.());
     document.getElementById('btn-slot-settings')?.addEventListener('click', () => openSlotSettings());
     document.getElementById('btn-slot-apply')?.addEventListener('click', () => applySlots());
 
@@ -1487,7 +1489,7 @@ function setupEventListeners() {
 
 function setupGlobalAutocomplete() {
     // Fields that have their own dropdowns or where Danbooru suggestions don't apply
-    const SKIP_IDS = new Set(['tag-move-search', 'spe-add-value', 'new-tag-val']);
+    const SKIP_IDS = new Set(['tag-move-search', 'spe-add-value', 'new-tag-val', 'input-dialog-field', 'prompt-preset-input']);
 
     let acDebounce = null;
 
@@ -1497,6 +1499,7 @@ function setupGlobalAutocomplete() {
         if (el.tagName !== 'INPUT') return;
         if (el.type && !['text', 'search', ''].includes(el.type)) return;
         if (SKIP_IDS.has(el.id)) return;
+        if (el.classList.contains('slot-settings-name-input') || el.classList.contains('slot-name-edit-input') || el.classList.contains('sep-label-edit') || el.classList.contains('chip-edit-input')) return;
 
         clearTimeout(acDebounce);
         // Use last word (split by comma then space) as query

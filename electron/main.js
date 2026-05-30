@@ -45,6 +45,19 @@ const appRoot = app.isPackaged
   ? (process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath))
   : process.cwd();
 const dataDir = path.join(appRoot, 'data');
+
+// userdata.txt があればそのパスを userData として使用（app.ready より前に設定必須）
+const userDataTxtPath = path.join(dataDir, 'userdata.txt');
+try {
+  if (fs.existsSync(userDataTxtPath)) {
+    const customUserData = fs.readFileSync(userDataTxtPath, 'utf8').trim();
+    if (customUserData) {
+      app.setPath('userData', customUserData);
+    }
+  }
+} catch (e) {
+  // 読み込み失敗時はデフォルトのまま
+}
 const tagImagesDir = path.join(dataDir, 'tag_images');
 
 // First-run: copy bundled defaults from resources to exe's directory
@@ -507,10 +520,16 @@ class AssetService {
 
   async getAllAssets() {
     log('[AssetService] Scanning for assets...');
+    const loraResult       = await this.scanDir(this.paths.lora,       'lora');
+    const embResult        = await this.scanDir(this.paths.embedding,  'embedding');
+    const ckptResult       = await this.scanDir(this.paths.checkpoint, 'checkpoint');
     const result = {
-      loras:       await this.scanDir(this.paths.lora,       'lora'),
-      embeddings:  await this.scanDir(this.paths.embedding,  'embedding'),
-      checkpoints: await this.scanDir(this.paths.checkpoint, 'checkpoint'),
+      loras:            loraResult.items,
+      embeddings:       embResult.items,
+      checkpoints:      ckptResult.items,
+      loraFolders:      loraResult.folders,
+      embeddingFolders: embResult.folders,
+      checkpointFolders: ckptResult.folders,
     };
     log(`[AssetService] Scan complete. Found ${result.loras.length} LoRAs, ${result.embeddings.length} Embeddings, ${result.checkpoints.length} Checkpoints.`);
     return result;
@@ -523,6 +542,7 @@ class AssetService {
     }
 
     const items = [];
+    const folders = new Set();
     const scan = (dir, relativeDir = '') => {
       try {
         const files = fs.readdirSync(dir);
@@ -531,6 +551,8 @@ class AssetService {
           const stat = fs.statSync(fullPath);
 
           if (stat.isDirectory()) {
+            const relFolder = relativeDir ? path.join(relativeDir, file) : file;
+            folders.add(relFolder.replace(/\\/g, '/'));
             scan(fullPath, path.join(relativeDir, file));
           } else if (stat.isFile()) {
             const ext = path.extname(file).toLowerCase();
@@ -658,7 +680,7 @@ class AssetService {
     };
 
     scan(baseDir);
-    return items;
+    return { items, folders: [...folders] };
   }
 
   /**
@@ -732,19 +754,25 @@ class AssetService {
 let tagService;
 let assetService;
 let danbooruService;
+let previewWin = null;
+let outputWatcher = null;
 
 function initServices(isPathUpdate = false) {
   log(`Initializing services (isPathUpdate: ${isPathUpdate})...`, 'INFO', 'Main');
   const cfg = configService.getConfig();
-  
+
   tagService = new TagService(resolveAppPath(cfg.tagsPath), dataDir);
   assetService = new AssetService({ lora: cfg.loraPath, embedding: cfg.embeddingsPath, checkpoint: cfg.checkpointsPath });
-  
+
   if (!danbooruService) {
     const danbooruPath = path.join(dataDir, 'danbooru.csv');
     danbooruService = new DanbooruService(danbooruPath);
     danbooruService.load().catch(err => log(`Load search failed: ${err.message}`, 'ERROR', 'Danbooru'));
   }
+
+  // 出力フォルダの監視を更新
+  const outPath = resolveAppPath(cfg.outputImagesPath);
+  startOutputWatch(outPath);
 }
 initServices();
 
@@ -838,6 +866,72 @@ function updateApplicationMenu() {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 }
+
+// ── Preview Window ─────────────────────────────────────────────
+function createPreviewWindow() {
+  if (previewWin && !previewWin.isDestroyed()) {
+    previewWin.focus();
+    return;
+  }
+  const previewHtml = app.isPackaged
+    ? path.join(process.resourcesPath, 'app', 'preview.html')
+    : path.join(process.cwd(), 'preview.html');
+
+  previewWin = new BrowserWindow({
+    width: 540,
+    height: 620,
+    minWidth: 300,
+    minHeight: 300,
+    title: 'Grimoire Preview',
+    alwaysOnTop: true,
+    backgroundColor: '#0a0f1e',
+    webPreferences: {
+      contextIsolation: false,
+      nodeIntegration: true,
+      sandbox: false,
+      webSecurity: false,
+    },
+  });
+  previewWin.loadFile(previewHtml);
+  previewWin.on('closed', () => { previewWin = null; });
+}
+
+function startOutputWatch(folderPath) {
+  if (outputWatcher) { try { outputWatcher.close(); } catch (_) {} outputWatcher = null; }
+  if (!folderPath || !fs.existsSync(folderPath)) return;
+
+  let debounce = null;
+  outputWatcher = fs.watch(folderPath, { recursive: false }, (event, filename) => {
+    if (!filename || !/\.(png|jpg|jpeg|webp)$/i.test(filename)) return;
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      const fullPath = path.join(folderPath, filename);
+      if (!fs.existsSync(fullPath)) return;
+      // 書き込み完了を待つ（ファイルサイズが安定するまで）
+      let prevSize = -1;
+      const check = setInterval(() => {
+        try {
+          const size = fs.statSync(fullPath).size;
+          if (size > 0 && size === prevSize) {
+            clearInterval(check);
+            if (previewWin && !previewWin.isDestroyed()) {
+              if (previewWin.isMinimized()) previewWin.restore();
+              previewWin.webContents.send('preview:new-image', fullPath);
+            }
+          }
+          prevSize = size;
+        } catch (_) { clearInterval(check); }
+      }, 200);
+    }, 100);
+  });
+  log(`[Preview] Watching: ${folderPath}`);
+}
+
+ipcMain.on('preview:set-always-on-top', (_, val) => {
+  if (previewWin && !previewWin.isDestroyed()) previewWin.setAlwaysOnTop(val);
+});
+
+ipcMain.handle('preview:open', () => createPreviewWindow());
 
 function createWindow() {
   log('--- CREATE WINDOW START ---');
@@ -1330,6 +1424,21 @@ ipcMain.handle('assets:get-all', async () => await assetService.getAllAssets());
 ipcMain.handle('danbooru:search', async (event, query) => await danbooruService.search(query));
 
 // Config & Presets
+ipcMain.handle('app:get-userdata-path', () => app.getPath('userData'));
+ipcMain.handle('app:set-userdata-path', (event, newPath) => {
+  try {
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    if (newPath) {
+      fs.writeFileSync(userDataTxtPath, newPath.trim(), 'utf8');
+    } else {
+      if (fs.existsSync(userDataTxtPath)) fs.unlinkSync(userDataTxtPath);
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
 ipcMain.handle('config:get', () => resolveConfigPaths(configService.getConfig()));
 ipcMain.handle('config:save', async (event, config) => {
   log('Saving new configuration...', 'INFO', 'Main');
@@ -1432,7 +1541,6 @@ ipcMain.handle('assets:move-file', async (event, { fullPath, destDir, conflictMo
 });
 
 ipcMain.handle('assets:create-folder', async (event, { folderPath }) => {
-  if (fs.existsSync(folderPath)) throw new Error(`Folder already exists: ${folderPath}`);
   fs.mkdirSync(folderPath, { recursive: true });
   log(`[AssetService] Created folder: ${folderPath}`);
   return { success: true };

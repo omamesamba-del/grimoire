@@ -385,7 +385,7 @@
                     <label>Clip skip</label>
                     <input type="checkbox" class="gen-send-chk" data-gen-group="clipSkip" checked title="Include in send">
                   </div>
-                  <input type="number" id="gen-clip-skip-num" class="gen-num" value="2" min="1" max="12">
+                  <input type="number" id="gen-clip-skip-num" class="gen-num" value="" min="1" max="12">
                 </div>
               </div>
 
@@ -410,7 +410,7 @@
                     <label>Steps</label>
                     <input type="checkbox" class="gen-send-chk" data-gen-group="steps" checked title="Include in send">
                   </div>
-                  <input type="number" id="gen-steps-num" class="gen-num" value="25" min="1" max="150">
+                  <input type="number" id="gen-steps-num" class="gen-num" value="" min="1" max="150">
                 </div>
               </div>
 
@@ -480,11 +480,11 @@
                       <label>Width</label>
                       <input type="checkbox" class="gen-send-chk" data-gen-group="resolution" checked title="Include in send">
                     </div>
-                    <input type="number" id="gen-width-num" class="gen-num" value="832" step="8" min="64" max="4096">
+                    <input type="number" id="gen-width-num" class="gen-num" value="" step="8" min="64" max="4096">
                   </div>
                   <div class="gen-field" data-gen-group="resolution">
                     <label>Height</label>
-                    <input type="number" id="gen-height-num" class="gen-num" value="1216" step="8" min="64" max="4096">
+                    <input type="number" id="gen-height-num" class="gen-num" value="" step="8" min="64" max="4096">
                   </div>
                 </div>
                 <button id="btn-res-swap" class="gen-swap-btn" title="Swap W/H">⇅</button>
@@ -510,7 +510,7 @@
                     <label>CFG Scale</label>
                     <input type="checkbox" class="gen-send-chk" data-gen-group="cfg" checked title="Include in send">
                   </div>
-                  <input type="number" id="gen-cfg-num" class="gen-num" value="4.5" step="0.5" min="1" max="30">
+                  <input type="number" id="gen-cfg-num" class="gen-num" value="" step="0.5" min="1" max="30">
                 </div>
                 <div class="gen-field" style="flex:3" data-gen-group="seed">
                   <div class="gen-field-hdr">
@@ -586,6 +586,7 @@
               <button class="builder-btn-history" id="btn-prompt-history" title="Prompt History">🕐</button>
             </div>
             <button class="builder-btn-slot-toggle" id="btn-slot-mode-toggle" title="スロットモード">⊞</button>
+            <button class="builder-btn-preview" id="btn-open-preview" title="プレビューウィンドウを開く">🖼</button>
             <button class="builder-btn-clear" id="clear-all" data-i18n="btn_clear_all">Clear</button>
           </div>
         </div>
@@ -796,6 +797,15 @@
           <!-- Tab: Paths -->
           <div class="settings-tab" id="stab-paths">
             <h3 class="stab-title" data-i18n="tab_paths">Paths</h3>
+            <div class="stab-section-label">User Data</div>
+            <div class="form-group">
+              <label data-i18n="label_userdata_folder">User Data Folder</label>
+              <p class="field-hint" data-i18n="hint_userdata_folder">localStorage・設定などの保存先。変更後は再起動が必要です。</p>
+              <div class="input-with-btn">
+                <input type="text" id="setting-userdata" class="modal-input" placeholder="デフォルト (%APPDATA%\grimoire)">
+                <button id="btn-browse-userdata" class="btn-secondary" data-i18n="btn_browse">Browse…</button>
+              </div>
+            </div>
             <div class="stab-section-label" data-i18n="section_tags_path">Tags</div>
             <div class="form-group">
               <label data-i18n="label_tags_folder">Tags Folder</label>

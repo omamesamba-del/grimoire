@@ -132,10 +132,12 @@ export function setupContextMenu() {
         const basePath = State.currentMode === 'lora'       ? cfg.loraPath
                        : State.currentMode === 'checkpoint' ? cfg.checkpointsPath
                        :                                       cfg.embeddingsPath;
+        if (!basePath) { alert('フォルダーパスが設定されていません。'); return; }
+        const base = basePath.replace(/[\\/]+$/, '');
         const parentRel = target.relPath;
         const fullPath = parentRel
-            ? `${basePath}\\${parentRel.replace(/\//g, '\\')}\\${name.trim()}`
-            : `${basePath}\\${name.trim()}`;
+            ? `${base}\\${parentRel.replace(/\//g, '\\')}\\${name.trim()}`
+            : `${base}\\${name.trim()}`;
         try {
             await IPC.createAssetFolder(fullPath);
             State.allAssets = await loadAssets();

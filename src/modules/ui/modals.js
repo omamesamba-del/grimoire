@@ -167,7 +167,7 @@ export function setupModals() {
     });
 
     // Browse Folder Buttons for Settings
-    const pathKeys = ['lora', 'embedding', 'tags', 'checkpoint', 'vae', 'upscaler', 'gen-presets', 'output-images'];
+    const pathKeys = ['lora', 'embedding', 'tags', 'checkpoint', 'vae', 'upscaler', 'gen-presets', 'output-images', 'userdata'];
     pathKeys.forEach(key => {
         const btn = document.getElementById(`btn-browse-${key}`);
         if (btn) {
@@ -236,6 +236,14 @@ export function setupModals() {
             };
             await IPC.saveConfig(config);
             loadShortcutOverrides(config.shortcuts);
+
+            // User Data Folder: 変更があればuserdata.txtに書き込み（再起動後に有効）
+            const newUserDataPath = document.getElementById('setting-userdata')?.value.trim() || '';
+            const currentUserDataPath = await IPC.getUserDataPath?.() || '';
+            if (newUserDataPath !== currentUserDataPath) {
+                await IPC.setUserDataPath?.(newUserDataPath);
+                showToast(i18n.t('toast_userdata_restart'));
+            }
 
             const theme = document.getElementById('setting-theme')?.value || 'dark';
             localStorage.setItem('pb-theme', theme);
@@ -699,6 +707,10 @@ export async function openSettings() {
 
     renderCategoryColorSettings();
     renderShortcutsTab(cfg.shortcuts || {});
+
+    // User Data Folder（現在の実際のパスを表示）
+    IPC.getUserDataPath?.().then(p => fill('setting-userdata', p || ''));
+
     settingsModal.showModal();
 }
 

@@ -11,6 +11,12 @@ import { parsePrompt, stringifyPrompt } from '../prompt/engine.js';
 const STORAGE_KEY  = 'slotConfig';
 const STORAGE_VALS = 'slotValues';
 
+const PALETTE_COLORS = [
+    '#ef4444','#f97316','#eab308','#22c55e',
+    '#14b8a6','#3b82f6','#8b5cf6','#ec4899',
+    '#f43f5e','#64748b','#a16207','#ffffff',
+];
+
 function getDefaultSlots() {
     return [
         { id: 'slot-quality',    name: i18n.t('slot_name_quality'),    area: 'positive' },
@@ -53,6 +59,7 @@ export function toggleSlotMode() {
 
 // Positive エリアで隠す要素セレクタ
 const POSITIVE_HIDE = [
+    '#toggle-positive',
     '#insert-newline-positive',
     '#clear-positive-inline',
     '#toggle-suffix-btn',
@@ -76,6 +83,7 @@ export function enterSlotMode() {
 
     document.getElementById('btn-slot-settings')?.style.setProperty('display', '');
     document.getElementById('btn-slot-mode-toggle')?.classList.add('active');
+    document.body.classList.add('slot-mode-active');
 
     renderSlots();
 }
@@ -94,6 +102,7 @@ export function exitSlotMode() {
 
     document.getElementById('btn-slot-settings')?.style.setProperty('display', 'none');
     document.getElementById('btn-slot-mode-toggle')?.classList.remove('active');
+    document.body.classList.remove('slot-mode-active');
 }
 
 // ── Render slots ───────────────────────────────────────────────
@@ -111,6 +120,7 @@ function renderSlots() {
         const details = document.createElement('details');
         details.className = 'slot-section';
         details.open = true;
+        if (slot.color) details.style.setProperty('--slot-color', slot.color);
 
         // ── summary（ヘッダー）─────────────────────
         const summary = document.createElement('summary');
@@ -141,6 +151,12 @@ function renderSlots() {
 
         summary.appendChild(nameSpan);
         summary.appendChild(clearBtn);
+
+        summary.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openSlotContextMenu(e.clientX, e.clientY, slot.id, details);
+        });
 
         // ── チップコンテナ + hidden textarea ──────
         const chipsId    = `slot-chips-${slot.id}`;
@@ -232,9 +248,9 @@ function restoreSlotsFromPrompt() {
         }
 
         for (const slot of areaSlots) {
-            if (slotTags[slot.id] !== undefined) {
-                values[slot.id] = stringifyPrompt(slotTags[slot.id]);
-            }
+            values[slot.id] = slotTags[slot.id] !== undefined
+                ? stringifyPrompt(slotTags[slot.id])
+                : '';
         }
     };
 
@@ -247,6 +263,108 @@ function restoreSlotsFromPrompt() {
 
 // 後方互換のためexport維持（main.jsから参照されているが実質不使用）
 export function applySlots() { syncSlotsToPrompt(); }
+
+// プリセットロード後などにスロットを再描画する
+export function reloadSlots() {
+    if (!isSlotMode) return;
+    renderSlots();
+}
+
+// ── Slot context menu ──────────────────────────────────────────
+function openSlotContextMenu(x, y, slotId, detailsEl) {
+    document.querySelectorAll('.slot-color-ctx-menu').forEach(m => m.remove());
+
+    const menu = document.createElement('div');
+    menu.className = 'slot-color-ctx-menu';
+    menu.style.left = `${x}px`;
+    menu.style.top  = `${y}px`;
+
+    // ── 名前を変更 ──────────────────────────────
+    const renameItem = document.createElement('div');
+    renameItem.className = 'slot-ctx-menu-item';
+    renameItem.textContent = '✏️ 名前を変更';
+    renameItem.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        menu.remove();
+        const nameSpan = detailsEl?.querySelector('.slot-section-name');
+        if (!nameSpan) return;
+        const current = loadConfig().find(s => s.id === slotId)?.name || '';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'slot-name-edit-input';
+        input.value = current;
+        nameSpan.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+            const newName = input.value.trim() || current;
+            const cfg = loadConfig();
+            const s = cfg.find(s => s.id === slotId);
+            if (s) { s.name = newName; saveConfig(cfg); }
+            const span = document.createElement('span');
+            span.className = 'slot-section-name';
+            span.textContent = newName;
+            input.replaceWith(span);
+        };
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+            if (e.key === 'Escape') { input.replaceWith(nameSpan); }
+            e.stopPropagation();
+        });
+        input.addEventListener('blur', commit);
+    });
+    menu.appendChild(renameItem);
+
+    // ── 区切り線 ────────────────────────────────
+    const divider = document.createElement('div');
+    divider.className = 'slot-ctx-divider';
+    menu.appendChild(divider);
+
+    // ── カラーパレット ───────────────────────────
+    const palette = document.createElement('div');
+    palette.className = 'slot-ctx-palette';
+    PALETTE_COLORS.forEach(c => {
+        const sw = document.createElement('div');
+        sw.className = 'slot-color-swatch';
+        sw.style.background = c;
+        if (c === '#ffffff') sw.style.border = '1px solid #475569';
+        sw.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const cfg = loadConfig();
+            const s = cfg.find(s => s.id === slotId);
+            if (s) { s.color = c; saveConfig(cfg); }
+            if (detailsEl) detailsEl.style.setProperty('--slot-color', c);
+            menu.remove();
+        });
+        palette.appendChild(sw);
+    });
+    const clearSw = document.createElement('div');
+    clearSw.className = 'slot-color-swatch slot-color-clear';
+    clearSw.textContent = '✕';
+    clearSw.title = '色をリセット';
+    clearSw.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const cfg = loadConfig();
+        const s = cfg.find(s => s.id === slotId);
+        if (s) { s.color = ''; saveConfig(cfg); }
+        if (detailsEl) detailsEl.style.removeProperty('--slot-color');
+        menu.remove();
+    });
+    palette.appendChild(clearSw);
+    menu.appendChild(palette);
+
+    document.body.appendChild(menu);
+
+    // はみ出し補正
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth)  menu.style.left = `${x - rect.width}px`;
+    if (rect.bottom > window.innerHeight) menu.style.top = `${y - rect.height}px`;
+
+    const close = (e) => {
+        if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('mousedown', close); }
+    };
+    setTimeout(() => document.addEventListener('mousedown', close), 0);
+}
 
 // ── Settings dialog ────────────────────────────────────────────
 export function openSlotSettings() {
@@ -317,6 +435,59 @@ export function openSlotSettings() {
                 if (s) { s.area = areaSel.value; saveConfig(cfg); }
             });
 
+            // ── カラースウォッチ ──────────────────────
+            const colorBtn = document.createElement('div');
+            colorBtn.className = 'slot-settings-color-btn';
+            colorBtn.style.background = slot.color || 'transparent';
+            colorBtn.title = '色を変更';
+            colorBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.slot-color-palette').forEach(p => p.remove());
+
+                const palette = document.createElement('div');
+                palette.className = 'slot-color-palette';
+                PALETTE_COLORS.forEach(c => {
+                    const sw = document.createElement('div');
+                    sw.className = 'slot-color-swatch';
+                    sw.style.background = c;
+                    if (c === '#ffffff') sw.style.border = '1px solid #475569';
+                    sw.addEventListener('mousedown', (ev) => {
+                        ev.preventDefault();
+                        const cfg = loadConfig();
+                        const s = cfg.find(s => s.id === slot.id);
+                        if (s) { s.color = c; saveConfig(cfg); }
+                        colorBtn.style.background = c;
+                        palette.remove();
+                        if (isSlotMode) renderSlots();
+                    });
+                    palette.appendChild(sw);
+                });
+                // クリアボタン
+                const clearColor = document.createElement('div');
+                clearColor.className = 'slot-color-swatch slot-color-clear';
+                clearColor.textContent = '✕';
+                clearColor.title = '色をリセット';
+                clearColor.addEventListener('mousedown', (ev) => {
+                    ev.preventDefault();
+                    const cfg = loadConfig();
+                    const s = cfg.find(s => s.id === slot.id);
+                    if (s) { s.color = ''; saveConfig(cfg); }
+                    colorBtn.style.background = 'transparent';
+                    palette.remove();
+                    if (isSlotMode) renderSlots();
+                });
+                palette.appendChild(clearColor);
+
+                colorBtn.appendChild(palette);
+                const closeOnOutside = (ev) => {
+                    if (!palette.contains(ev.target) && ev.target !== colorBtn) {
+                        palette.remove();
+                        document.removeEventListener('mousedown', closeOnOutside);
+                    }
+                };
+                setTimeout(() => document.addEventListener('mousedown', closeOnOutside), 0);
+            });
+
             const delBtn = document.createElement('button');
             delBtn.className = 'spe-row-del';
             delBtn.textContent = '✕';
@@ -329,6 +500,7 @@ export function openSlotSettings() {
             row.appendChild(drag);
             row.appendChild(nameInput);
             row.appendChild(areaSel);
+            row.appendChild(colorBtn);
             row.appendChild(delBtn);
             list.appendChild(row);
         });

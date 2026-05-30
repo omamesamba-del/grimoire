@@ -455,6 +455,9 @@ class I18n {
                 'danbooru_underscore_convert':   '選択時にアンダースコアをスペースに変換する',
                 'btn_reset_danbooru_history':    '🗑️ 使用回数をリセット',
                 'toast_danbooru_reset':          '使用回数をリセットしました',
+                'label_userdata_folder':         'User Data フォルダ',
+                'hint_userdata_folder':          'localStorage・設定などの保存先。変更後は再起動が必要です。',
+                'toast_userdata_restart':        'User Data フォルダを変更しました。再起動後に有効になります。',
                 'civitai_domain_hint':           'Auto: civitai.com を試して失敗したら civitai.red にフォールバック',
 
                 // ── スタイルパレット追加 ─────────────────────────────────
@@ -1004,6 +1007,9 @@ class I18n {
                 'danbooru_underscore_convert':   'Convert underscores to spaces on selection',
                 'btn_reset_danbooru_history':    '🗑️ Reset Usage Counts',
                 'toast_danbooru_reset':          'Usage counts reset',
+                'label_userdata_folder':         'User Data Folder',
+                'hint_userdata_folder':          'Where localStorage and settings are stored. Restart required after changing.',
+                'toast_userdata_restart':        'User Data folder updated. Restart to apply.',
                 'civitai_domain_hint':           'Auto: tries civitai.com, falls back to civitai.red',
 
                 // ── Style Palette additions ──────────────────────────────
