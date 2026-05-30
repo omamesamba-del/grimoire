@@ -211,6 +211,19 @@ export const IPC = {
         else window.open(url, '_blank');
     },
 
+    async openPreviewWindow() {
+        if (isElectron) return await window.electronAPI.openPreviewWindow();
+    },
+
+    async getUserDataPath() {
+        if (isElectron) return await window.electronAPI.getUserDataPath();
+        return '';
+    },
+
+    async setUserDataPath(p) {
+        if (isElectron) return await window.electronAPI.setUserDataPath(p);
+    },
+
     async saveCheckpointSettings(fullPath, settings) {
         if (isElectron) return await window.electronAPI.saveCheckpointSettings(fullPath, settings);
         console.log('[MOCK] saveCheckpointSettings', fullPath, settings);

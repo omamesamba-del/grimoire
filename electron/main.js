@@ -901,7 +901,7 @@ function startOutputWatch(folderPath) {
   if (!folderPath || !fs.existsSync(folderPath)) return;
 
   let debounce = null;
-  outputWatcher = fs.watch(folderPath, { recursive: false }, (event, filename) => {
+  outputWatcher = fs.watch(folderPath, { recursive: true }, (event, filename) => {
     if (!filename || !/\.(png|jpg|jpeg|webp)$/i.test(filename)) return;
     clearTimeout(debounce);
     debounce = setTimeout(() => {
