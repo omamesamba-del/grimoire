@@ -58,11 +58,7 @@ export const State = {
 
     // Style Palette
     pendingStyle: {
-        colorMods: [],    // string[] selected color modifier values (dark/light/two-tone…)
-        colors: [],       // string[] selected color values (for active-state lookup)
-        materials: [],    // string[] selected material values
-        patterns: [],     // string[] selected pattern values
-        decorations: [],  // string[] selected decoration values
+        selections: {},   // { [catId: string]: string[] } — selected values per category
         custom: '',       // free-text prefix (chips append here directly)
         modeAEnabled: true, // auto-apply on tag click
     }

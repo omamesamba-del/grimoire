@@ -26,7 +26,6 @@ const DEFAULT_COLOR_MODS = [
 ];
 
 const DEFAULT_COLORS = [
-    // ── 基本色 ──
     { label: '白',      labelEn: 'White',     value: 'white',           hex: '#ffffff' },
     { label: '黒',      labelEn: 'Black',     value: 'black',           hex: '#1a1a2e' },
     { label: '灰',      labelEn: 'Gray',      value: 'gray',            hex: '#9ca3af' },
@@ -43,7 +42,6 @@ const DEFAULT_COLORS = [
     { label: '金',      labelEn: 'Gold',      value: 'gold',            hex: '#ca8a04' },
     { label: '銀',      labelEn: 'Silver',    value: 'silver',          hex: '#a8a29e' },
     { label: '虹',      labelEn: 'Rainbow',   value: 'rainbow colored', hex: '#e040fb' },
-    // ── ライト系 ──
     { label: 'L赤',     labelEn: 'L.Red',     value: 'light red',       hex: '#fca5a5' },
     { label: 'L青',     labelEn: 'L.Blue',    value: 'light blue',      hex: '#93c5fd' },
     { label: 'L緑',     labelEn: 'L.Green',   value: 'light green',     hex: '#86efac' },
@@ -52,7 +50,6 @@ const DEFAULT_COLORS = [
     { label: 'Lピンク', labelEn: 'L.Pink',    value: 'light pink',      hex: '#fda4af' },
     { label: 'L紫',     labelEn: 'L.Purple',  value: 'light purple',    hex: '#c4b5fd' },
     { label: 'L茶',     labelEn: 'L.Brown',   value: 'light brown',     hex: '#d4a574' },
-    // ── ダーク系 ──
     { label: 'D赤',     labelEn: 'D.Red',     value: 'dark red',        hex: '#991b1b' },
     { label: 'D青',     labelEn: 'D.Blue',    value: 'dark blue',       hex: '#1e40af' },
     { label: 'D緑',     labelEn: 'D.Green',   value: 'dark green',      hex: '#166534' },
@@ -115,31 +112,43 @@ const DEFAULT_DECORATIONS = [
     { label: 'ハイネック',   labelEn: 'High Neck',  value: 'high neck' },
 ];
 
+function _buildDefaultCategories() {
+    return [
+        { id: 'colorMods',   label: 'Mod',      isColor: false, items: _clone(DEFAULT_COLOR_MODS) },
+        { id: 'colors',      label: 'Color',    isColor: true,  items: _clone(DEFAULT_COLORS) },
+        { id: 'materials',   label: 'Material', isColor: false, items: _clone(DEFAULT_MATERIALS) },
+        { id: 'patterns',    label: 'Pattern',  isColor: false, items: _clone(DEFAULT_PATTERNS) },
+        { id: 'decorations', label: 'Deco',     isColor: false, items: _clone(DEFAULT_DECORATIONS) },
+    ];
+}
+
 // ──────────────────────────────────────────────────────────────
 // Persistent palette data (localStorage)
 // ──────────────────────────────────────────────────────────────
 
 const LS_KEY = 'stylePaletteData';
-let paletteData = { colorMods: [], colors: [], materials: [], patterns: [], decorations: [] };
+let paletteData = { categories: [] };
 
 function _loadPaletteData() {
     try {
         const raw = localStorage.getItem(LS_KEY);
         if (raw) {
             const p = JSON.parse(raw);
-            paletteData.colorMods   = p.colorMods   || _clone(DEFAULT_COLOR_MODS);
-            paletteData.colors      = p.colors      || _clone(DEFAULT_COLORS);
-            paletteData.materials   = p.materials   || _clone(DEFAULT_MATERIALS);
-            paletteData.patterns    = p.patterns    || _clone(DEFAULT_PATTERNS);
-            paletteData.decorations = p.decorations || _clone(DEFAULT_DECORATIONS);
+            if (Array.isArray(p.categories)) {
+                paletteData.categories = p.categories;
+                return;
+            }
+            // 旧フォーマット移行
+            paletteData.categories = _buildDefaultCategories();
+            if (p.colorMods)   paletteData.categories.find(c => c.id === 'colorMods').items   = p.colorMods;
+            if (p.colors)      paletteData.categories.find(c => c.id === 'colors').items       = p.colors;
+            if (p.materials)   paletteData.categories.find(c => c.id === 'materials').items    = p.materials;
+            if (p.patterns)    paletteData.categories.find(c => c.id === 'patterns').items     = p.patterns;
+            if (p.decorations) paletteData.categories.find(c => c.id === 'decorations').items  = p.decorations;
             return;
         }
     } catch (_) {}
-    paletteData.colorMods   = _clone(DEFAULT_COLOR_MODS);
-    paletteData.colors      = _clone(DEFAULT_COLORS);
-    paletteData.materials   = _clone(DEFAULT_MATERIALS);
-    paletteData.patterns    = _clone(DEFAULT_PATTERNS);
-    paletteData.decorations = _clone(DEFAULT_DECORATIONS);
+    paletteData.categories = _buildDefaultCategories();
 }
 
 function _savePaletteData() {
@@ -181,12 +190,8 @@ export function applyStyleToValue(tagValue) {
 }
 
 function clearStyle() {
-    State.pendingStyle.colorMods   = [];
-    State.pendingStyle.colors      = [];
-    State.pendingStyle.materials   = [];
-    State.pendingStyle.patterns    = [];
-    State.pendingStyle.decorations = [];
-    State.pendingStyle.custom      = '';
+    State.pendingStyle.selections = {};
+    State.pendingStyle.custom = '';
     const inp = document.getElementById('style-custom-input');
     if (inp) inp.value = '';
     _refreshChips();
@@ -199,13 +204,9 @@ function clearStyle() {
 
 export function initStylePalette() {
     _loadPaletteData();
-    ALL_KEYS.forEach(key => {
-        _buildChips(CHIP_CONTAINER_MAP[key], paletteData[key], key);
-        _attachChipSortable(key);
-    });
+    _buildAllRows();
 
-    // Toggle button (v5: btn-style-palette-toggle in pane-header)
-    document.getElementById('btn-style-palette-toggle')?.addEventListener('click', (e) => {
+    document.getElementById('btn-style-palette-toggle')?.addEventListener('click', () => {
         const dropdown = document.getElementById('style-palette-dropdown');
         if (!dropdown) return;
         const hidden = dropdown.classList.toggle('sp-hidden');
@@ -213,7 +214,6 @@ export function initStylePalette() {
         _setModeA(!hidden);
     });
 
-    // Restore: default = collapsed (hidden)
     const wasCollapsed = localStorage.getItem('stylePaletteCollapsed') !== '0';
     const dropdown = document.getElementById('style-palette-dropdown');
     if (dropdown) {
@@ -225,18 +225,15 @@ export function initStylePalette() {
         }
     }
 
-    // Edit button
     document.getElementById('style-palette-edit-btn')?.addEventListener('click', (e) => {
         e.stopPropagation();
         _openEditor();
     });
 
-    // Mode A checkbox
     document.getElementById('style-mode-a')?.addEventListener('change', (e) => {
         State.pendingStyle.modeAEnabled = e.target.checked;
     });
 
-    // Quick-add apply checkbox (persist in localStorage)
     const qaChk = document.getElementById('style-apply-quickadd');
     if (qaChk) {
         qaChk.checked = localStorage.getItem('styleApplyQuickAdd') !== 'false';
@@ -245,7 +242,6 @@ export function initStylePalette() {
         });
     }
 
-    // Close-on-apply checkbox (persist in localStorage)
     const cocChk = document.getElementById('style-close-on-apply');
     if (cocChk) {
         cocChk.checked = localStorage.getItem('styleCloseOnApply') === 'true';
@@ -254,19 +250,16 @@ export function initStylePalette() {
         });
     }
 
-    // Custom prefix input
     document.getElementById('style-custom-input')?.addEventListener('input', (e) => {
         State.pendingStyle.custom = e.target.value;
         _updateBadge();
     });
 
-    // Clear button
     document.getElementById('style-clear-btn')?.addEventListener('click', clearStyle);
 
     _updateBadge();
     _buildEditorDialog();
 
-    // 言語切替時にチップラベルを再描画
     window.addEventListener('languageChanged', _rebuildAllChips);
 }
 
@@ -277,20 +270,59 @@ function _setModeA(enabled) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Chip rendering
+// Palette row rendering (dynamic)
 // ──────────────────────────────────────────────────────────────
 
-function _buildChips(containerId, data, stateKey) {
-    const container = document.getElementById(containerId);
+const _chipSortables = {};
+
+function _buildAllRows() {
+    const body = document.getElementById('style-palette-body');
+    if (!body) return;
+
+    // 既存のカテゴリ行を削除（.style-footer は残す）
+    body.querySelectorAll('.style-row').forEach(r => r.remove());
+
+    // Sortable インスタンスを破棄
+    for (const id of Object.keys(_chipSortables)) {
+        try { _chipSortables[id].destroy(); } catch (_) {}
+        delete _chipSortables[id];
+    }
+
+    const footer = body.querySelector('.style-footer');
+    paletteData.categories.forEach(cat => {
+        const row = document.createElement('div');
+        row.className = 'style-row' + (cat.isColor ? ' style-row-colors' : '');
+        row.dataset.catId = cat.id;
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'style-row-label';
+        labelEl.textContent = cat.label;
+
+        const chips = document.createElement('div');
+        chips.className = 'style-chips';
+        chips.id = `style-chips-${cat.id}`;
+
+        row.appendChild(labelEl);
+        row.appendChild(chips);
+        body.insertBefore(row, footer || null);
+
+        _buildChips(cat.id, cat.items, cat.isColor);
+        _attachChipSortable(cat.id);
+    });
+}
+
+function _buildChips(catId, items, isColor) {
+    const container = document.getElementById(`style-chips-${catId}`);
     if (!container) return;
     container.innerHTML = '';
-    data.forEach(item => {
+    items.forEach(item => {
         const chip = document.createElement('button');
+        chip.type = 'button';
         chip.className = 'style-chip';
         chip.dataset.value = item.value;
-        chip.dataset.key   = stateKey;
+        chip.dataset.catId = catId;
 
-        if (stateKey === 'colors') {
+        if (isColor) {
             chip.classList.add('style-chip-color');
             chip.title = `${_getLabel(item)} (${item.value})`;
             chip.style.setProperty('--swatch-bg', item.hex || '#888');
@@ -301,55 +333,45 @@ function _buildChips(containerId, data, stateKey) {
             chip.appendChild(t);
             chip.title = item.value;
         }
-        chip.addEventListener('click', () => _toggleChip(chip, stateKey, item.value));
+        chip.addEventListener('click', () => _toggleChip(chip, catId, item.value));
         container.appendChild(chip);
     });
 }
 
-const ALL_KEYS = ['colorMods', 'colors', 'materials', 'patterns', 'decorations'];
-const CHIP_CONTAINER_MAP = {
-    colorMods:   'style-color-mods',
-    colors:      'style-colors',
-    materials:   'style-materials',
-    patterns:    'style-patterns',
-    decorations: 'style-decorations',
-};
-
-// Sortable instances for chip rows (keyed by stateKey)
-const _chipSortables = {};
-
-function _attachChipSortable(key) {
-    const containerId = CHIP_CONTAINER_MAP[key];
-    const container = document.getElementById(containerId);
+function _attachChipSortable(catId) {
+    const container = document.getElementById(`style-chips-${catId}`);
     if (!container) return;
-
-    if (_chipSortables[key]) {
-        try { _chipSortables[key].destroy(); } catch (_) {}
+    if (_chipSortables[catId]) {
+        try { _chipSortables[catId].destroy(); } catch (_) {}
     }
-
-    _chipSortables[key] = new Sortable(container, {
+    _chipSortables[catId] = new Sortable(container, {
         animation: 150,
         ghostClass: 'style-chip-ghost',
         onEnd: (evt) => {
             const { oldIndex, newIndex } = evt;
             if (oldIndex === newIndex) return;
-            const [moved] = paletteData[key].splice(oldIndex, 1);
-            paletteData[key].splice(newIndex, 0, moved);
+            const cat = paletteData.categories.find(c => c.id === catId);
+            if (!cat) return;
+            const [moved] = cat.items.splice(oldIndex, 1);
+            cat.items.splice(newIndex, 0, moved);
             _savePaletteData();
         },
     });
 }
 
 function _rebuildAllChips() {
-    // Drop selections that no longer exist in palette data
-    ALL_KEYS.forEach(key => {
-        const vals = new Set(paletteData[key].map(i => i.value));
-        State.pendingStyle[key] = (State.pendingStyle[key] || []).filter(v => vals.has(v));
-    });
-    ALL_KEYS.forEach(key => {
-        _buildChips(CHIP_CONTAINER_MAP[key], paletteData[key], key);
-        _attachChipSortable(key);
-    });
+    // 消えたカテゴリの選択を削除
+    const validIds = new Set(paletteData.categories.map(c => c.id));
+    for (const id of Object.keys(State.pendingStyle.selections)) {
+        if (!validIds.has(id)) {
+            delete State.pendingStyle.selections[id];
+        } else {
+            const cat = paletteData.categories.find(c => c.id === id);
+            const vals = new Set(cat.items.map(i => i.value));
+            State.pendingStyle.selections[id] = (State.pendingStyle.selections[id] || []).filter(v => vals.has(v));
+        }
+    }
+    _buildAllRows();
     _refreshChips();
     _updateBadge();
 }
@@ -365,8 +387,9 @@ function _removeValueFromCustom(value) {
     State.pendingStyle.custom = inp.value;
 }
 
-function _toggleChip(chip, stateKey, value) {
-    const arr = State.pendingStyle[stateKey];
+function _toggleChip(chip, catId, value) {
+    if (!State.pendingStyle.selections[catId]) State.pendingStyle.selections[catId] = [];
+    const arr = State.pendingStyle.selections[catId];
     const idx = arr.indexOf(value);
     const inp = document.getElementById('style-custom-input');
 
@@ -388,9 +411,9 @@ function _toggleChip(chip, stateKey, value) {
 
 function _refreshChips() {
     document.querySelectorAll('.style-chip').forEach(chip => {
-        const key = chip.dataset.key;
-        const val = chip.dataset.value;
-        chip.classList.toggle('active', !!State.pendingStyle[key]?.includes(val));
+        const catId = chip.dataset.catId;
+        const val   = chip.dataset.value;
+        chip.classList.toggle('active', !!(State.pendingStyle.selections[catId]?.includes(val)));
     });
 }
 
@@ -406,17 +429,9 @@ function _updateBadge() {
 // Editor modal
 // ──────────────────────────────────────────────────────────────
 
-const TAB_DEFS = [
-    { key: 'colorMods',   label: 'Mod' },
-    { key: 'colors',      label: '🎨 Color' },
-    { key: 'materials',   label: 'Material' },
-    { key: 'patterns',    label: 'Pattern' },
-    { key: 'decorations', label: 'Deco' },
-];
-
-let _activeEditorTab = 'colors';
+let _activeEditorTab = 'colors';   // catId or '__new__'
 let _acDebounce = null;
-let _currentSortable = null;  // 重複インスタンス防止
+let _currentSortable = null;
 
 function _buildEditorDialog() {
     if (document.getElementById('spe-dialog')) return;
@@ -427,7 +442,7 @@ function _buildEditorDialog() {
         <div class="spe-content">
             <div class="spe-header">
                 <span class="spe-title">${i18n.t('style_edit_title')}</span>
-                <button class="spe-close-x" id="spe-close-x" onclick="document.getElementById('spe-dialog').close()">✕</button>
+                <button class="spe-close-x" onclick="document.getElementById('spe-dialog').close()">✕</button>
             </div>
             <div class="spe-tabs" id="spe-tabs"></div>
             <div class="spe-body" id="spe-body"></div>
@@ -439,6 +454,10 @@ function _buildEditorDialog() {
 function _openEditor() {
     const dlg = document.getElementById('spe-dialog');
     if (!dlg) return;
+    // アクティブタブが消えていたらリセット
+    if (_activeEditorTab !== '__new__' && !paletteData.categories.find(c => c.id === _activeEditorTab)) {
+        _activeEditorTab = paletteData.categories[0]?.id || '__new__';
+    }
     _renderEditorTabs();
     _renderEditorBody(_activeEditorTab);
     dlg.showModal();
@@ -448,25 +467,58 @@ function _renderEditorTabs() {
     const tabBar = document.getElementById('spe-tabs');
     if (!tabBar) return;
     tabBar.innerHTML = '';
-    TAB_DEFS.forEach(({ key, label }) => {
+
+    paletteData.categories.forEach(({ id, label }) => {
         const btn = document.createElement('button');
-        btn.className = 'spe-tab' + (key === _activeEditorTab ? ' active' : '');
+        btn.type = 'button';
+        btn.className = 'spe-tab' + (id === _activeEditorTab ? ' active' : '');
         btn.textContent = label;
         btn.addEventListener('click', () => {
-            _activeEditorTab = key;
+            _activeEditorTab = id;
             _renderEditorTabs();
-            _renderEditorBody(key);
+            _renderEditorBody(id);
         });
         tabBar.appendChild(btn);
     });
+
+    // ＋ カテゴリ追加タブ
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'spe-tab spe-tab-add' + (_activeEditorTab === '__new__' ? ' active' : '');
+    addBtn.textContent = '＋';
+    addBtn.title = 'カテゴリを追加';
+    addBtn.addEventListener('click', () => {
+        _activeEditorTab = '__new__';
+        _renderEditorTabs();
+        _renderEditorBody('__new__');
+    });
+    tabBar.appendChild(addBtn);
 }
 
 function _renderEditorBody(tabKey) {
     const body = document.getElementById('spe-body');
     if (!body) return;
-    const isColor = tabKey === 'colors';
+
+    if (tabKey === '__new__') {
+        _renderNewCategoryForm(body);
+        return;
+    }
+
+    const cat = paletteData.categories.find(c => c.id === tabKey);
+    if (!cat) return;
+    const isColor = cat.isColor;
 
     body.innerHTML = `
+        <div class="spe-cat-header">
+            <input type="text" id="spe-cat-label" class="spe-input spe-input-catname"
+                   value="${cat.label}" maxlength="20" placeholder="カテゴリ名">
+            <label class="spe-color-check">
+                <input type="checkbox" id="spe-cat-is-color" ${isColor ? 'checked' : ''}>
+                <span>カラースウォッチ</span>
+            </label>
+            <button type="button" class="spe-cat-rename-btn" id="spe-cat-rename-btn">名前変更</button>
+            <button type="button" class="spe-cat-del-btn" id="spe-cat-del-btn">🗑 カテゴリ削除</button>
+        </div>
         <div class="spe-list" id="spe-list"></div>
         <div class="spe-add-form">
             ${isColor
@@ -479,8 +531,33 @@ function _renderEditorBody(tabKey) {
                        placeholder="${isColor ? i18n.t('style_edit_val_ph') : i18n.t('style_edit_mat_val_ph')}" autocomplete="off">
                 <div id="spe-ac-list" class="spe-ac-list hidden"></div>
             </div>
-            <button class="spe-add-btn" id="spe-add-btn">${i18n.t('style_edit_add_btn')}</button>
+            <button type="button" class="spe-add-btn" id="spe-add-btn">${i18n.t('style_edit_add_btn')}</button>
         </div>`;
+
+    // カテゴリ名変更
+    document.getElementById('spe-cat-rename-btn').addEventListener('click', () => {
+        const newLabel = document.getElementById('spe-cat-label').value.trim();
+        if (!newLabel) return;
+        cat.label = newLabel;
+        cat.isColor = document.getElementById('spe-cat-is-color').checked;
+        _savePaletteData();
+        _rebuildAllChips();
+        _renderEditorTabs();
+        _renderEditorBody(tabKey);
+    });
+
+    // カテゴリ削除
+    document.getElementById('spe-cat-del-btn').addEventListener('click', () => {
+        if (!confirm(`「${cat.label}」カテゴリを削除しますか？`)) return;
+        const idx = paletteData.categories.findIndex(c => c.id === tabKey);
+        if (idx !== -1) paletteData.categories.splice(idx, 1);
+        delete State.pendingStyle.selections[tabKey];
+        _savePaletteData();
+        _rebuildAllChips();
+        _activeEditorTab = paletteData.categories[0]?.id || '__new__';
+        _renderEditorTabs();
+        _renderEditorBody(_activeEditorTab);
+    });
 
     _renderEditorList(tabKey);
     _attachAddHandler(tabKey, isColor);
@@ -488,11 +565,48 @@ function _renderEditorBody(tabKey) {
     _attachSortable(tabKey);
 }
 
+function _renderNewCategoryForm(body) {
+    body.innerHTML = `
+        <div class="spe-new-cat-form">
+            <h3 class="spe-new-cat-title">新しいカテゴリを追加</h3>
+            <div class="spe-new-cat-row">
+                <label>カテゴリ名</label>
+                <input type="text" id="spe-new-cat-label" class="spe-input" maxlength="20" placeholder="例: Hair Style">
+            </div>
+            <div class="spe-new-cat-row">
+                <label class="spe-color-check">
+                    <input type="checkbox" id="spe-new-cat-is-color">
+                    <span>カラースウォッチ表示（hex カラー付きアイテム）</span>
+                </label>
+            </div>
+            <button type="button" class="spe-add-btn" id="spe-new-cat-add-btn">追加</button>
+        </div>`;
+
+    document.getElementById('spe-new-cat-add-btn').addEventListener('click', () => {
+        const label = document.getElementById('spe-new-cat-label').value.trim();
+        if (!label) return;
+        const isColor = document.getElementById('spe-new-cat-is-color').checked;
+        const id = 'cat_' + Date.now();
+        paletteData.categories.push({ id, label, isColor, items: [] });
+        _savePaletteData();
+        _rebuildAllChips();
+        _activeEditorTab = id;
+        _renderEditorTabs();
+        _renderEditorBody(id);
+    });
+
+    document.getElementById('spe-new-cat-label')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('spe-new-cat-add-btn').click();
+    });
+}
+
 function _renderEditorList(tabKey) {
     const list = document.getElementById('spe-list');
     if (!list) return;
-    const isColor = tabKey === 'colors';
-    const items = paletteData[tabKey];
+    const cat = paletteData.categories.find(c => c.id === tabKey);
+    if (!cat) return;
+    const isColor = cat.isColor;
+    const items = cat.items;
 
     list.innerHTML = '';
     if (!items.length) {
@@ -511,10 +625,10 @@ function _renderEditorList(tabKey) {
                 : ''}
             <span class="spe-row-label">${item.label}</span>
             <span class="spe-row-value">${item.value}</span>
-            <button class="spe-row-del" data-idx="${idx}" title="${i18n.t('style_edit_del_title')}">✕</button>`;
+            <button type="button" class="spe-row-del" data-idx="${idx}" title="${i18n.t('style_edit_del_title')}">✕</button>`;
 
         row.querySelector('.spe-row-del').addEventListener('click', () => {
-            paletteData[tabKey].splice(idx, 1);
+            cat.items.splice(idx, 1);
             _savePaletteData();
             _rebuildAllChips();
             _renderEditorList(tabKey);
@@ -525,13 +639,15 @@ function _renderEditorList(tabKey) {
 }
 
 function _attachAddHandler(tabKey, isColor) {
+    const cat = paletteData.categories.find(c => c.id === tabKey);
+    if (!cat) return;
     const doAdd = () => {
         const label = document.getElementById('spe-add-label')?.value.trim();
         const value = document.getElementById('spe-add-value')?.value.trim();
         if (!label || !value) return;
         const item = { label, value };
         if (isColor) item.hex = document.getElementById('spe-add-hex')?.value || '#888888';
-        paletteData[tabKey].push(item);
+        cat.items.push(item);
         _savePaletteData();
         _rebuildAllChips();
         _renderEditorList(tabKey);
@@ -549,7 +665,7 @@ function _attachAddHandler(tabKey, isColor) {
     });
 }
 
-// ── Autocomplete for tag value input (dialog-scoped dropdown) ──
+// ── Autocomplete for tag value input ──────────────────────────
 
 const AC_BADGE = { 0: 'GEN', 1: 'ART', 3: 'CPY', 4: 'CHR', 5: 'META' };
 
@@ -600,13 +716,11 @@ function _attachValueAutocomplete() {
     valInput.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') _speAcHide();
         if (e.key === 'ArrowDown') {
-            const first = acList.querySelector('.spe-ac-item');
-            first?.focus();
+            acList.querySelector('.spe-ac-item')?.focus();
             e.preventDefault();
         }
     });
 
-    // Keyboard navigation within dropdown
     acList.addEventListener('keydown', (e) => {
         const items = [...acList.querySelectorAll('.spe-ac-item')];
         const idx   = items.indexOf(document.activeElement);
@@ -623,7 +737,6 @@ function _attachSortable(tabKey) {
     const list = document.getElementById('spe-list');
     if (!list || !list.children.length) return;
 
-    // 既存インスタンスを破棄してから新規作成（重複防止）
     if (_currentSortable) {
         try { _currentSortable.destroy(); } catch (_) {}
         _currentSortable = null;
@@ -631,16 +744,17 @@ function _attachSortable(tabKey) {
 
     _currentSortable = new Sortable(list, {
         handle: '.spe-row-drag',
-        filter: '.spe-row-del',   // ✕ボタンはドラッグ対象から除外
-        preventOnFilter: false,   // filter要素のクリックイベントは通す
+        filter: '.spe-row-del',
+        preventOnFilter: false,
         animation: 150,
         ghostClass: 'spe-row-ghost',
         onEnd: (evt) => {
             const { oldIndex, newIndex } = evt;
             if (oldIndex === newIndex) return;
-            const items = paletteData[tabKey];
-            const [moved] = items.splice(oldIndex, 1);
-            items.splice(newIndex, 0, moved);
+            const cat = paletteData.categories.find(c => c.id === tabKey);
+            if (!cat) return;
+            const [moved] = cat.items.splice(oldIndex, 1);
+            cat.items.splice(newIndex, 0, moved);
             _savePaletteData();
             _rebuildAllChips();
             _renderEditorList(tabKey);

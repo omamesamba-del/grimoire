@@ -6548,6 +6548,36 @@ body.theme-light .explorer-item-wrap[class*="cat-"] .item-label {
 }
 .spe-tab:hover  { color: var(--slate-200); }
 .spe-tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
+.spe-tab-add    { color: var(--slate-500); letter-spacing: 0; padding: 0 10px; }
+.spe-tab-add:hover { color: var(--accent-primary); }
+
+/* Category header (rename / delete) */
+.spe-cat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0 10px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+.spe-input-catname { width: 120px; font-weight: 600; }
+.spe-color-check { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--slate-400); cursor: pointer; }
+.spe-cat-rename-btn {
+    padding: 2px 8px; font-size: 0.72rem; border-radius: 4px;
+    border: 1px solid var(--border-color); background: none; color: var(--slate-400); cursor: pointer;
+}
+.spe-cat-rename-btn:hover { background: var(--border-color); color: var(--slate-200); }
+.spe-cat-del-btn {
+    margin-left: auto; padding: 2px 8px; font-size: 0.72rem; border-radius: 4px;
+    border: 1px solid #7f1d1d; background: none; color: #f87171; cursor: pointer;
+}
+.spe-cat-del-btn:hover { background: #7f1d1d22; }
+
+/* New category form */
+.spe-new-cat-form { padding: 16px 4px; display: flex; flex-direction: column; gap: 14px; }
+.spe-new-cat-title { font-size: 0.85rem; color: var(--slate-300); margin: 0; }
+.spe-new-cat-row { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--slate-400); }
 
 /* Body */
 .spe-body {
