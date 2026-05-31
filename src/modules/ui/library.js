@@ -288,19 +288,23 @@ function createRootToolbar(catId, groupName) {
     }
     const nameEl = document.createElement('span');
     nameEl.className = 'root-toolbar-name';
-    nameEl.textContent = groupName
-        ? `${cat?.name || ''} › ${groupName}`
+
+    // Use full group path for display (e.g. "IP Characters › ゲーム › 東方Project")
+    const groupPath = State.currentGroupPath; // array like ["ゲーム", "東方Project"]
+    nameEl.textContent = groupPath?.length
+        ? `${cat?.name || ''} › ${groupPath.join(' › ')}`
         : (cat?.name || '');
 
     // 🎲 ランダムチップ挿入ボタン
-    const scopePath = groupName
-        ? `${cat?.name || ''}:${groupName}`
+    const scopePath = groupPath?.length
+        ? `${cat?.name || ''}:${groupPath.join(':')}`
         : (cat?.name || '');
+    const diceLabel = groupPath?.length ? groupPath[groupPath.length - 1] : (cat?.name || '');
     if (scopePath) {
         const diceBtn = document.createElement('button');
         diceBtn.className = 'btn-random-chip';
         diceBtn.textContent = '🎲';
-        diceBtn.title = i18n.t('dice_insert_from').replace('{name}', groupName || cat?.name || '');
+        diceBtn.title = i18n.t('dice_insert_from').replace('{name}', diceLabel);
         diceBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             addToPrompt(`[@${scopePath}@]`);

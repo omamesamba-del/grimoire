@@ -215,6 +215,10 @@ export const IPC = {
         if (isElectron) return await window.electronAPI.openPreviewWindow();
     },
 
+    setPreviewTheme(theme) {
+        if (isElectron) window.electronAPI.setPreviewTheme?.(theme);
+    },
+
     async getUserDataPath() {
         if (isElectron) return await window.electronAPI.getUserDataPath();
         return '';

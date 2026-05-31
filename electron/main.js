@@ -756,6 +756,7 @@ let assetService;
 let danbooruService;
 let previewWin = null;
 let outputWatcher = null;
+let currentPreviewTheme = 'gray';
 
 function initServices(isPathUpdate = false) {
   log(`Initializing services (isPathUpdate: ${isPathUpdate})...`, 'INFO', 'Main');
@@ -877,14 +878,23 @@ function createPreviewWindow() {
     ? path.join(process.resourcesPath, 'app', 'preview.html')
     : path.join(process.cwd(), 'preview.html');
 
+  const savedBounds = configService.getConfig().previewWindowBounds || {};
+  const PREVIEW_THEME_BG     = { dark: '#0a0f1e', black: '#000000', gray: '#1e1e1e', light: '#f1f5f9' };
+  const PREVIEW_SYMBOL_COLOR = { dark: '#94a3b8', black: '#94a3b8', gray: '#cccccc', light: '#475569' };
+  const bgColor     = PREVIEW_THEME_BG[currentPreviewTheme]     || '#1e1e1e';
+  const symbolColor = PREVIEW_SYMBOL_COLOR[currentPreviewTheme] || '#94a3b8';
+
   previewWin = new BrowserWindow({
-    width: 540,
-    height: 620,
+    width: savedBounds.width || 540,
+    height: savedBounds.height || 620,
+    ...(savedBounds.x != null && savedBounds.y != null ? { x: savedBounds.x, y: savedBounds.y } : {}),
     minWidth: 300,
-    minHeight: 300,
+    minHeight: 200,
     title: 'Grimoire Preview',
-    alwaysOnTop: true,
-    backgroundColor: '#0a0f1e',
+    alwaysOnTop: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: { color: bgColor, symbolColor, height: 34 },
+    backgroundColor: bgColor,
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true,
@@ -893,6 +903,17 @@ function createPreviewWindow() {
     },
   });
   previewWin.loadFile(previewHtml);
+
+  previewWin.webContents.on('did-finish-load', () => {
+    previewWin.webContents.send('preview:theme', currentPreviewTheme);
+  });
+
+  const savePreviewBounds = () => {
+    if (!previewWin || previewWin.isDestroyed() || previewWin.isMinimized()) return;
+    configService.saveConfig({ previewWindowBounds: previewWin.getBounds() });
+  };
+  previewWin.on('resize', savePreviewBounds);
+  previewWin.on('move', savePreviewBounds);
   previewWin.on('closed', () => { previewWin = null; });
 }
 
@@ -902,6 +923,7 @@ function startOutputWatch(folderPath) {
 
   let debounce = null;
   outputWatcher = fs.watch(folderPath, { recursive: true }, (event, filename) => {
+    if (event !== 'rename') return; // 'change' はExplorerのサムネイル読み込み等で誤発火するため除外
     if (!filename || !/\.(png|jpg|jpeg|webp)$/i.test(filename)) return;
     clearTimeout(debounce);
     debounce = setTimeout(() => {
@@ -930,6 +952,23 @@ function startOutputWatch(folderPath) {
 ipcMain.on('preview:set-always-on-top', (_, val) => {
   if (previewWin && !previewWin.isDestroyed()) previewWin.setAlwaysOnTop(val);
 });
+
+const PREVIEW_THEME_BG     = { dark: '#0a0f1e', black: '#000000', gray: '#1e1e1e', light: '#f1f5f9' };
+const PREVIEW_SYMBOL_COLOR = { dark: '#94a3b8', black: '#94a3b8', gray: '#cccccc', light: '#475569' };
+
+ipcMain.on('preview:set-theme', (_, theme) => {
+  currentPreviewTheme = theme;
+  if (previewWin && !previewWin.isDestroyed()) {
+    previewWin.webContents.send('preview:theme', theme);
+    previewWin.setTitleBarOverlay({
+      color: PREVIEW_THEME_BG[theme] || '#1e1e1e',
+      symbolColor: PREVIEW_SYMBOL_COLOR[theme] || '#94a3b8',
+      height: 34,
+    });
+  }
+});
+
+ipcMain.handle('preview:get-theme', () => currentPreviewTheme);
 
 ipcMain.handle('preview:open', () => createPreviewWindow());
 
@@ -1001,6 +1040,10 @@ function createWindow() {
   win.on('move', saveBounds);
   win.on('maximize', saveBounds);
   win.on('unmaximize', saveBounds);
+
+  win.on('close', () => {
+    if (previewWin && !previewWin.isDestroyed()) previewWin.close();
+  });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     log(`Loading URL: ${process.env.VITE_DEV_SERVER_URL}`);
@@ -1275,7 +1318,11 @@ ipcMain.handle('window:reset', () => {
   const defaultBounds = { width: 1400, height: 900 };
   win.setSize(defaultBounds.width, defaultBounds.height);
   win.center();
-  configService.saveConfig({ windowBounds: win.getBounds() });
+  configService.saveConfig({ windowBounds: win.getBounds(), previewWindowBounds: null });
+  if (previewWin && !previewWin.isDestroyed()) {
+    previewWin.setSize(540, 620);
+    previewWin.center();
+  }
   log(`[Main] Window reset to default.`);
   return { success: true };
 });

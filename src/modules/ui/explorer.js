@@ -699,10 +699,19 @@ function handleItemClick(e, node, wrap, canExpand) {
     if (node.type === 'category') {
         State.currentCategoryId = node.id;
         State.currentGroupName = null;
+        State.currentGroupPath = null;
         State.currentTags = node.children || [];
     } else {
         State.currentGroupName = node.name;
+        // _pathId format: "CategoryName > GroupA > GroupB"
+        const pathId = node._pathId || node.name;
+        const parts = pathId.split(' > ');
+        State.currentGroupPath = parts.slice(1);
         State.currentTags = node.children || [];
+        // パスの先頭からカテゴリを特定して currentCategoryId を更新
+        const catName = parts[0];
+        const cat = State.allTags.find(c => c.name === catName);
+        if (cat) State.currentCategoryId = cat.id;
     }
 
     renderExplorer();

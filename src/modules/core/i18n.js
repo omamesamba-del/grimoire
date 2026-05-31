@@ -326,8 +326,8 @@ class I18n {
                 'slot_name_negative':        'ネガティブ',
 
                 // ── プロンプトチップ ──────────────────────────────────────
-                'chip_break_title':          '改行 (右クリックで削除)',
-                'chip_random_title':         'クリックで今すぐランダム解決 / 右クリックで削除',
+                'chip_break_title':          '改行 (中クリックで削除)',
+                'chip_random_title':         'クリックで今すぐランダム解決 / 中クリックで削除',
                 'chip_menu_edit':            '✏️ 編集',
                 'chip_menu_insert_break':    '↵ 改行を挿入',
                 'chip_menu_delete':          '🗑️ 削除',
@@ -878,8 +878,8 @@ class I18n {
                 'slot_name_negative':        'Negative',
 
                 // ── Prompt Chips ─────────────────────────────────────────
-                'chip_break_title':          'Line break (right-click to delete)',
-                'chip_random_title':         'Click to resolve now / Right-click to delete',
+                'chip_break_title':          'Line break (middle-click to delete)',
+                'chip_random_title':         'Click to resolve now / Middle-click to delete',
                 'chip_menu_edit':            '✏️ Edit',
                 'chip_menu_insert_break':    '↵ Insert Line Break',
                 'chip_menu_delete':          '🗑️ Delete',

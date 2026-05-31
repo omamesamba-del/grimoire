@@ -12,6 +12,7 @@ export const State = {
     currentTags: [], // Currently displayed tags in grid
     currentCategoryId: null,
     currentGroupName: null, // Name of the group when drilling into subgroups (null = category root)
+    currentGroupPath: null, // Full path array of group names e.g. ["ゲーム", "東方Project"]
     isFavoriteView: false,
     isTagSearch: false, // true while search query is active (suppresses root toolbar)
     selectedTags: new Set(), // Set of Tag IDs (library tag-grid selection)

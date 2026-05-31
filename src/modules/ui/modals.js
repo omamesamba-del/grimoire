@@ -114,6 +114,7 @@ export function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-light', 'theme-black', 'theme-gray');
     document.body.classList.add(`theme-${theme}`);
     window.electronAPI?.setTitlebarOverlay?.(THEME_TITLEBAR[theme] || THEME_TITLEBAR.dark);
+    IPC.setPreviewTheme(theme);
 }
 
 export function setupModals() {

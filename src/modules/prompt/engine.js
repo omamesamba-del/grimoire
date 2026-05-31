@@ -189,21 +189,13 @@ function _flattenTags(node) {
 }
 
 function _pickFromScope(allTags, scopeParts) {
-    const cat = allTags.find(c => c.name === scopeParts[0]);
-    if (!cat) return null;
-    if (scopeParts.length === 1) {
-        const pool = _flattenTags(cat);
-        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+    let node = allTags.find(c => c.name === scopeParts[0]);
+    if (!node) return null;
+    for (let i = 1; i < scopeParts.length; i++) {
+        node = (node.children || []).find(c => c.name === scopeParts[i]);
+        if (!node) return null;
     }
-    const group = (cat.children || []).find(g => g.name === scopeParts[1]);
-    if (!group) return null;
-    if (scopeParts.length === 2) {
-        const pool = _flattenTags(group);
-        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
-    }
-    const sub = (group.children || []).find(s => s.name === scopeParts[2]);
-    if (!sub) return null;
-    const pool = _flattenTags(sub);
+    const pool = _flattenTags(node);
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 

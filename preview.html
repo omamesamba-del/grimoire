@@ -5,9 +5,32 @@
   <title>Grimoire Preview</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Themes (grimoire style.css と同値) ─────── */
     body {
-      background: #0a0f1e;
-      color: #cbd5e1;
+      --bg: #0a0f1e; --text: #cbd5e1; --toolbar: #0f172a;
+      --border: rgba(255,255,255,0.08); --text-muted: #475569;
+    }
+    body.theme-dark {
+      --bg: #0a0f1e; --text: #cbd5e1; --toolbar: #0f172a;
+      --border: rgba(255,255,255,0.08); --text-muted: #475569;
+    }
+    body.theme-gray {
+      --bg: #1e1e1e; --text: #cccccc; --toolbar: #252526;
+      --border: rgba(255,255,255,0.08); --text-muted: #888888;
+    }
+    body.theme-black {
+      --bg: #000000; --text: #94a3b8; --toolbar: #0a0a0a;
+      --border: rgba(255,255,255,0.06); --text-muted: #444444;
+    }
+    body.theme-light {
+      --bg: #f1f5f9; --text: #0f172a; --toolbar: #e2e8f0;
+      --border: rgba(0,0,0,0.1); --text-muted: #64748b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
       font-family: sans-serif;
       height: 100vh;
       display: flex;
@@ -16,29 +39,59 @@
       -webkit-user-select: none;
       user-select: none;
     }
+
+    /* タイトルバー兼ツールバー */
     #toolbar {
+      height: 34px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      background: #0f172a;
-      border-bottom: 1px solid #1e293b;
+      gap: 6px;
+      padding: 0 8px;
+      /* Windows では右端 ~138px がネイティブウインドウコントロール領域 */
+      padding-right: 144px;
+      background: var(--toolbar);
       flex-shrink: 0;
       -webkit-app-region: drag;
     }
     #toolbar button {
       -webkit-app-region: no-drag;
       background: none;
-      border: 1px solid #334155;
+      border: 1px solid transparent;
       border-radius: 4px;
-      color: #94a3b8;
-      font-size: 0.72rem;
-      padding: 2px 8px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      width: 26px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      flex-shrink: 0;
     }
-    #toolbar button:hover { background: #1e293b; color: #fff; }
-    #filename { font-size: 0.72rem; color: #475569; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #timestamp { font-size: 0.7rem; color: #334155; flex-shrink: 0; }
+    #toolbar button:hover { background: var(--border); color: var(--text); }
+    #btn-always-top.active {
+      background: rgba(99,102,241,0.18);
+      color: #818cf8;
+      border-color: #6366f1;
+    }
+    #filename {
+      font-size: 0.70rem;
+      color: var(--text-muted);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      -webkit-app-region: drag;
+    }
+    #timestamp {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+    }
+
     #img-container {
       flex: 1;
       display: flex;
@@ -48,25 +101,27 @@
       position: relative;
     }
     #preview-img {
-      max-width: 100%;
-      max-height: 100%;
+      /* ウインドウサイズに合わせて拡縮（縦横比維持） */
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       display: none;
       cursor: zoom-in;
     }
     #preview-img.zoomed {
-      max-width: none;
-      max-height: none;
       width: auto;
       height: auto;
+      max-width: none;
+      max-height: none;
+      object-fit: none;
       cursor: zoom-out;
-      overflow: auto;
     }
     #waiting {
-      color: #334155;
+      color: var(--text-muted);
       font-size: 0.85rem;
       text-align: center;
       line-height: 2;
+      opacity: 0.5;
     }
     #waiting .icon { font-size: 2rem; display: block; margin-bottom: 8px; }
     #flash {
@@ -83,8 +138,8 @@
   <div id="toolbar">
     <span id="filename">待機中…</span>
     <span id="timestamp"></span>
-    <button id="btn-open-folder" title="フォルダを開く">📁</button>
-    <button id="btn-always-top" title="最前面固定">📌</button>
+    <button type="button" id="btn-open-folder" title="フォルダを開く">📁</button>
+    <button type="button" id="btn-always-top">📌</button>
   </div>
   <div id="img-container">
     <div id="waiting">
@@ -99,13 +154,30 @@
     const { ipcRenderer, shell } = require('electron');
 
     let currentPath = null;
-    let alwaysOnTop = true;
-    const img = document.getElementById('preview-img');
-    const waiting = document.getElementById('waiting');
+    let alwaysOnTop = false;
+    const img       = document.getElementById('preview-img');
+    const waiting   = document.getElementById('waiting');
     const filenameEl = document.getElementById('filename');
     const timestampEl = document.getElementById('timestamp');
-    const flash = document.getElementById('flash');
+    const flash     = document.getElementById('flash');
+    const pinBtn    = document.getElementById('btn-always-top');
 
+    function applyTheme(theme) {
+      document.body.className = theme ? `theme-${theme}` : '';
+    }
+
+    function updatePinButton() {
+      pinBtn.classList.toggle('active', alwaysOnTop);
+      pinBtn.title = alwaysOnTop ? '最前面固定: オン' : '最前面固定: オフ';
+    }
+
+    // 起動時に現在のテーマを取得
+    ipcRenderer.invoke('preview:get-theme').then(theme => { if (theme) applyTheme(theme); });
+
+    // grimoire 側のテーマ変更に追従
+    ipcRenderer.on('preview:theme', (_, theme) => { applyTheme(theme); });
+
+    // 新しい画像
     ipcRenderer.on('preview:new-image', (_, filePath) => {
       currentPath = filePath;
       img.src = 'file:///' + filePath.replace(/\\/g, '/') + '?t=' + Date.now();
@@ -114,30 +186,28 @@
       img.classList.remove('zoomed');
       filenameEl.textContent = filePath.split(/[\\/]/).pop();
       timestampEl.textContent = new Date().toLocaleTimeString();
-
-      // flash effect
       flash.style.opacity = '1';
       setTimeout(() => { flash.style.opacity = '0'; }, 150);
     });
 
+    // クリックでズーム切替
     img.addEventListener('click', () => {
       img.classList.toggle('zoomed');
-      img.style.cursor = img.classList.contains('zoomed') ? 'zoom-out' : 'zoom-in';
     });
 
     document.getElementById('btn-open-folder').addEventListener('click', () => {
       if (currentPath) shell.showItemInFolder(currentPath);
     });
 
-    document.getElementById('btn-always-top').addEventListener('click', () => {
+    pinBtn.addEventListener('click', () => {
       alwaysOnTop = !alwaysOnTop;
       ipcRenderer.send('preview:set-always-on-top', alwaysOnTop);
-      document.getElementById('btn-always-top').style.color = alwaysOnTop ? '#6366f1' : '';
+      updatePinButton();
     });
 
-    // 初期状態：最前面固定ON
-    ipcRenderer.send('preview:set-always-on-top', true);
-    document.getElementById('btn-always-top').style.color = '#6366f1';
+    // 初期状態：最前面固定OFF
+    ipcRenderer.send('preview:set-always-on-top', false);
+    updatePinButton();
   </script>
 </body>
 </html>
