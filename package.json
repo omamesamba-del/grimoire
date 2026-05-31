@@ -28,7 +28,8 @@
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
-      "preload-bridge.js"
+      "preload-bridge.js",
+      "preview.html"
     ],
     "extraResources": [
       {
