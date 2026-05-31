@@ -127,6 +127,8 @@ function _collectAll() {
     const n = id => parseFloat(document.getElementById(id)?.value ?? '0');
     const b = id => document.getElementById(id)?.checked ?? false;
     return {
+        checkpoint: v('gen-main-checkpoint'),
+        vae: v('gen-main-vae'),
         clipSkip: n('gen-clip-skip-num'),
         sampler: v('gen-sampler'),
         schedule: v('gen-schedule'),
