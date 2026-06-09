@@ -884,6 +884,10 @@ function createPreviewWindow() {
   const bgColor     = PREVIEW_THEME_BG[currentPreviewTheme]     || '#1e1e1e';
   const symbolColor = PREVIEW_SYMBOL_COLOR[currentPreviewTheme] || '#94a3b8';
 
+  const previewIconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'app', 'assets', 'icon.ico')
+    : path.join(process.cwd(), 'assets', 'icon.ico');
+
   previewWin = new BrowserWindow({
     width: savedBounds.width || 540,
     height: savedBounds.height || 620,
@@ -891,6 +895,7 @@ function createPreviewWindow() {
     minWidth: 300,
     minHeight: 200,
     title: 'Grimoire Preview',
+    icon: previewIconPath,
     alwaysOnTop: false,
     titleBarStyle: 'hidden',
     titleBarOverlay: { color: bgColor, symbolColor, height: 34 },
@@ -951,6 +956,10 @@ function startOutputWatch(folderPath) {
 
 ipcMain.on('preview:set-always-on-top', (_, val) => {
   if (previewWin && !previewWin.isDestroyed()) previewWin.setAlwaysOnTop(val);
+});
+
+ipcMain.on('main:set-always-on-top', (_, val) => {
+  if (win && !win.isDestroyed()) win.setAlwaysOnTop(val);
 });
 
 const PREVIEW_THEME_BG     = { dark: '#0a0f1e', black: '#000000', gray: '#1e1e1e', light: '#f1f5f9' };

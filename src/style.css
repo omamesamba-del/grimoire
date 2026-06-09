@@ -176,6 +176,7 @@ body.app-loading #image-info-panel {
   transition: background 0.15s;
 }
 .icon-btn:hover { background: rgba(255,255,255,0.08); }
+.icon-btn.active { background: rgba(99,102,241,0.18); color: #818cf8; }
 
 .titlebar-icon-btn {
   width: 28px;

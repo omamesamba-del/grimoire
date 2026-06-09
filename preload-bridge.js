@@ -107,6 +107,7 @@ window.electronAPI = {
   // Preview Window
   openPreviewWindow: () => ipcRenderer.invoke('preview:open'),
   setPreviewTheme: (theme) => ipcRenderer.send('preview:set-theme', theme),
+  setMainAlwaysOnTop: (val) => ipcRenderer.send('main:set-always-on-top', val),
 
   // Shell
   openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),

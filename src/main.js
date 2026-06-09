@@ -1438,6 +1438,18 @@ function setupEventListeners() {
         };
     }
 
+    // Main Window Pin (Always on Top)
+    const pinMainBtn = document.getElementById('btn-pin-main');
+    if (pinMainBtn) {
+        let mainPinned = false;
+        pinMainBtn.addEventListener('click', () => {
+            mainPinned = !mainPinned;
+            window.electronAPI.setMainAlwaysOnTop(mainPinned);
+            pinMainBtn.classList.toggle('active', mainPinned);
+            pinMainBtn.title = mainPinned ? 'Unpin (Always on Top)' : 'Always on Top';
+        });
+    }
+
     // Comfy Syntax Toggle Logic
     const comfyToggle = document.getElementById('btn-toggle-comfy');
     if (comfyToggle) {
