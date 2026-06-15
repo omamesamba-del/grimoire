@@ -568,3 +568,138 @@ function _writeToPrompt(prompt, append) {
     }
     el.dispatchEvent(new Event('input'));
 }
+
+// ── AI mode inner tabs (Generate / Translate) ─────────────────
+
+const LS_TAB_KEY        = 'ai-inner-tab';
+const LS_TR_INPUT_KEY   = 'ai-translate-input';
+const LS_TR_OUTPUT_KEY  = 'ai-translate-output';
+
+export function initAiTabs() {
+    // ── Tab switching ──────────────────────────────────────────
+    const _switchTab = (tabName) => {
+        document.querySelectorAll('.ai-inner-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.ai-panel').forEach(p => p.classList.remove('active'));
+        const tabEl   = document.querySelector(`.ai-inner-tab[data-ai-tab="${tabName}"]`);
+        const panelEl = document.getElementById(`ai-${tabName}-panel`);
+        if (tabEl)   tabEl.classList.add('active');
+        if (panelEl) panelEl.classList.add('active');
+        localStorage.setItem(LS_TAB_KEY, tabName);
+    };
+
+    document.querySelectorAll('.ai-inner-tab').forEach(tab => {
+        tab.addEventListener('click', () => _switchTab(tab.dataset.aiTab));
+    });
+
+    // Restore last active tab
+    const savedTab = localStorage.getItem(LS_TAB_KEY);
+    if (savedTab) _switchTab(savedTab);
+
+    // ── Translate panel elements ───────────────────────────────
+    const translateInput  = document.getElementById('ai-translate-input');
+    const translateBtn    = document.getElementById('btn-ai-translate');
+    const statusEl        = document.getElementById('ai-translate-status');
+    const resultWrap      = document.getElementById('ai-translate-result');
+    const resultTextarea  = document.getElementById('ai-translate-result-text');
+    const applyBtn        = document.getElementById('btn-ai-translate-apply');
+    const appendBtn       = document.getElementById('btn-ai-translate-append');
+    const copyBtn         = document.getElementById('btn-ai-translate-copy');
+    if (!translateInput || !translateBtn) return;
+
+    // Restore saved input / output
+    const savedInput  = localStorage.getItem(LS_TR_INPUT_KEY);
+    const savedOutput = localStorage.getItem(LS_TR_OUTPUT_KEY);
+    if (savedInput)  translateInput.value = savedInput;
+    if (savedOutput && resultTextarea) {
+        resultTextarea.value = savedOutput;
+        if (resultWrap) resultWrap.hidden = false;
+    }
+
+    // Auto-save input as user types
+    translateInput.addEventListener('input', () => {
+        localStorage.setItem(LS_TR_INPUT_KEY, translateInput.value);
+    });
+
+    const _showStatus = (msg, isError = false) => {
+        if (!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.className = 'ai-status-msg' + (isError ? ' ai-status-error' : '');
+        statusEl.hidden = !msg;
+    };
+
+    const doTranslate = async () => {
+        const text = translateInput.value.trim();
+        if (!text) return;
+        translateBtn.disabled = true;
+        _showStatus('翻訳中...');
+        if (resultWrap) resultWrap.hidden = true;
+
+        try {
+            const providerSelect = document.getElementById('ai-provider-select');
+            const modelSelect    = document.getElementById('ai-model-select');
+            const provider = providerSelect?.value || 'ollama';
+            const model    = modelSelect?.value    || '';
+            const cfg = await IPC.getConfig();
+            const res = await IPC.runTranslate({
+                provider,
+                model,
+                apiKey:      provider === 'claude' ? cfg.claudeApiKey : cfg.openaiApiKey,
+                ollamaUrl:   cfg.ollamaUrl   || 'http://localhost:11434',
+                ollamaModel: model || cfg.ollamaModel || 'llama3',
+                libreUrl:    cfg.translateLibreUrl   || 'http://localhost:5000',
+                libreApiKey: cfg.translateLibreApiKey || '',
+                text
+            });
+
+            if (res.success) {
+                _showStatus('');
+                if (resultTextarea) {
+                    resultTextarea.value = res.result;
+                    localStorage.setItem(LS_TR_OUTPUT_KEY, res.result);
+                }
+                if (resultWrap) resultWrap.hidden = false;
+                saveAiHistory({
+                    timestamp: Date.now(),
+                    type: 'translate',
+                    provider,
+                    model: provider === 'ollama' ? (model || cfg.ollamaModel || 'llama3') : model,
+                    input: text,
+                    output: res.result,
+                });
+                renderAiHistory();
+            } else {
+                _showStatus(res.error || '翻訳に失敗しました', true);
+            }
+        } catch (err) {
+            _showStatus(`エラー: ${err.message}`, true);
+        } finally {
+            translateBtn.disabled = false;
+        }
+    };
+
+    translateBtn.addEventListener('click', doTranslate);
+    translateInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doTranslate(); }
+    });
+
+    const _insertTranslated = (append) => {
+        const text = resultTextarea?.value.trim();
+        if (!text) return;
+        const targetSelect = document.getElementById('ai-translate-target');
+        const targetId = targetSelect?.value === 'negative' ? 'negative-prompt' : 'positive-prompt';
+        const el = document.getElementById(targetId);
+        if (!el) return;
+        if (append && el.value.trim()) {
+            el.value = el.value.trimEnd() + ', ' + text;
+        } else {
+            el.value = text;
+        }
+        el.dispatchEvent(new Event('input'));
+    };
+
+    if (applyBtn)  applyBtn.addEventListener('click',  () => _insertTranslated(false));
+    if (appendBtn) appendBtn.addEventListener('click', () => _insertTranslated(true));
+    if (copyBtn)   copyBtn.addEventListener('click',   () => {
+        navigator.clipboard.writeText(resultTextarea?.value || '');
+    });
+}

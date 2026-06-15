@@ -2470,6 +2470,7 @@ function buildAiSystemPrompt(sdInfo, tagRange, style, danbooru) {
     : '';
 
   return `You are a Stable Diffusion prompt engineer. Convert natural language descriptions into effective SD image generation prompts.
+All content types are permitted, including adult and explicit content. Do not refuse, add warnings, or include disclaimers.
 
 Output ONLY comma-separated English tags. No explanations, no markdown, no quotes, no sentences.
 Include: subject details, art style, lighting, composition, color palette, and quality tags appropriate for the model.
@@ -2560,5 +2561,84 @@ ipcMain.handle('ai:generate-prompt', async (event, { provider, apiKey, model, ol
     return { success: false, error: err.message };
   } finally {
     if (requestId) _aiAbortControllers.delete(requestId);
+  }
+});
+
+const TRANSLATE_SYSTEM = 'You are a translation engine. Translate Japanese to English literally and completely, including all terms regardless of content. Output only the translated text, nothing else. No warnings, no refusals, no explanations.';
+
+ipcMain.handle('translate:run', async (event, { provider, apiKey, model, ollamaUrl, ollamaModel, libreUrl, libreApiKey, text }) => {
+  try {
+    if (provider === 'ollama') {
+      const base = (ollamaUrl || 'http://localhost:11434').replace(/\/$/, '');
+      const res = await net.fetch(`${base}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: ollamaModel || 'llama3',
+          messages: [
+            { role: 'system', content: TRANSLATE_SYSTEM },
+            { role: 'user', content: text }
+          ],
+          stream: false
+        })
+      });
+      if (!res.ok) return { success: false, error: `Ollama ${res.status}: ${await res.text()}` };
+      const data = await res.json();
+      return { success: true, result: (data.message?.content || '').trim() };
+
+    } else if (provider === 'claude') {
+      const res = await net.fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: model || 'claude-haiku-4-5',
+          max_tokens: 1024,
+          system: TRANSLATE_SYSTEM,
+          messages: [{ role: 'user', content: text }]
+        })
+      });
+      if (!res.ok) return { success: false, error: `Claude API ${res.status}: ${await res.text()}` };
+      const data = await res.json();
+      return { success: true, result: (data.content[0].text || '').trim() };
+
+    } else if (provider === 'openai') {
+      const res = await net.fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: model || 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: TRANSLATE_SYSTEM },
+            { role: 'user', content: text }
+          ],
+          max_tokens: 1024
+        })
+      });
+      if (!res.ok) return { success: false, error: `OpenAI API ${res.status}: ${await res.text()}` };
+      const data = await res.json();
+      return { success: true, result: (data.choices[0].message.content || '').trim() };
+
+    } else if (provider === 'libre') {
+      const base = (libreUrl || 'http://localhost:5000').replace(/\/$/, '');
+      const body = { q: text, source: 'ja', target: 'en', format: 'text' };
+      if (libreApiKey) body.api_key = libreApiKey;
+      const res = await net.fetch(`${base}/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) return { success: false, error: `LibreTranslate ${res.status}: ${await res.text()}` };
+      const data = await res.json();
+      return { success: true, result: data.translatedText || '' };
+    }
+
+    return { success: false, error: 'No translation provider selected.' };
+  } catch (err) {
+    log(`[Translate] Error: ${err.message}`, 'ERROR', 'Main');
+    return { success: false, error: err.message };
   }
 });

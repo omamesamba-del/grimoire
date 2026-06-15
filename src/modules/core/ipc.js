@@ -314,6 +314,11 @@ export const IPC = {
         return { success: true };
     },
 
+    async runTranslate(params) {
+        if (isElectron) return await window.electronAPI.runTranslate(params);
+        return { success: false, error: 'Not in Electron' };
+    },
+
     async generateAiPrompt(params) {
         if (isElectron) return await window.electronAPI.generateAiPrompt(params);
         return { success: false, error: 'Not in Electron' };

@@ -42,6 +42,24 @@ function _deleteEntry(idx) {
 }
 
 function _restoreEntry(item) {
+    if (item.type === 'translate') {
+        document.querySelectorAll('.ai-inner-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.ai-panel').forEach(p => p.classList.remove('active'));
+        const tabEl   = document.querySelector('.ai-inner-tab[data-ai-tab="translate"]');
+        const panelEl = document.getElementById('ai-translate-panel');
+        if (tabEl)   tabEl.classList.add('active');
+        if (panelEl) panelEl.classList.add('active');
+        localStorage.setItem('ai-inner-tab', 'translate');
+
+        const inputEl  = document.getElementById('ai-translate-input');
+        const resultEl = document.getElementById('ai-translate-result');
+        const resultTA = document.getElementById('ai-translate-result-text');
+        if (inputEl)  { inputEl.value = item.input;  localStorage.setItem('ai-translate-input', item.input); }
+        if (resultTA) { resultTA.value = item.output; localStorage.setItem('ai-translate-output', item.output); }
+        if (resultEl) resultEl.hidden = false;
+        return;
+    }
+
     const inputEl  = document.getElementById('ai-natural-input');
     const resultEl = document.getElementById('ai-prompt-result');
     const resultText = document.getElementById('ai-result-text');
@@ -98,8 +116,9 @@ export function renderAiHistory() {
         const date = new Date(item.timestamp);
         const timeStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
 
+        const typeLabel = item.type === 'translate' ? '🌐 ' : '';
         el.innerHTML = `
-            <div class="ai-history-meta">${timeStr} · ${item.provider} · ${item.model || ''}</div>
+            <div class="ai-history-meta">${typeLabel}${timeStr} · ${item.provider} · ${item.model || ''}</div>
             <div class="ai-history-input">${item.input}</div>
             <div class="ai-history-output">${item.output}</div>
         `;

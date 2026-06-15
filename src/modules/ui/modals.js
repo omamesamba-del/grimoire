@@ -232,6 +232,11 @@ export function setupModals() {
                 yamlAutoSave: document.getElementById('setting-yaml-autosave')?.checked || false,
                 allowMultipleInstances: document.getElementById('setting-allow-multi-instance')?.checked || false,
                 danbooruUnderscoreToSpace: document.getElementById('setting-danbooru-underscore')?.checked ?? true,
+                translateBackend:       document.getElementById('setting-translate-backend')?.value       || 'off',
+                translateOllamaUrl:     document.getElementById('setting-translate-ollama-url')?.value    || 'http://localhost:11434',
+                translateOllamaModel:   document.getElementById('setting-translate-ollama-model')?.value  || 'llama3',
+                translateLibreUrl:      document.getElementById('setting-translate-libre-url')?.value     || 'http://localhost:5000',
+                translateLibreApiKey:   document.getElementById('setting-translate-libre-apikey')?.value  || '',
                 shortcuts: collectShortcutOverrides(),
                 language: langSelect?.value || 'en',
             };
@@ -260,6 +265,14 @@ export function setupModals() {
 
             settingsModal.close();
         };
+    }
+
+    // Translation backend select (live preview in settings)
+    const translateBackendSelect = document.getElementById('setting-translate-backend');
+    if (translateBackendSelect) {
+        translateBackendSelect.addEventListener('change', () => {
+            _updateTranslateBackendSections(translateBackendSelect.value);
+        });
     }
 
     // Add Category
@@ -706,6 +719,15 @@ export async function openSettings() {
     fill('setting-openai-apikey',   cfg.openaiApiKey || '');
     fill('setting-openai-model',    cfg.openaiModel  || '');
 
+    // Translation settings
+    const translateBackendEl = document.getElementById('setting-translate-backend');
+    if (translateBackendEl) translateBackendEl.value = cfg.translateBackend || 'off';
+    fill('setting-translate-ollama-url',   cfg.translateOllamaUrl   || 'http://localhost:11434');
+    fill('setting-translate-ollama-model', cfg.translateOllamaModel || 'llama3');
+    fill('setting-translate-libre-url',    cfg.translateLibreUrl    || 'http://localhost:5000');
+    fill('setting-translate-libre-apikey', cfg.translateLibreApiKey || '');
+    _updateTranslateBackendSections(cfg.translateBackend || 'off');
+
     renderCategoryColorSettings();
     renderShortcutsTab(cfg.shortcuts || {});
 
@@ -1073,3 +1095,13 @@ export function openImportYamlModal(parsedCategories) {
 
     modal.showModal();
 }
+
+// ── Translation Modal ──────────────────────────────────────────
+
+function _updateTranslateBackendSections(backend) {
+    const ollamaSection = document.getElementById('translate-section-ollama');
+    const libreSection  = document.getElementById('translate-section-libre');
+    if (ollamaSection) ollamaSection.style.display = backend === 'ollama' ? '' : 'none';
+    if (libreSection)  libreSection.style.display  = backend === 'libre'  ? '' : 'none';
+}
+

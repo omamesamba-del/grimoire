@@ -219,7 +219,8 @@
 
           <!-- AI Prompt Generation View (visible in AI mode) -->
           <div id="ai-container" class="tab-content">
-            <div class="ai-mode-wrap">
+            <!-- Shared header: provider / model selectors -->
+            <div class="ai-mode-wrap ai-shared-header">
               <!-- Provider selector -->
               <div class="ai-provider-row">
                 <label class="ai-selector-label" data-i18n="ai_provider_label">使用する AI</label>
@@ -239,7 +240,17 @@
               </div>
               <!-- Status / warning -->
               <div id="ai-status-msg" class="ai-status-msg" hidden></div>
+            </div>
 
+            <!-- Inner tab bar -->
+            <div class="ai-inner-tabs">
+              <button class="ai-inner-tab active" data-ai-tab="generate">✨ 生成</button>
+              <button class="ai-inner-tab" data-ai-tab="translate">🌐 翻訳</button>
+            </div>
+
+            <!-- Generate panel -->
+            <div id="ai-generate-panel" class="ai-panel active">
+            <div class="ai-mode-wrap">
               <!-- SD Info -->
               <div class="ai-section-sep"></div>
               <div class="ai-provider-row ai-sdinfo-header">
@@ -312,10 +323,6 @@
                 data-i18n="ai_input_placeholder"
                 placeholder="日本語や英語で自由に描写してください&#10;例: 夕暮れの海辺で白いワンピースの女の子が波を眺めている、映画的な雰囲気で&#10;&#10;Enter で変換 / Shift+Enter で改行"></textarea>
               <div class="ai-prompt-controls">
-                <select id="ai-target-area" class="ai-target-select">
-                  <option value="positive" data-i18n="ai_target_positive">➕ Positive に追加</option>
-                  <option value="negative" data-i18n="ai_target_negative">➖ Negative に追加</option>
-                </select>
                 <button id="btn-ai-generate" class="btn-primary ai-generate-btn" data-i18n="ai_generate_btn">✨ AI 変換</button>
                 <button id="btn-ai-cancel" class="btn-secondary ai-cancel-btn" hidden data-i18n="ai_cancel_btn">✕ キャンセル</button>
               </div>
@@ -323,6 +330,10 @@
                 <div class="ai-result-header">
                   <span class="ai-result-label" data-i18n="ai_result_label">生成結果</span>
                   <div class="ai-result-actions">
+                    <select id="ai-target-area" class="ai-target-select">
+                      <option value="positive" data-i18n="ai_target_positive">➕ Positive</option>
+                      <option value="negative" data-i18n="ai_target_negative">➖ Negative</option>
+                    </select>
                     <button id="btn-ai-apply" class="btn-primary" data-i18n="ai_apply_overwrite">→ 上書き</button>
                     <button id="btn-ai-append" class="btn-secondary" data-i18n="ai_append">＋ 追記</button>
                     <button id="btn-ai-copy" class="btn-secondary" data-i18n="ai_copy">📋 コピー</button>
@@ -331,6 +342,36 @@
                 <div id="ai-result-text" class="ai-result-text"></div>
               </div>
             </div>
+            </div><!-- /#ai-generate-panel -->
+
+            <!-- Translate panel -->
+            <div id="ai-translate-panel" class="ai-panel">
+              <div class="ai-mode-wrap">
+                <div class="ai-mode-label">💬 日本語を入力してください</div>
+                <textarea id="ai-translate-input" class="ai-natural-input"
+                  placeholder="日本語で入力...&#10;&#10;Ctrl+Enter で翻訳"></textarea>
+                <div class="ai-prompt-controls">
+                  <button id="btn-ai-translate" class="btn-primary ai-generate-btn">🌐 翻訳</button>
+                </div>
+                <div id="ai-translate-status" class="ai-status-msg" hidden></div>
+                <div id="ai-translate-result" class="ai-mode-result" hidden>
+                  <div class="ai-result-header">
+                    <span class="ai-result-label">翻訳結果 <span style="font-size:0.78rem; font-weight:400; opacity:0.6;">（編集可）</span></span>
+                    <div class="ai-result-actions">
+                      <select id="ai-translate-target" class="ai-target-select">
+                        <option value="positive">➕ Positive</option>
+                        <option value="negative">➖ Negative</option>
+                      </select>
+                      <button id="btn-ai-translate-apply" class="btn-primary">→ 上書き</button>
+                      <button id="btn-ai-translate-append" class="btn-secondary">＋ 追記</button>
+                      <button id="btn-ai-translate-copy" class="btn-secondary">📋 コピー</button>
+                    </div>
+                  </div>
+                  <textarea id="ai-translate-result-text" class="ai-translate-result-textarea"></textarea>
+                </div>
+              </div>
+            </div><!-- /#ai-translate-panel -->
+
           </div>
 
 
@@ -768,6 +809,9 @@
           <div class="settings-nav-item" data-tab="ai">
             <span class="snav-icon">✨</span> <span data-i18n="tab_ai_settings">AI 生成</span>
           </div>
+          <div class="settings-nav-item" data-tab="translation">
+            <span class="snav-icon">🌐</span> <span>Translation</span>
+          </div>
           <div class="settings-nav-item" data-tab="shortcuts">
             <span class="snav-icon">⌨️</span> <span data-i18n="tab_shortcuts">ショートカット</span>
           </div>
@@ -1047,6 +1091,44 @@
                   <label><span data-i18n="ai_settings_model">モデル</span> <span class="ai-field-hint" data-i18n="ai_settings_openai_hint">（空欄 = gpt-4o-mini）</span></label>
                   <input type="text" id="setting-openai-model" class="modal-input" placeholder="gpt-4o-mini">
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Translation -->
+          <div class="settings-tab" id="stab-translation">
+            <h3 class="stab-title">🌐 Translation</h3>
+            <div class="stab-section-label">Backend</div>
+            <div class="form-group">
+              <label>Translation Backend</label>
+              <select id="setting-translate-backend" class="modal-input">
+                <option value="off">Off</option>
+                <option value="ollama">Ollama (local LLM)</option>
+                <option value="libre">LibreTranslate (local)</option>
+              </select>
+            </div>
+
+            <div class="translate-backend-section" id="translate-section-ollama">
+              <div class="stab-section-label">Ollama</div>
+              <div class="form-group">
+                <label>URL</label>
+                <input type="text" id="setting-translate-ollama-url" class="modal-input" placeholder="http://localhost:11434">
+              </div>
+              <div class="form-group">
+                <label>Model <span class="ai-field-hint">（例: llama3, qwen3:0.6b）</span></label>
+                <input type="text" id="setting-translate-ollama-model" class="modal-input" placeholder="llama3">
+              </div>
+            </div>
+
+            <div class="translate-backend-section" id="translate-section-libre">
+              <div class="stab-section-label">LibreTranslate</div>
+              <div class="form-group">
+                <label>URL</label>
+                <input type="text" id="setting-translate-libre-url" class="modal-input" placeholder="http://localhost:5000">
+              </div>
+              <div class="form-group">
+                <label>API Key <span class="ai-field-hint">（不要な場合は空欄）</span></label>
+                <input type="text" id="setting-translate-libre-apikey" class="modal-input" placeholder="">
               </div>
             </div>
           </div>

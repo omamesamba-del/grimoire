@@ -30,7 +30,12 @@ export class ConfigService {
       allowMultipleInstances: false,
       danbooruUnderscoreToSpace: true,
       shortcuts: {},
-      language: 'en'
+      language: 'en',
+      translateBackend: 'off',
+      translateOllamaUrl: 'http://localhost:11434',
+      translateOllamaModel: 'llama3',
+      translateLibreUrl: 'http://localhost:5000',
+      translateLibreApiKey: ''
     };
     
     // Ensure data directory exists

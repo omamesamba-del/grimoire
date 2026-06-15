@@ -18,7 +18,7 @@ import { addToPrompt, parsePrompt, stringifyPrompt, resolveRandomChips, getActiv
 import { initImageBrowser, renderImageExplorer, refreshImageBrowserView } from './modules/ui/image-browser.js';
 import { initGeneration, getGenPayload, applyPreset, syncSamplerScheduleToMode } from './modules/ui/generation.js';
 import { registerComfySlotsHandler, syncComfySlotsVisibility, loadComfySlots, getAllSlotTexts } from './modules/ui/comfySlots.js';
-import { initAiPrompt } from './modules/ui/ai-prompt.js';
+import { initAiPrompt, initAiTabs } from './modules/ui/ai-prompt.js';
 import { recordHistory, openHistoryPanel } from './modules/ui/promptHistory.js';
 import { toggleSlotMode, exitSlotMode, applySlots, openSlotSettings, isSlotMode, activeSlotEl, reloadSlots } from './modules/ui/slotMode.js';
 import { initCheckpointEdit } from './modules/ui/checkpointEdit.js';
@@ -70,6 +70,7 @@ async function initApp() {
         initHistory();
         initStylePalette();
         initAiPrompt();
+        initAiTabs();
         initCheckpointEdit();
         initAssetEdit();
 
@@ -1339,6 +1340,7 @@ function setupEventListeners() {
         if (enableBtn) enableBtn.style.display = isChipMode ? '' : 'none';
     };
     window.addEventListener('selection-changed', updateSelectionHud);
+
 
     // Selection HUD: Bulk Star（タググリッド選択のみ）
     document.getElementById('btn-hud-star')?.addEventListener('click', async () => {

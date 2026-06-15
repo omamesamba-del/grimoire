@@ -7428,3 +7428,55 @@ body.theme-gray .ai-target-select option {
 }
 .ai-result-text.ai-result-error { color: #fb7185; }
 
+/* ── AI mode shared header ───────────────────────────────────── */
+.ai-shared-header {
+  border-bottom: 1px solid var(--border-divider, rgba(255,255,255,0.08));
+  padding-bottom: 0.25rem;
+}
+
+/* ── AI mode inner tabs ───────────────────────────────────────── */
+.ai-inner-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid var(--border-divider, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+}
+.ai-inner-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem 0.4rem;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ai-inner-tab:hover { color: var(--text-primary); }
+.ai-inner-tab.active {
+  color: var(--accent-primary, #818cf8);
+  border-bottom-color: var(--accent-primary, #818cf8);
+}
+.ai-panel { display: none; flex: 1; overflow-y: auto; }
+.ai-panel.active { display: block; }
+
+/* ── Translate panel result textarea ────────────────────────── */
+.ai-translate-result-textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  background: var(--slate-800, rgba(30,41,59,0.8));
+  border: 1px solid var(--slate-700, rgba(255,255,255,0.1));
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  line-height: 1.65;
+  padding: 0.6rem 0.75rem;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* ── Translation Settings section ───────────────────────────── */
+.translate-backend-section { margin-top: 0.5rem; }
+

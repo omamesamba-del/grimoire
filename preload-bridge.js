@@ -116,6 +116,9 @@ window.electronAPI = {
   getFavImageDir: () => ipcRenderer.invoke('images:get-fav-dir'),
   addFavoriteImage: (filePath) => ipcRenderer.invoke('images:add-favorite', { filePath }),
 
+  // Translation
+  runTranslate: (params) => ipcRenderer.invoke('translate:run', params),
+
   // AI Prompt Generation
   generateAiPrompt: (params) => ipcRenderer.invoke('ai:generate-prompt', params),
   cancelAiPrompt: (params) => ipcRenderer.invoke('ai:cancel-prompt', params),
