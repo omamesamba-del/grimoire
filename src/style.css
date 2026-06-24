@@ -6283,14 +6283,52 @@ body.theme-light .explorer-item-wrap[class*="cat-"] .item-label {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   max-height: 300px;
   transition: max-height 0.2s var(--ease-out), padding 0.2s var(--ease-out);
+  scrollbar-width: thin;
+  scrollbar-color: var(--slate-600) transparent;
+}
+.style-palette-body::-webkit-scrollbar { width: 5px; }
+.style-palette-body::-webkit-scrollbar-track { background: transparent; }
+.style-palette-body::-webkit-scrollbar-thumb {
+  background: var(--slate-600);
+  border-radius: 3px;
 }
 .style-palette-body.collapsed {
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
+  overflow: hidden;
+}
+
+/* Resize handle */
+.style-palette-resize-handle {
+  height: 6px;
+  cursor: ns-resize;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.style-palette-resize-handle:hover,
+.style-palette-resize-handle.dragging {
+  background: rgba(255,255,255,0.06);
+}
+.style-palette-resize-handle::after {
+  content: '';
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--slate-600);
+  transition: background 0.15s;
+}
+.style-palette-resize-handle:hover::after,
+.style-palette-resize-handle.dragging::after {
+  background: var(--slate-400);
 }
 
 /* Row */

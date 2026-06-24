@@ -259,6 +259,7 @@ export function initStylePalette() {
 
     _updateBadge();
     _buildEditorDialog();
+    _initResizeHandle();
 
     window.addEventListener('languageChanged', _rebuildAllChips);
 }
@@ -760,5 +761,53 @@ function _attachSortable(tabKey) {
             _renderEditorList(tabKey);
             _attachSortable(tabKey);
         }
+    });
+}
+
+// ──────────────────────────────────────────────────────────────
+// Resize handle
+// ──────────────────────────────────────────────────────────────
+
+const SP_HEIGHT_KEY = 'stylePaletteHeight';
+const SP_MIN_HEIGHT = 80;
+const SP_MAX_HEIGHT = 600;
+
+function _initResizeHandle() {
+    const body = document.getElementById('style-palette-body');
+    const handle = document.getElementById('style-palette-resize-handle');
+    if (!body || !handle) return;
+
+    const saved = parseInt(localStorage.getItem(SP_HEIGHT_KEY), 10);
+    if (saved && saved >= SP_MIN_HEIGHT && saved <= SP_MAX_HEIGHT) {
+        body.style.maxHeight = saved + 'px';
+    }
+
+    let startY = 0;
+    let startH = 0;
+
+    function onPointerMove(e) {
+        const delta = e.clientY - startY;
+        const newH = Math.min(SP_MAX_HEIGHT, Math.max(SP_MIN_HEIGHT, startH + delta));
+        body.style.maxHeight = newH + 'px';
+    }
+
+    function onPointerUp(e) {
+        handle.classList.remove('dragging');
+        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerup', onPointerUp);
+        handle.releasePointerCapture(e.pointerId);
+        const h = parseInt(body.style.maxHeight, 10);
+        if (h) localStorage.setItem(SP_HEIGHT_KEY, String(h));
+    }
+
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        handle.setPointerCapture(e.pointerId);
+        handle.classList.add('dragging');
+        startY = e.clientY;
+        startH = body.getBoundingClientRect().height;
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
     });
 }
