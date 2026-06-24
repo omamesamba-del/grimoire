@@ -10,10 +10,12 @@
  */
 
 import { IPC } from '../core/ipc.js';
+import { i18n } from '../core/i18n.js';
 import { applyPreset } from './generation.js';
 import { readPngTextChunks, parseSdMetadata } from './genPngDrop.js';
 
 let _currentAsset = null;
+let _contextMenu  = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,20 @@ export function initCheckpointEdit() {
     document.getElementById('checkpoint-edit-save')?.addEventListener('click', async () => {
         if (!_currentAsset) return;
         await _collectAndSave();
+    });
+
+    // Right-click on a CivitAI thumbnail → set as thumbnail
+    document.getElementById('checkpoint-edit-images')?.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const thumb = e.target.closest('.cp-edit-civitai-thumb');
+        if (!thumb) return;
+        _showContextMenu(e.clientX, e.clientY, thumb.dataset.url);
+    });
+
+    // Close context menu on outside click
+    document.addEventListener('click', _hideContextMenu);
+    document.addEventListener('contextmenu', (e) => {
+        if (!e.target.closest('#checkpoint-edit-images')) _hideContextMenu();
     });
 
     // Click on a CivitAI thumbnail → auto-fill from PNG metadata
@@ -184,7 +200,7 @@ export function openCheckpointEditModal(asset) {
                 const safeUrl  = String(img.url || '').replace(/"/g, '&quot;');
                 const metaJson = img.meta ? JSON.stringify(img.meta).replace(/"/g, '&quot;') : '';
                 const hasMeta  = !!img.meta;
-                return `<div class="cp-edit-civitai-thumb" data-url="${safeUrl}" data-meta-json="${metaJson}" title="${hasMeta ? 'Has metadata — click to auto-fill' : 'No metadata'}">
+                return `<div class="cp-edit-civitai-thumb" data-url="${safeUrl}" data-meta-json="${metaJson}" title="${hasMeta ? 'Click to auto-fill · Right-click to set as thumbnail' : 'Right-click to set as thumbnail'}">
                     <img src="${safeUrl}" alt="" loading="lazy" onerror="this.closest('.cp-edit-civitai-thumb').style.display='none'">
                     ${hasMeta ? '<span class="cp-edit-has-meta">i</span>' : ''}
                 </div>`;
@@ -438,4 +454,31 @@ function _fillFormFromApiMeta(meta) {
         if (w) _setVal('checkpoint-edit-width',  w.trim());
         if (h) _setVal('checkpoint-edit-height', h.trim());
     }
+}
+
+// ── Thumbnail context menu ────────────────────────────────────────────────────
+
+function _showContextMenu(x, y, imageUrl) {
+    _hideContextMenu();
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.id = 'cp-edit-context-menu';
+    menu.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:9999;`;
+    menu.innerHTML = `<div class="context-menu-item" id="cp-edit-set-thumb">${i18n.t('asset_edit_set_thumb')}</div>`;
+    document.getElementById('checkpoint-edit-dialog').appendChild(menu);
+    _contextMenu = menu;
+
+    document.getElementById('cp-edit-set-thumb').addEventListener('click', async () => {
+        _hideContextMenu();
+        if (!_currentAsset?.fullPath || !imageUrl) return;
+        const result = await IPC.setAssetThumbnail(_currentAsset.fullPath, imageUrl);
+        if (result?.success) {
+            _currentAsset.thumbnail = `asset:///${encodeURIComponent(result.thumbPath.replace(/\\/g, '/'))}`;
+            window.dispatchEvent(new CustomEvent('asset:thumbnail-updated', { detail: _currentAsset }));
+        }
+    });
+}
+
+function _hideContextMenu() {
+    if (_contextMenu) { _contextMenu.remove(); _contextMenu = null; }
 }
