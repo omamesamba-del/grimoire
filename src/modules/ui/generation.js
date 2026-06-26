@@ -74,7 +74,7 @@ const SAMPLERS = {
 };
 
 const SCHEDULERS = {
-    webui: ['Automatic', 'Karras', 'Exponential', 'Polyexponential', 'SGM Uniform'],
+    webui: ['Automatic', 'Normal', 'Karras', 'Exponential', 'Polyexponential', 'SGM Uniform'],
     comfy: ['normal', 'karras', 'exponential', 'sgm_uniform', 'simple', 'ddim_uniform', 'beta'],
 };
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, Menu, dialog, nativeImage, net, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, Menu, dialog, nativeImage, net, shell, session } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -560,23 +560,62 @@ class AssetService {
               const name = path.parse(file).name;
               const relPath = path.join(relativeDir, file);
 
-              // --- Enhanced Image Discovery ---
+              // --- Enhanced Image Discovery (CivitAI Helper compatible) ---
               let thumbnail = null;
-              const imgPatterns = ['', '.preview', '.sample', 'thumb', '_preview', '_thumb', '.view'];
               const imgExts = ['.png', '.jpg', '.jpeg', '.webp'];
+              const thumbUrl = (p) => {
+                const mt = Math.floor(fs.statSync(p).mtimeMs);
+                return `thumb:///${encodeURIComponent(p.replace(/\\/g, '/'))}?t=${mt}`;
+              };
 
-              // 1. Strict pattern matching
-              outer: for (const pattern of imgPatterns) {
+              // 1. CivitAI Helper priority: model.png (no suffix) is highest
+              for (const imgExt of imgExts) {
+                const imgPath = path.join(dir, name + imgExt);
+                if (fs.existsSync(imgPath)) {
+                  thumbnail = thumbUrl(imgPath);
+                  break;
+                }
+              }
+
+              // 2. .preview suffix (CivitAI Helper standard)
+              if (!thumbnail) {
                 for (const imgExt of imgExts) {
-                  const imgPath = path.join(dir, name + pattern + imgExt);
+                  const imgPath = path.join(dir, name + '.preview' + imgExt);
                   if (fs.existsSync(imgPath)) {
-                    thumbnail = `thumb:///${encodeURIComponent(imgPath.replace(/\\/g, '/'))}`;
-                    break outer;
+                    thumbnail = thumbUrl(imgPath);
+                    break;
                   }
                 }
               }
 
-              // 2. Flexible matching for download duplicates like "name (1).png"
+              // 3. .example.N suffix (CivitAI Helper v1.8.3+ multiple previews)
+              if (!thumbnail) {
+                try {
+                  const siblingFiles = fs.readdirSync(dir);
+                  const baseEsc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                  const exampleRegex = new RegExp(`^${baseEsc}\\.example\\.\\d+\\.(${imgExts.map(e => e.slice(1)).join('|')})$`, 'i');
+                  const exampleMatch = siblingFiles.find(f => exampleRegex.test(f));
+                  if (exampleMatch) {
+                    thumbnail = thumbUrl(path.join(dir, exampleMatch));
+                  }
+                } catch (e) {}
+              }
+
+              // 4. Other legacy patterns
+              if (!thumbnail) {
+                const legacyPatterns = ['.sample', '_preview', '_thumb', '.view'];
+                outer: for (const pattern of legacyPatterns) {
+                  for (const imgExt of imgExts) {
+                    const imgPath = path.join(dir, name + pattern + imgExt);
+                    if (fs.existsSync(imgPath)) {
+                      thumbnail = thumbUrl(imgPath);
+                      break outer;
+                    }
+                  }
+                }
+              }
+
+              // 5. Flexible matching for download duplicates like "name (1).png"
               if (!thumbnail) {
                 try {
                   const siblingFiles = fs.readdirSync(dir);
@@ -584,21 +623,18 @@ class AssetService {
                   const flexRegex = new RegExp(`^${basePattern}\\s*\\(\\d+\\)\\.(${imgExts.map(e => e.slice(1)).join('|')})$`, 'i');
                   const flexMatch = siblingFiles.find(f => flexRegex.test(f));
                   if (flexMatch) {
-                    thumbnail = `thumb:///${encodeURIComponent(path.join(dir, flexMatch).replace(/\\/g, '/'))}`;
+                    thumbnail = thumbUrl(path.join(dir, flexMatch));
                   }
                 } catch (e) {}
               }
 
-              if (thumbnail) {
-                  // log(`[AssetService] Found thumbnail for ${name}: ${thumbnail.slice(-30)}`);
-              }
-
-              // 3. Hidden file discovery
+              // 6. Hidden file discovery
               if (!thumbnail) {
                 for (const imgExt of imgExts) {
                   const imgPath = path.join(dir, '.' + name + imgExt);
                   if (fs.existsSync(imgPath)) {
-                    thumbnail = `asset:///${encodeURIComponent(imgPath.replace(/\\/g, '/'))}`;
+                    const mt = fs.statSync(imgPath).mtimeMs | 0;
+                    thumbnail = `asset:///${encodeURIComponent(imgPath.replace(/\\/g, '/'))}?t=${mt}`;
                     break;
                   }
                 }
@@ -611,22 +647,36 @@ class AssetService {
 
               let modelId  = null;
               let versionId = null;
+              let modelName = null;
+              let versionName = null;
+              let modelType = null;
               let civitaiImages = [];
+              let legacyMeta = false;
               const infoPath = path.join(dir, name + '.civitai.info');
               if (fs.existsSync(infoPath)) {
                 try {
                   const info = JSON.parse(fs.readFileSync(infoPath, 'utf8'));
+                  // Detect legacy Grimoire format: has 'versionId' but no 'id', or has flat 'modelName' but no 'model' object
+                  if ((info.versionId && !info.id) || (info.modelName && !info.model)) {
+                    legacyMeta = true;
+                  }
                   if (info.trainedWords && Array.isArray(info.trainedWords)) {
                     triggerWords = [...new Set([...triggerWords, ...info.trainedWords])];
                   }
                   if (info.baseModel) baseModel = info.baseModel;
-                  if (info.description) {
-                    // Strip HTML tags for cleaner display
-                    description = info.description.replace(/<[^>]*>?/gm, '').substring(0, 200);
+                  // Helper stores description at root or under model.description
+                  const rawDesc = info.description || info.model?.description || '';
+                  if (rawDesc) {
+                    description = rawDesc.replace(/<[^>]*>?/gm, '').substring(0, 200);
                   }
-                  if (info.modelId)   modelId   = info.modelId;
-                  if (info.versionId) versionId = info.versionId;
+                  modelId = info.modelId ?? null;
+                  versionId = info.versionId ?? info.id ?? null;
                   if (Array.isArray(info.images)) civitaiImages = info.images;
+                  if (!modelName && info.model?.name) modelName = info.model.name;
+                  if (!modelName && info.modelName) modelName = info.modelName;
+                  if (!versionName && info.name) versionName = info.name;
+                  if (!versionName && info.versionName) versionName = info.versionName;
+                  if (info.model?.type) modelType = info.model.type;
                 } catch (e) {}
               }
 
@@ -666,9 +716,13 @@ class AssetService {
                 description,
                 modelId,
                 versionId,
+                modelName,
+                versionName,
+                modelType,
                 civitaiImages,
                 pbSettings,
                 hasInfoFile: fs.existsSync(path.join(dir, name + '.civitai.info')),
+                legacyMeta,
                 category: relativeDir || 'root'
               });
             }
@@ -1108,18 +1162,20 @@ app.whenReady().then(() => {
         }
       }
 
-      // Use cached/resized thumbnail if available, otherwise serve original
-      const servePath = (await thumbnailService.getThumbnail(resolvedPath)) || resolvedPath;
+      // Asset preview files (.preview.xxx): serve directly, skip thumbnail cache
+      // Tag images: use cached/resized thumbnail
+      const basename = path.basename(resolvedPath).toLowerCase();
+      const isAssetPreview = basename.includes('.preview.') || basename.includes('.example.');
+      const servePath = isAssetPreview ? resolvedPath : ((await thumbnailService.getThumbnail(resolvedPath)) || resolvedPath);
 
-      // Read file directly — no net.fetch, no URL backslash issues
       const data = await fs.promises.readFile(servePath);
-      const ext = path.extname(servePath).slice(1).toLowerCase();
+      const serveExt = path.extname(servePath).slice(1).toLowerCase();
       const mimeMap = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif' };
-      const contentType = mimeMap[ext] || 'image/jpeg';
-      return new Response(data, { status: 200, headers: { 'Content-Type': contentType } });
+      const contentType = mimeMap[serveExt] || 'image/jpeg';
+      return new Response(data, { status: 200, headers: { 'Content-Type': contentType, 'Cache-Control': 'no-cache' } });
     } catch (e) {
       log(`[thumb://] Error: ${e.message}`);
-      return new Response(TRANSPARENT_PNG, { status: 200, headers: { 'Content-Type': 'image/png' } });
+      return new Response(TRANSPARENT_PNG, { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache' } });
     }
   });
 
@@ -1629,21 +1685,7 @@ ipcMain.handle('assets:delete-file', async (event, { fullPath }) => {
 });
 
 ipcMain.handle('civitai:delete-metadata', async (event, { fullPath }) => {
-  const dir      = path.dirname(fullPath);
-  const baseName = path.parse(fullPath).name;
-  const previewPatterns = ['.preview', '.sample', '_preview', '_thumb', '.view'];
-  const imgExts  = ['.png', '.jpg', '.jpeg', '.webp'];
-  const targets  = [baseName + '.civitai.info'];
-  for (const p of previewPatterns) {
-    for (const e of imgExts) targets.push(baseName + p + e);
-  }
-  const deleted = [];
-  for (const f of targets) {
-    const fp = path.join(dir, f);
-    if (fs.existsSync(fp)) {
-      try { fs.unlinkSync(fp); deleted.push(f); } catch (e) {}
-    }
-  }
+  const deleted = deleteMetadataFiles(fullPath);
   return { success: true, deletedFiles: deleted };
 });
 
@@ -1659,6 +1701,36 @@ function calcSHA256(filePath) {
   });
 }
 
+/** Delete all metadata/preview sidecar files for a given model file. */
+function deleteMetadataFiles(fullPath) {
+  const dir = path.dirname(fullPath);
+  const baseName = path.parse(fullPath).name;
+  const previewPatterns = ['.preview', '.sample', '_preview', '_thumb', '.view'];
+  const imgExts = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.mp4'];
+  const targets = [baseName + '.civitai.info'];
+  for (const p of previewPatterns) {
+    for (const e of imgExts) targets.push(baseName + p + e);
+  }
+  for (const e of imgExts) targets.push(baseName + e);
+  const deleted = [];
+  for (const f of targets) {
+    const fp = path.join(dir, f);
+    if (fs.existsSync(fp)) {
+      try { fs.unlinkSync(fp); deleted.push(f); } catch (_) {}
+    }
+  }
+  try {
+    const baseEsc = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const exRegex = new RegExp(`^${baseEsc}\\.example\\.\\d+\\.(${imgExts.map(e => e.slice(1)).join('|')})$`, 'i');
+    for (const f of fs.readdirSync(dir)) {
+      if (exRegex.test(f)) {
+        try { fs.unlinkSync(path.join(dir, f)); deleted.push(f); } catch (_) {}
+      }
+    }
+  } catch (_) {}
+  return deleted;
+}
+
 ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => {
   log(`[CivitAI] Fetching metadata for: ${path.basename(fullPath)}`);
 
@@ -1668,12 +1740,11 @@ ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => 
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-  // Domain fallback: auto → try civitai.com first, then civitai.red
   const cfg = configService.getConfig();
   const domainSetting = cfg.civitaiDomain || 'auto';
-  const tryDomains = domainSetting === 'auto'
-    ? ['civitai.com', 'civitai.red']
-    : [domainSetting];
+  const tryDomains = domainSetting === 'auto'     ? ['civitai.com', 'civitai.red']
+                   : domainSetting === 'auto-red' ? ['civitai.red', 'civitai.com']
+                   :                                [domainSetting];
 
   let res = null;
   let lastErr = '';
@@ -1696,71 +1767,86 @@ ipcMain.handle('civitai:fetch-metadata', async (event, { fullPath, apiKey }) => 
 
   const data = await res.json();
 
+  // API succeeded — now safe to delete old metadata before saving new
   const dir = path.dirname(fullPath);
   const baseName = path.parse(fullPath).name;
+  const cleaned = deleteMetadataFiles(fullPath);
+  if (cleaned.length > 0) log(`[CivitAI] Cleaned ${cleaned.length} old file(s)`);
 
-  // Build .civitai.info (same fields the app already reads)
+  // Build .civitai.info — store API response in CivitAI Helper compatible format
   const info = {
-    trainedWords: data.trainedWords || [],
-    baseModel: data.baseModel || '',
-    description: data.description
-      ? data.description.replace(/<[^>]*>/gm, '').trim().substring(0, 500)
-      : (data.model?.description ? data.model.description.replace(/<[^>]*>/gm, '').trim().substring(0, 500) : ''),
+    id: data.id,
     modelId: data.modelId,
-    versionId: data.id,
-    versionName: data.name,
-    modelName: data.model?.name || '',
-    // Store up to 10 images with their generation metadata
+    name: data.name || '',
+    description: data.description || '',
+    baseModel: data.baseModel || '',
+    trainedWords: data.trainedWords || [],
+    downloadUrl: data.downloadUrl || '',
+    tags: data.tags || [],
+    files: (data.files || []).map(f => ({
+      name: f.name,
+      type: f.type,
+      sizeKB: f.sizeKB,
+      hashes: f.hashes || {},
+    })),
     images: (data.images || []).slice(0, 10).map(img => ({
       url: img.url,
-      meta: img.meta || null,   // generation params: prompt, negativePrompt, sampler, steps, cfgScale, seed, Size, ...
+      type: img.type || 'image',
+      width: img.width || null,
+      height: img.height || null,
+      nsfwLevel: img.nsfwLevel ?? null,
+      meta: img.meta || null,
     })),
+    model: data.model ? {
+      name: data.model.name || '',
+      type: data.model.type || '',
+      description: data.model.description || '',
+      nsfw: data.model.nsfw ?? false,
+      poi: data.model.poi ?? false,
+      tags: data.model.tags || [],
+    } : null,
+    creator: data.creator || null,
   };
   const infoPath = path.join(dir, baseName + '.civitai.info');
   fs.writeFileSync(infoPath, JSON.stringify(info, null, 2), 'utf8');
   log(`[CivitAI] Saved: ${baseName}.civitai.info`);
 
-  // 既存のプレビュー画像を削除（拡張子が変わると古いファイルが残るため）
-  const previewPatterns = ['.preview', '.sample', '_preview', '_thumb', '.view'];
-  const previewImgExts  = ['.png', '.jpg', '.jpeg', '.webp'];
-  try {
-    const siblings = fs.readdirSync(dir);
-    for (const f of siblings) {
-      const lf = f.toLowerCase();
-      const matchesBase = previewPatterns.some(p =>
-        lf === (baseName + p).toLowerCase() + previewImgExts.find(e => lf.endsWith(e)) || false
-      ) || previewImgExts.some(imgExt =>
-        previewPatterns.some(p => lf === (baseName + p + imgExt).toLowerCase())
-      );
-      if (matchesBase) {
-        fs.unlinkSync(path.join(dir, f));
-        log(`[CivitAI] Removed old preview: ${f}`);
-      }
-    }
-  } catch (e) {
-    log(`[CivitAI] Preview cleanup failed: ${e.message}`, 'WARN');
-  }
-
-  // Download preview image — try each image in order until one succeeds
+  // Download preview image — first still image (skip videos)
   let savedThumb = null;
   const images = data.images || [];
-  for (const previewImg of images) {
+  const stillImages = images.filter(img => img.type !== 'video');
+  const primaryImages = stillImages.length > 0 ? stillImages : images;
+
+  const fetchImage = async (url) => {
+    const res = await session.defaultSession.fetch(url);
+    const buf = Buffer.from(await res.arrayBuffer());
+    return { status: res.status, buf };
+  };
+
+  for (let pi = 0; pi < primaryImages.length; pi++) {
+    const previewImg = primaryImages[pi];
     if (!previewImg?.url) continue;
+    const rawExt = path.extname(previewImg.url.split('?')[0]).toLowerCase() || '.jpeg';
+    if (rawExt === '.mp4') continue;
     try {
-      const imgUrl = previewImg.url;
-      const rawExt = path.extname(imgUrl.split('?')[0]) || '.jpeg';
-      const imgRes = await net.fetch(imgUrl, { headers });
-      if (imgRes.ok) {
-        const buf = Buffer.from(await imgRes.arrayBuffer());
-        const thumbPath = path.join(dir, baseName + '.preview.png');
-        fs.writeFileSync(thumbPath, buf);
+      const saveExt = ['.png', '.jpg', '.jpeg', '.webp', '.gif'].includes(rawExt) ? rawExt : '.png';
+      let result = null;
+      for (let retry = 0; retry < 3; retry++) {
+        if (retry > 0) await new Promise(r => setTimeout(r, 2000 * retry));
+        result = await fetchImage(previewImg.url);
+        if (result.status === 200) break;
+        if (result.status !== 401 && result.status !== 429) break;
+      }
+      if (result.status === 200 && result.buf.length > 0) {
+        const thumbPath = path.join(dir, baseName + '.preview' + saveExt);
+        fs.writeFileSync(thumbPath, result.buf);
         savedThumb = thumbPath;
-        log(`[CivitAI] Saved preview: ${path.basename(thumbPath)}`);
+        log(`[CivitAI] Saved preview: ${path.basename(thumbPath)} (${result.buf.length} bytes)`);
         break;
       }
-      log(`[CivitAI] Preview download skipped (HTTP ${imgRes.status}): ${imgUrl}`, 'WARN');
+      log(`[CivitAI] Preview skipped (HTTP ${result.status}): image ${pi}`, 'WARN');
     } catch (e) {
-      log(`[CivitAI] Preview download failed: ${e.message}`, 'WARN');
+      log(`[CivitAI] Preview failed: ${e.message}`, 'WARN');
     }
   }
 
@@ -2257,8 +2343,9 @@ ipcMain.handle('ai:get-checkpoints-with-meta', async () => {
   if (!basePath || !fs.existsSync(basePath)) return { checkpoints: [] };
 
   const modelExts   = ['.safetensors', '.ckpt', '.pt'];
-  const previewExts = ['.preview.jpeg', '.preview.jpg', '.preview.png', '.preview.webp',
-                       '.jpeg', '.jpg', '.png', '.webp'];
+  // CivitAI Helper priority: bare image → .preview → .example.N
+  const previewExts = ['.png', '.jpg', '.jpeg', '.webp',
+                       '.preview.png', '.preview.jpg', '.preview.jpeg', '.preview.webp'];
   const results = [];
 
   const walk = (dir, relPrefix = '') => {
@@ -2272,14 +2359,15 @@ ipcMain.handle('ai:get-checkpoints-with-meta', async () => {
           const baseName = path.basename(entry.name, path.extname(entry.name));
           let baseModel = null, modelName = null, description = null, thumbnail = null;
 
-          // .civitai.info
+          // .civitai.info (CivitAI Helper compatible)
           const infoPath = path.join(dir, baseName + '.civitai.info');
           if (fs.existsSync(infoPath)) {
             try {
               const info = JSON.parse(fs.readFileSync(infoPath, 'utf8'));
-              baseModel   = info.baseModel   || null;
-              modelName   = info.modelName   || null;
-              description = info.description || null;
+              baseModel   = info.baseModel || null;
+              modelName   = info.model?.name || info.modelName || null;
+              const rawDesc = info.description || info.model?.description || '';
+              description = rawDesc ? rawDesc.replace(/<[^>]*>?/gm, '').substring(0, 200) : null;
             } catch (_) {}
           }
           // .json fallback

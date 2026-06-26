@@ -674,8 +674,14 @@ export function renderAssetGrid(query = '') {
             const thumb = document.createElement('div');
             thumb.className = 'asset-thumb';
             if (asset.thumbnail) {
-                // Use the protocol-prefixed URL from backend directly
                 thumb.style.backgroundImage = `url("${asset.thumbnail}")`;
+            }
+            if (asset.legacyMeta) {
+                const warn = document.createElement('span');
+                warn.className = 'asset-legacy-badge';
+                warn.textContent = '⚠';
+                warn.title = 'Legacy metadata — Shift+Click the CivitAI button to refresh';
+                thumb.appendChild(warn);
             }
 
             const info = document.createElement('div');

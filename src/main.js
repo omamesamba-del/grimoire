@@ -177,6 +177,34 @@ async function initApp() {
         // データロード完了 — コンテンツを表示
         document.body.classList.remove('app-loading');
 
+        // Backend detection — show connected WebUI/ComfyUI info
+        const detectBackends = async () => {
+            const ind = document.getElementById('backend-indicator');
+            if (!ind) return;
+            const labels = [];
+            try {
+                const webui = await IPC.checkWebuiBridge();
+                if (webui.connected) {
+                    const name = { 'a1111': 'A1111', 'forge': 'Forge', 'forge-neo': 'Forge Neo', 'sdnext': 'SD.Next' }[webui.backend] || webui.backend || 'WebUI';
+                    labels.push(name);
+                }
+            } catch (_) {}
+            try {
+                const comfy = await IPC.checkComfyBridge();
+                if (comfy?.ok) labels.push('ComfyUI');
+            } catch (_) {}
+            if (labels.length > 0) {
+                ind.textContent = labels.join(' + ');
+                ind.classList.add('connected');
+                ind.title = `Connected: ${labels.join(', ')}`;
+            } else {
+                ind.textContent = 'offline';
+                ind.classList.remove('connected');
+                ind.title = 'No backend connected';
+            }
+        };
+        detectBackends();
+
         // Default focus: positive section
         const posChips = document.getElementById('positive-chips');
         posChips?.closest('.prompt-section')?.classList.add('active-area');
@@ -501,33 +529,85 @@ function setupEventListeners() {
     const btnRandomPick = document.getElementById('btn-random-pick');
     if (btnRandomPick) btnRandomPick.onclick = (e) => pickRandomTags(e.shiftKey ? 3 : 1);
 
-    // CivitAI Fetch All
+    // CivitAI Fetch All — normal click: fetch missing only / Shift+click: refresh all
     const btnFetchAll = document.getElementById('btn-fetch-all-civitai');
     if (btnFetchAll) {
-        btnFetchAll.onclick = async () => {
-            if (btnFetchAll.disabled) return;
+        let _fetchAbort = false;
+        let _fetchRunning = false;
+        btnFetchAll.onclick = async (e) => {
+            // Cancel if already running
+            if (_fetchRunning) {
+                _fetchAbort = true;
+                return;
+            }
+            const refreshAll = e.shiftKey;
             const mode = State.currentMode;
-            const assets = (mode === 'checkpoint' ? State.allAssets.checkpoints : mode === 'lora' ? State.allAssets.loras : State.allAssets.embeddings) || [];
-            const missing = assets.filter(a => a.fullPath && !a.hasInfoFile);
-            if (missing.length === 0) { alert('All assets already have metadata.'); return; }
-            if (!await showConfirmDialog(`Fetch metadata for ${missing.length} asset(s) without metadata?`)) return;
+            let assets = (mode === 'checkpoint' ? State.allAssets.checkpoints : mode === 'lora' ? State.allAssets.loras : State.allAssets.embeddings) || [];
+            const folder = State.currentAssetFilter;
+            if (folder && folder !== '__favorites__' && folder !== '__all__') {
+                assets = assets.filter(a => (a.relPath || '').startsWith(folder + '/'));
+            }
+            const targets = refreshAll
+                ? assets.filter(a => a.fullPath)
+                : assets.filter(a => a.fullPath && !a.hasInfoFile);
+            if (targets.length === 0) {
+                showToast(refreshAll ? 'No assets found.' : 'All assets already have metadata.', 'info');
+                return;
+            }
+            const scope = (folder && folder !== '__favorites__' && folder !== '__all__') ? ` in "${folder}"` : '';
+            const msg = refreshAll
+                ? `Re-fetch metadata for ${targets.length} asset(s)${scope}? This will update existing .civitai.info files.`
+                : `Fetch metadata for ${targets.length} asset(s)${scope} without metadata?`;
+            if (!await showConfirmDialog(msg)) return;
 
-            btnFetchAll.disabled = true;
+            _fetchRunning = true;
+            _fetchAbort = false;
             const origText = btnFetchAll.textContent;
             const cfg = await IPC.getConfig();
-            let done = 0;
-            for (const asset of missing) {
-                btnFetchAll.textContent = `⬇ ${done}/${missing.length}`;
+            let done = 0, failed = 0;
+            for (const asset of targets) {
+                if (_fetchAbort) break;
+                btnFetchAll.textContent = `■ ${done}/${targets.length}`;
+                btnFetchAll.title = 'Click to stop';
                 try {
                     await IPC.fetchCivitaiMetadata(asset.fullPath, cfg.civitaiApiKey || '');
-                } catch (_) {}
+                } catch (_) { failed++; }
                 done++;
+                if (done < targets.length && !_fetchAbort) await new Promise(r => setTimeout(r, 1500));
             }
+
+            // Retry pass: re-fetch assets that have .civitai.info but no preview
+            if (!_fetchAbort && done > 5) {
+                State.allAssets = await loadAssets();
+                const retryList = (mode === 'checkpoint' ? State.allAssets.checkpoints : mode === 'lora' ? State.allAssets.loras : State.allAssets.embeddings) || [];
+                const noPreview = retryList.filter(a => a.fullPath && a.hasInfoFile && !a.thumbnail && targets.some(t => t.fullPath === a.fullPath));
+                if (noPreview.length > 0) {
+                    btnFetchAll.textContent = `♻ 0/${noPreview.length}`;
+                    await new Promise(r => setTimeout(r, 5000));
+                    let retryDone = 0;
+                    for (const asset of noPreview) {
+                        if (_fetchAbort) break;
+                        btnFetchAll.textContent = `♻ ${retryDone}/${noPreview.length}`;
+                        try {
+                            await IPC.fetchCivitaiMetadata(asset.fullPath, cfg.civitaiApiKey || '');
+                        } catch (_) {}
+                        retryDone++;
+                        if (retryDone < noPreview.length && !_fetchAbort) await new Promise(r => setTimeout(r, 2000));
+                    }
+                }
+            }
+
             btnFetchAll.textContent = origText;
-            btnFetchAll.disabled = false;
+            btnFetchAll.title = 'Fetch missing metadata (Shift+Click: refresh all)';
+            _fetchRunning = false;
             State.allAssets = await loadAssets();
             renderAssetGrid();
+            const successCount = done - failed;
+            const abortMsg = _fetchAbort ? ' (stopped)' : '';
+            showToast(`Metadata updated: ${successCount}/${targets.length} succeeded${abortMsg}` + (failed > 0 ? `, ${failed} failed` : ''), _fetchAbort ? 'info' : (failed > 0 ? 'warning' : 'success'));
+            _fetchAbort = false;
         };
+        btnFetchAll.title = 'Fetch missing metadata (Shift+Click: refresh all)';
     }
 
     // Prompt Presets

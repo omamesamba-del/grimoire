@@ -458,7 +458,7 @@ class I18n {
                 'label_userdata_folder':         'User Data フォルダ',
                 'hint_userdata_folder':          'localStorage・設定などの保存先。変更後は再起動が必要です。',
                 'toast_userdata_restart':        'User Data フォルダを変更しました。再起動後に有効になります。',
-                'civitai_domain_hint':           'Auto: civitai.com を試して失敗したら civitai.red にフォールバック',
+                'civitai_domain_hint':           'Auto: 最初のドメインを試して失敗したらフォールバック',
 
                 // ── スタイルパレット追加 ─────────────────────────────────
                 'style_apply_quickadd':          'Quick-Add にも適用',
@@ -1010,7 +1010,7 @@ class I18n {
                 'label_userdata_folder':         'User Data Folder',
                 'hint_userdata_folder':          'Where localStorage and settings are stored. Restart required after changing.',
                 'toast_userdata_restart':        'User Data folder updated. Restart to apply.',
-                'civitai_domain_hint':           'Auto: tries civitai.com, falls back to civitai.red',
+                'civitai_domain_hint':           'Auto: tries first domain, falls back to the other',
 
                 // ── Style Palette additions ──────────────────────────────
                 'style_apply_quickadd':          'Apply to Quick-Add',

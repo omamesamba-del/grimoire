@@ -105,6 +105,7 @@
 
       <!-- Right: comfy toggle + layout/settings buttons + native window button spacer -->
       <div class="header-titlebar-right titlebar-no-drag">
+        <span id="backend-indicator" class="backend-indicator" title="Not connected"></span>
         <div id="btn-toggle-comfy" class="mode-toggle-btn" title="Toggle ComfyUI Syntax">
           <span class="mode-label">WEBUI</span>
           <div class="mode-switch-track"><div class="mode-switch-thumb"></div></div>
@@ -910,7 +911,8 @@
             <div class="form-group">
               <label>Domain</label>
               <select id="setting-civitai-domain" class="modal-input" style="max-width:220px;">
-                <option value="auto">Auto (civitai.com → civitai.red fallback)</option>
+                <option value="auto">Auto (civitai.com → civitai.red)</option>
+                <option value="auto-red">Auto (civitai.red → civitai.com)</option>
                 <option value="civitai.com">civitai.com only</option>
                 <option value="civitai.red">civitai.red only</option>
               </select>

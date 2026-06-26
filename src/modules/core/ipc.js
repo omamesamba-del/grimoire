@@ -251,7 +251,9 @@ export const IPC = {
         let domain = 'civitai.com';
         try {
             const cfg = await this.getConfig();
-            if (cfg.civitaiDomain && cfg.civitaiDomain !== 'auto') {
+            if (cfg.civitaiDomain === 'auto-red' || cfg.civitaiDomain === 'civitai.red') {
+                domain = 'civitai.red';
+            } else if (cfg.civitaiDomain && cfg.civitaiDomain !== 'auto') {
                 domain = cfg.civitaiDomain;
             }
         } catch (_) {}
