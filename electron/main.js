@@ -963,6 +963,17 @@ function createPreviewWindow() {
   });
   previewWin.loadFile(previewHtml);
 
+  // メインウィンドウと同様、異なるDPIスケールのモニターに配置していた場合の
+  // サイズ・位置ずれを防ぐため、対象モニターに紐づいた後に再適用する。
+  previewWin.once('ready-to-show', () => {
+    if (!previewWin) return;
+    previewWin.setBounds({
+      width: savedBounds.width || 540,
+      height: savedBounds.height || 620,
+      ...(savedBounds.x != null && savedBounds.y != null ? { x: savedBounds.x, y: savedBounds.y } : {}),
+    });
+  });
+
   previewWin.webContents.on('did-finish-load', () => {
     previewWin.webContents.send('preview:theme', currentPreviewTheme);
   });
@@ -1073,9 +1084,16 @@ function createWindow() {
     backgroundColor: '#0a0f1e',
   });
 
-  if (cfg.isMaximized) {
-    win.maximize();
-  }
+  // 別モニター(異なるDPIスケール)に配置していた場合、コンストラクタのx/y/width/height指定は
+  // primaryディスプレイのスケールで解釈され実際のサイズがずれることがあるため、
+  // ウィンドウが対象モニターに紐づいた後（ready-to-show）に再度bounds/maximizeを適用する。
+  win.once('ready-to-show', () => {
+    if (!win) return;
+    win.setBounds(bounds);
+    if (cfg.isMaximized) {
+      win.maximize();
+    }
+  });
 
   // Save window state on change (debounced)
   let saveTimeout;
