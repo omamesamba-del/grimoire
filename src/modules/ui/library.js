@@ -88,7 +88,7 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
         // Initialize Sortable for root direct-tag view (deepest group level has no sections)
         if (!targetContainer && !State.isFavoriteView && !State.isFrequentView) {
             const sortableInst = Sortable.create(tagGrid, {
-                group: { name: 'tags', pull: 'clone', put: false },
+                group: { name: 'tags', pull: 'clone', put: ['tags'] },
                 animation: 150,
                 multiDrag: true,
                 selectedClass: 'selected',
@@ -102,6 +102,7 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
                     updateStateAfterDrag(movedTagIds, from.dataset.groupId, to.dataset.groupId, newIndex);
                     await saveTagOrder(State.allTags);
                     renderExplorer();
+                    if (from.dataset.groupId !== to.dataset.groupId) renderTagGrid();
                 }
             });
             tagGridSortables.push(sortableInst);
@@ -228,7 +229,7 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
         // --- Initialize Sortable for this grid ---
         if (!State.isFavoriteView) {
             const sortableInst = Sortable.create(nodeGrid, {
-                group: { name: 'tags', pull: 'clone', put: false },
+                group: { name: 'tags', pull: 'clone', put: ['tags'] },
                 animation: 150,
                 multiDrag: true,
                 selectedClass: 'selected',
@@ -245,6 +246,7 @@ export function renderTagGrid(nodes = State.currentTags, targetContainer = null,
                     
                     await saveTagOrder(State.allTags);
                     renderExplorer();
+                    if (from.dataset.groupId !== to.dataset.groupId) renderTagGrid();
                 }
             });
             tagGridSortables.push(sortableInst);
