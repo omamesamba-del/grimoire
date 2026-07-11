@@ -1037,6 +1037,22 @@
                 <span data-i18n="danbooru_underscore_convert">Convert underscores to spaces on selection</span>
               </label>
               <button id="btn-reset-danbooru-history" class="btn-secondary" style="margin-top:0.5rem; color:#fb7185; border-color:rgba(251,113,133,0.3);" data-i18n="btn_reset_danbooru_history">🗑️ Reset Usage Counts</button>
+              <p id="danbooru-last-updated" class="setting-hint" style="margin-top:0.5rem;"></p>
+              <div style="margin-top:0.25rem; display:flex; align-items:center; gap:0.5rem;">
+                <button id="btn-check-danbooru-updates" class="btn-secondary" data-i18n="btn_check_danbooru_updates">🔍 Check for Updates</button>
+                <button id="btn-update-danbooru-tags" class="btn-secondary" data-i18n="btn_update_danbooru_tags">🔄 Update Danbooru Tags</button>
+                <button id="btn-cancel-danbooru-update" class="btn-secondary" data-i18n="btn_cancel_danbooru_update" hidden>Cancel</button>
+              </div>
+              <p id="danbooru-check-result" class="setting-hint" hidden></p>
+              <div id="danbooru-update-progress-wrap" class="danbooru-progress-wrap" hidden>
+                <div class="danbooru-progress-track">
+                  <div id="danbooru-update-progress-fill" class="danbooru-progress-fill"></div>
+                </div>
+                <div class="danbooru-progress-rows">
+                  <span id="danbooru-update-progress-text" class="setting-hint"></span>
+                  <span id="danbooru-update-progress-stats" class="setting-hint"></span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1404,6 +1420,10 @@
           <div class="cp-edit-field">
             <label>Clip Skip</label>
             <input id="checkpoint-edit-clipskip" class="cp-edit-input" type="number" min="1" max="12">
+          </div>
+          <div class="cp-edit-field">
+            <label>VAE</label>
+            <input id="checkpoint-edit-vae" class="cp-edit-input" type="text" placeholder="e.g. vae-ft-mse-840000">
           </div>
           <div class="cp-edit-field" style="grid-column:1/-1;display:flex;align-items:center;gap:0.5rem;padding-top:0.25rem;">
             <input type="checkbox" id="checkpoint-edit-hires-enabled" style="width:14px;height:14px;">

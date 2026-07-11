@@ -64,6 +64,159 @@ export function showConfirmDialog(message) {
     });
 }
 
+// ── Danbooru タグ更新 ────────────────────────────────────────
+let _danbooruUpdateRunning = false;
+
+function _formatEta(seconds) {
+    if (!isFinite(seconds) || seconds < 0) return '--:--';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+if (window.electronAPI?.onDanbooruUpdateProgress) {
+    window.electronAPI.onDanbooruUpdateProgress(({ done, total, elapsedMs }) => {
+        const fillEl = document.getElementById('danbooru-update-progress-fill');
+        const textEl = document.getElementById('danbooru-update-progress-text');
+        const statsEl = document.getElementById('danbooru-update-progress-stats');
+        const wrapEl = document.getElementById('danbooru-update-progress-wrap');
+        if (!wrapEl) return;
+        wrapEl.hidden = false;
+
+        const pct = total > 0 ? Math.min(100, (done / total) * 100) : 0;
+        if (fillEl) fillEl.style.width = `${pct.toFixed(1)}%`;
+        if (textEl) {
+            textEl.textContent = i18n.t('label_danbooru_update_progress')
+                .replace('{done}', done).replace('{total}', total) + ` (${pct.toFixed(0)}%)`;
+        }
+        if (statsEl) {
+            const elapsedSec = (elapsedMs ?? 0) / 1000;
+            const rate = elapsedSec > 0 ? done / elapsedSec : 0; // tags/sec
+            const remaining = total - done;
+            const etaSec = rate > 0 ? remaining / rate : NaN;
+            statsEl.textContent = `${rate.toFixed(0)} tags/s ・ ETA ${_formatEta(etaSec)}`;
+        }
+    });
+}
+
+async function runDanbooruTagUpdate() {
+    if (_danbooruUpdateRunning) { showToast(i18n.t('toast_danbooru_update_running'), 'error'); return; }
+
+    let resume = false;
+    const resumeState = await IPC.getDanbooruUpdateResumeState();
+    if (resumeState?.cursor) {
+        const wantResume = await showConfirmDialog(
+            i18n.t('confirm_resume_danbooru_update')
+                .replace('{cursor}', resumeState.cursor).replace('{total}', resumeState.total)
+        );
+        if (wantResume) {
+            resume = true;
+        } else {
+            const ok = await showConfirmDialog(i18n.t('confirm_update_danbooru_tags'));
+            if (!ok) return;
+        }
+    } else {
+        const ok = await showConfirmDialog(i18n.t('confirm_update_danbooru_tags'));
+        if (!ok) return;
+    }
+
+    const btnUpdate = document.getElementById('btn-update-danbooru-tags');
+    const btnCancel = document.getElementById('btn-cancel-danbooru-update');
+    const wrapEl = document.getElementById('danbooru-update-progress-wrap');
+    const fillEl = document.getElementById('danbooru-update-progress-fill');
+    const textEl = document.getElementById('danbooru-update-progress-text');
+    const statsEl = document.getElementById('danbooru-update-progress-stats');
+
+    _danbooruUpdateRunning = true;
+    if (btnUpdate) btnUpdate.disabled = true;
+    if (btnCancel) {
+        btnCancel.hidden = false;
+        btnCancel.onclick = () => IPC.cancelDanbooruUpdate();
+    }
+    if (wrapEl) wrapEl.hidden = false;
+    if (fillEl) fillEl.style.width = resume ? `${(resumeState.cursor / resumeState.total * 100).toFixed(1)}%` : '0%';
+    if (textEl) textEl.textContent = i18n.t('label_danbooru_update_progress').replace('{done}', resume ? resumeState.cursor : 0).replace('{total}', resume ? resumeState.total : '?');
+    if (statsEl) statsEl.textContent = '';
+
+    try {
+        const result = await IPC.updateDanbooruTags(resume);
+        if (result?.aborted) {
+            showToast(i18n.t('toast_danbooru_update_aborted'), 'info');
+        } else if (result?.success) {
+            showToast(
+                i18n.t('toast_danbooru_update_done')
+                    .replace('{updated}', result.updated ?? 0)
+                    .replace('{notFound}', result.notFound ?? 0),
+                'success'
+            );
+        } else {
+            showToast(i18n.t('toast_danbooru_update_error'), 'error');
+        }
+    } catch (e) {
+        console.error('[Danbooru Update]', e);
+        showToast(i18n.t('toast_danbooru_update_error'), 'error');
+    } finally {
+        _danbooruUpdateRunning = false;
+        if (btnUpdate) btnUpdate.disabled = false;
+        if (btnCancel) { btnCancel.hidden = true; btnCancel.onclick = null; }
+        if (wrapEl) wrapEl.hidden = true;
+        _refreshDanbooruLastUpdated();
+    }
+}
+
+async function _refreshDanbooruLastUpdated() {
+    const el = document.getElementById('danbooru-last-updated');
+    if (!el) return;
+    try {
+        const info = await IPC.getDanbooruInfo();
+        if (info?.lastModified) {
+            const d = new Date(info.lastModified);
+            const formatted = d.toLocaleString(i18n.currentLang === 'ja' ? 'ja-JP' : 'en-US');
+            el.textContent = i18n.t('label_danbooru_last_updated').replace('{date}', formatted);
+        } else {
+            el.textContent = '';
+        }
+    } catch { /* noop */ }
+}
+
+async function runDanbooruCheckForUpdates() {
+    const btn = document.getElementById('btn-check-danbooru-updates');
+    const resultEl = document.getElementById('danbooru-check-result');
+    if (!btn || !resultEl) return;
+
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = i18n.t('label_checking_updates');
+    resultEl.hidden = true;
+
+    try {
+        const result = await IPC.checkDanbooruForUpdates();
+        resultEl.hidden = false;
+        if (!result?.success) {
+            resultEl.textContent = i18n.t('toast_danbooru_check_error');
+        } else if (result.sampleSize === 0) {
+            resultEl.textContent = i18n.t('toast_danbooru_check_error');
+        } else if (Math.abs(result.diffPct) < 0.5) {
+            resultEl.textContent = i18n.t('label_danbooru_check_uptodate').replace('{pct}', result.diffPct.toFixed(1));
+        } else {
+            const examplesStr = (result.examples || [])
+                .map(e => `${e.name}: ${e.oldCount.toLocaleString()}→${e.newCount.toLocaleString()}`)
+                .join(', ');
+            resultEl.textContent = i18n.t('label_danbooru_check_diff')
+                .replace('{sample}', result.sampleSize)
+                .replace('{pct}', result.diffPct.toFixed(1))
+                .replace('{examples}', examplesStr || '-');
+        }
+    } catch (e) {
+        console.error('[Danbooru Check]', e);
+        resultEl.hidden = false;
+        resultEl.textContent = i18n.t('toast_danbooru_check_error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = origText;
+    }
+}
+
 export function showInputDialog(title, defaultValue = '', { allowEmpty = false } = {}) {
     return new Promise((resolve) => {
         const dialog = document.getElementById('input-dialog');
@@ -707,6 +860,14 @@ export async function openSettings() {
         localStorage.removeItem('danbooruUsedTags');
         showToast(i18n.t('toast_danbooru_reset'));
     };
+
+    const btnUpdateDanbooru = document.getElementById('btn-update-danbooru-tags');
+    if (btnUpdateDanbooru) btnUpdateDanbooru.onclick = () => runDanbooruTagUpdate();
+
+    const btnCheckDanbooru = document.getElementById('btn-check-danbooru-updates');
+    if (btnCheckDanbooru) btnCheckDanbooru.onclick = () => runDanbooruCheckForUpdates();
+
+    _refreshDanbooruLastUpdated();
 
     const themeEl = document.getElementById('setting-theme');
     if (themeEl) themeEl.value = localStorage.getItem('pb-theme') || 'gray';

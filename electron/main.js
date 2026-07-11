@@ -377,7 +377,33 @@ class DanbooruService {
     this.csvPath = csvPath;
     this.tags = [];
     this.ready = false;
+    this.statePath = csvPath.replace(/\.csv$/, '_update_state.json');
     log(`[DanbooruService] Initialized with path: ${csvPath}`);
+  }
+
+  loadResumeState() {
+    try {
+      if (!fs.existsSync(this.statePath)) return null;
+      const raw = JSON.parse(fs.readFileSync(this.statePath, 'utf8'));
+      if (!raw || typeof raw.cursor !== 'number' || !Array.isArray(raw.updated)) return null;
+      return { cursor: raw.cursor, total: raw.total, updated: new Map(raw.updated), savedAt: raw.savedAt };
+    } catch (e) {
+      log(`[DanbooruService] Resume state read error: ${e.message}`, 'WARN', 'Danbooru');
+      return null;
+    }
+  }
+
+  async saveResumeState(cursor, total, updatedMap) {
+    try {
+      const raw = { cursor, total, updated: Array.from(updatedMap.entries()), savedAt: Date.now() };
+      await fs.promises.writeFile(this.statePath, JSON.stringify(raw), 'utf8');
+    } catch (e) {
+      log(`[DanbooruService] Resume state write error: ${e.message}`, 'WARN', 'Danbooru');
+    }
+  }
+
+  async clearResumeState() {
+    try { if (fs.existsSync(this.statePath)) await fs.promises.unlink(this.statePath); } catch { /* noop */ }
   }
 
   async load() {
@@ -439,7 +465,7 @@ class DanbooruService {
     if (!this.ready || !query) return [];
     const q = query.toLowerCase();
     const results = [];
-    
+
     // 1. Prefix match on name (Highest priority)
     for (const tag of this.tags) {
       if (tag.n.startsWith(q)) {
@@ -447,21 +473,178 @@ class DanbooruService {
         if (results.length >= limit) return results;
       }
     }
-    
+
     // 2. Alias match or contains match (Next priority)
     if (results.length < limit) {
       for (const tag of this.tags) {
         // Skip already found
         if (tag.n.startsWith(q)) continue;
-        
+
         if (tag.a.some(alias => alias.startsWith(q)) || tag.n.includes(q)) {
           results.push(tag);
           if (results.length >= limit) break;
         }
       }
     }
-    
+
     return results;
+  }
+
+  _csvEscapeAliases(aliases) {
+    if (!aliases || aliases.length === 0) return '';
+    const joined = aliases.join(',');
+    return aliases.length > 1 ? `"${joined}"` : joined;
+  }
+
+  async updateFromApi({ onProgress, signal, resume } = {}) {
+    if (!this.ready) return { success: false, error: 'not_ready' };
+
+    const BATCH_SIZE = 150;
+    const DELAY_MS = 400;
+    const names = this.tags.map(t => t.n);
+    const total = names.length;
+
+    let updated = new Map(); // name -> { category, count, is_deprecated }
+    let startIndex = 0;
+    if (resume) {
+      const state = this.loadResumeState();
+      if (state && state.total === total) {
+        updated = state.updated;
+        startIndex = Math.min(state.cursor, total);
+        log(`[DanbooruService] Resuming update from ${startIndex}/${total}`, 'INFO', 'Danbooru');
+      }
+    } else {
+      await this.clearResumeState();
+    }
+
+    let done = startIndex;
+    const startTime = Date.now();
+
+    for (let i = startIndex; i < names.length; i += BATCH_SIZE) {
+      if (signal?.aborted) {
+        log('[DanbooruService] Update aborted by user', 'INFO', 'Danbooru');
+        await this.saveResumeState(i, total, updated);
+        return { success: false, aborted: true, updated: updated.size, total, cursor: i };
+      }
+
+      const batch = names.slice(i, i + BATCH_SIZE);
+      const params = new URLSearchParams();
+      for (const n of batch) params.append('search[name][]', n);
+      params.append('limit', String(batch.length));
+      const url = `https://danbooru.donmai.us/tags.json?${params.toString()}`;
+
+      try {
+        const res = await net.fetch(url, {
+          headers: { 'User-Agent': 'grimoire-prompt-builder (tag-updater)' },
+        });
+        if (res.status === 429) {
+          log('[DanbooruService] Rate limited, retrying after backoff', 'WARN', 'Danbooru');
+          await new Promise(r => setTimeout(r, DELAY_MS * 4));
+          const retry = await net.fetch(url, {
+            headers: { 'User-Agent': 'grimoire-prompt-builder (tag-updater)' },
+          });
+          if (retry.ok) {
+            const arr = await retry.json();
+            for (const t of arr) updated.set(t.name, { category: t.category, count: t.post_count, deprecated: !!t.is_deprecated });
+          } else {
+            log(`[DanbooruService] Batch failed after retry: HTTP ${retry.status}`, 'WARN', 'Danbooru');
+          }
+        } else if (res.ok) {
+          const arr = await res.json();
+          for (const t of arr) updated.set(t.name, { category: t.category, count: t.post_count, deprecated: !!t.is_deprecated });
+        } else {
+          log(`[DanbooruService] Batch failed: HTTP ${res.status}`, 'WARN', 'Danbooru');
+        }
+      } catch (e) {
+        log(`[DanbooruService] Batch error: ${e.message}`, 'WARN', 'Danbooru');
+      }
+
+      done += batch.length;
+      onProgress?.({ done: Math.min(done, total), total, elapsedMs: Date.now() - startTime });
+
+      if (i + BATCH_SIZE < names.length) {
+        await new Promise(r => setTimeout(r, DELAY_MS));
+      }
+    }
+
+    return { success: true, updated, total };
+  }
+
+  async writeCsv(updatedMap) {
+    await this.clearResumeState();
+    let notFound = 0;
+    let changed = 0;
+    for (const tag of this.tags) {
+      const found = updatedMap.get(tag.n);
+      if (!found) { notFound++; continue; }
+      if (found.count !== tag.c || found.category !== tag.t) changed++;
+      tag.c = found.count;
+      tag.t = found.category;
+    }
+
+    this.tags.sort((a, b) => b.c - a.c);
+
+    const lines = this.tags.map(tag => `${tag.n},${tag.t},${tag.c},${this._csvEscapeAliases(tag.a)}`);
+    const csvContent = lines.join('\n') + '\n';
+
+    try {
+      if (fs.existsSync(this.csvPath)) {
+        await fs.promises.copyFile(this.csvPath, this.csvPath + '.bak');
+      }
+      await fs.promises.writeFile(this.csvPath, csvContent, 'utf8');
+    } catch (e) {
+      log(`[DanbooruService] Write error: ${e.stack}`, 'ERROR', 'Danbooru');
+      return { success: false, error: e.message };
+    }
+
+    await this.load();
+    return { success: true, updated: changed, notFound, total: this.tags.length };
+  }
+
+  getInfo() {
+    let lastModified = null;
+    try {
+      if (fs.existsSync(this.csvPath)) lastModified = fs.statSync(this.csvPath).mtimeMs;
+    } catch { /* noop */ }
+    return { lastModified, total: this.tags.length };
+  }
+
+  async checkForUpdates(sampleSize = 30) {
+    if (!this.ready || this.tags.length === 0) return { success: false, error: 'not_ready' };
+
+    const sample = this.tags.slice(0, sampleSize); // already sorted by count desc
+    const params = new URLSearchParams();
+    for (const t of sample) params.append('search[name][]', t.n);
+    params.append('limit', String(sample.length));
+    const url = `https://danbooru.donmai.us/tags.json?${params.toString()}`;
+
+    try {
+      const res = await net.fetch(url, {
+        headers: { 'User-Agent': 'grimoire-prompt-builder (tag-updater)' },
+      });
+      if (!res.ok) return { success: false, error: `HTTP ${res.status}` };
+      const arr = await res.json();
+      const liveByName = new Map(arr.map(t => [t.name, t.post_count]));
+
+      let comparedCount = 0;
+      let totalOldCount = 0;
+      let totalNewCount = 0;
+      const examples = [];
+      for (const t of sample) {
+        const liveCount = liveByName.get(t.n);
+        if (liveCount == null) continue;
+        comparedCount++;
+        totalOldCount += t.c;
+        totalNewCount += liveCount;
+        if (t.c !== liveCount && examples.length < 3) {
+          examples.push({ name: t.n, oldCount: t.c, newCount: liveCount });
+        }
+      }
+      const diffPct = totalOldCount > 0 ? ((totalNewCount - totalOldCount) / totalOldCount) * 100 : 0;
+      return { success: true, sampleSize: comparedCount, diffPct, examples };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   }
 }
 // --- Thumbnail Service (Caching & Resizing) ---
@@ -1552,6 +1735,35 @@ ipcMain.handle('tags:reimport-yaml', async () => {
 });
 ipcMain.handle('assets:get-all', async () => await assetService.getAllAssets());
 ipcMain.handle('danbooru:search', async (event, query) => await danbooruService.search(query));
+
+let _danbooruUpdateAbort = null;
+ipcMain.handle('danbooru:update-tags', async (event, { resume } = {}) => {
+  if (_danbooruUpdateAbort) return { success: false, error: 'already_running' };
+  const ctrl = new AbortController();
+  _danbooruUpdateAbort = ctrl;
+  try {
+    const result = await danbooruService.updateFromApi({
+      signal: ctrl.signal,
+      resume,
+      onProgress: (progress) => event.sender.send('danbooru:update-progress', progress),
+    });
+    if (!result.success) return result;
+    return await danbooruService.writeCsv(result.updated);
+  } finally {
+    _danbooruUpdateAbort = null;
+  }
+});
+ipcMain.handle('danbooru:update-tags-cancel', async () => {
+  if (_danbooruUpdateAbort) { _danbooruUpdateAbort.abort(); return { success: true }; }
+  return { success: false };
+});
+ipcMain.handle('danbooru:update-tags-resume-state', async () => {
+  const state = danbooruService.loadResumeState();
+  if (!state) return null;
+  return { cursor: state.cursor, total: state.total, savedAt: state.savedAt };
+});
+ipcMain.handle('danbooru:get-info', async () => danbooruService.getInfo());
+ipcMain.handle('danbooru:check-for-updates', async () => await danbooruService.checkForUpdates());
 
 // Config & Presets
 ipcMain.handle('app:get-userdata-path', () => app.getPath('userData'));

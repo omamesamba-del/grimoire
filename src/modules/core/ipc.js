@@ -102,6 +102,31 @@ export const IPC = {
         if (isElectron) return await window.electronAPI.searchDanbooru(query);
         return []; // No mock data for remote search
     },
+
+    async updateDanbooruTags(resume = false) {
+        if (isElectron) return await window.electronAPI.updateDanbooruTags(resume);
+        return { success: false, error: 'not_electron' };
+    },
+
+    async getDanbooruUpdateResumeState() {
+        if (isElectron) return await window.electronAPI.getDanbooruUpdateResumeState();
+        return null;
+    },
+
+    async getDanbooruInfo() {
+        if (isElectron) return await window.electronAPI.getDanbooruInfo();
+        return { lastModified: null, total: 0 };
+    },
+
+    async checkDanbooruForUpdates() {
+        if (isElectron) return await window.electronAPI.checkDanbooruForUpdates();
+        return { success: false, error: 'not_electron' };
+    },
+
+    async cancelDanbooruUpdate() {
+        if (isElectron) return await window.electronAPI.cancelDanbooruUpdate();
+        return { success: false };
+    },
     
     async selectImageFile() {
         if (isElectron) return await window.electronAPI.selectImageFile();
