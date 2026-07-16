@@ -177,6 +177,17 @@ async function initApp() {
         // データロード完了 — コンテンツを表示
         document.body.classList.remove('app-loading');
 
+        // Gen モードを起動後バックグラウンドで初期化しておく。
+        // これをGenタブを開くまで遅延させると、Checkpointモードでの選択が
+        // restoreGenSettings() の localStorage 復元で上書きされてしまう。
+        setTimeout(() => {
+            if (!State._genInitialized) {
+                State._genInitialized = true;
+                initGeneration();
+                initGenPngDrop();
+            }
+        }, 0);
+
         // Backend detection — show connected WebUI/ComfyUI info
         const detectBackends = async () => {
             const ind = document.getElementById('backend-indicator');

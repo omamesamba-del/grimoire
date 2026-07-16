@@ -695,6 +695,32 @@ class ThumbnailService {
 
 const thumbnailService = new ThumbnailService();
 
+// --- Background thumbnail cache warm-up ---
+// getThumbnail() resizes images synchronously; with many LoRAs this freezes the UI
+// the first time the library grid requests them all at once. Pre-generate the cache
+// in the background after startup instead, yielding between items so IPC/UI stay responsive.
+let _thumbWarmupRunning = false;
+async function warmThumbnailCache(result) {
+  if (_thumbWarmupRunning) return;
+  _thumbWarmupRunning = true;
+  try {
+    const items = [...(result.loras || []), ...(result.checkpoints || []), ...(result.embeddings || [])];
+    for (const item of items) {
+      if (!item.thumbnail || !item.thumbnail.startsWith('thumb:///')) continue;
+      const rawPath = decodeURIComponent(item.thumbnail.replace(/^thumb:\/\/\//, '').split('?')[0]);
+      const resolvedPath = path.isAbsolute(rawPath) ? rawPath : path.join(appRoot, rawPath);
+      const basename = path.basename(resolvedPath).toLowerCase();
+      if (basename.includes('.preview.') || basename.includes('.example.')) continue; // served directly, no cache needed
+      await thumbnailService.getThumbnail(resolvedPath);
+      await new Promise((r) => setImmediate(r));
+    }
+  } catch (e) {
+    log(`[ThumbnailWarmup] Error: ${e.message}`);
+  } finally {
+    _thumbWarmupRunning = false;
+  }
+}
+
 // --- Asset Service (LoRA / Embeddings) ---
 class AssetService {
   constructor(paths) {
@@ -721,7 +747,7 @@ class AssetService {
   async scanDir(baseDir, type) {
     if (!fs.existsSync(baseDir)) {
       log(`[AssetService] ERR: Directory not found: ${baseDir}`);
-      return [];
+      return { items: [], folders: [] };
     }
 
     const items = [];
@@ -1733,7 +1759,11 @@ ipcMain.handle('tags:reimport-yaml', async () => {
   await tagService.saveTags(categories);
   return { success: true, count: categories.length };
 });
-ipcMain.handle('assets:get-all', async () => await assetService.getAllAssets());
+ipcMain.handle('assets:get-all', async () => {
+  const result = await assetService.getAllAssets();
+  warmThumbnailCache(result); // fire-and-forget: caches thumbnails in the background
+  return result;
+});
 ipcMain.handle('danbooru:search', async (event, query) => await danbooruService.search(query));
 
 let _danbooruUpdateAbort = null;
