@@ -45,7 +45,7 @@ export function initCheckpointEdit() {
             'checkpoint-edit-positive', 'checkpoint-edit-negative',
             'checkpoint-edit-sampler', 'checkpoint-edit-schedule',
             'checkpoint-edit-steps', 'checkpoint-edit-cfg', 'checkpoint-edit-seed',
-            'checkpoint-edit-width', 'checkpoint-edit-height', 'checkpoint-edit-clipskip',
+            'checkpoint-edit-width', 'checkpoint-edit-height', 'checkpoint-edit-clipskip', 'checkpoint-edit-vae',
             'checkpoint-edit-hires-upscaler', 'checkpoint-edit-hires-steps', 'checkpoint-edit-hires-denoise',
         ];
         ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -151,6 +151,7 @@ export function applyPbSettingsFromAsset(asset) {
         width:          s.width         ? Number(s.width)          : undefined,
         height:         s.height        ? Number(s.height)         : undefined,
         clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        vae:            s.vae           || undefined,
         hiresFix:       s.hiresEnabled  ? true                     : undefined,
         hiresUpscaler:  s.hiresUpscaler || undefined,
         hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
@@ -172,6 +173,7 @@ export function applyGenSettingsFromAsset(asset) {
         width:          s.width         ? Number(s.width)          : undefined,
         height:         s.height        ? Number(s.height)         : undefined,
         clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        vae:            s.vae           || undefined,
         hiresFix:       s.hiresEnabled  ? true                     : undefined,
         hiresUpscaler:  s.hiresUpscaler || undefined,
         hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
@@ -223,6 +225,7 @@ export function openCheckpointEditModal(asset) {
     _setVal('checkpoint-edit-width',         s.width         ?? '');
     _setVal('checkpoint-edit-height',        s.height        ?? '');
     _setVal('checkpoint-edit-clipskip',      s.clipSkip      ?? '');
+    _setVal('checkpoint-edit-vae',           s.vae           ?? '');
     _setChk('checkpoint-edit-hires-enabled', !!s.hiresEnabled);
     _setVal('checkpoint-edit-hires-upscaler',s.hiresUpscaler ?? '');
     _setVal('checkpoint-edit-hires-steps',   s.hiresSteps    ?? '');
@@ -259,6 +262,7 @@ export function applyCheckpointSettings(asset) {
         width:         s.width         ? Number(s.width)         : undefined,
         height:        s.height        ? Number(s.height)        : undefined,
         clipSkip:      s.clipSkip      ? Number(s.clipSkip)      : undefined,
+        vae:           s.vae           || undefined,
         hiresFix:      s.hiresEnabled  ? true                    : undefined,
         hiresUpscaler: s.hiresUpscaler || undefined,
         hiresSteps:    s.hiresSteps    ? Number(s.hiresSteps)    : undefined,
@@ -290,6 +294,7 @@ function _collectSettings() {
         width:         document.getElementById('checkpoint-edit-width')?.value         || '',
         height:        document.getElementById('checkpoint-edit-height')?.value        || '',
         clipSkip:      document.getElementById('checkpoint-edit-clipskip')?.value      || '',
+        vae:           document.getElementById('checkpoint-edit-vae')?.value            || '',
         hiresEnabled:  document.getElementById('checkpoint-edit-hires-enabled')?.checked ?? false,
         hiresUpscaler: document.getElementById('checkpoint-edit-hires-upscaler')?.value || '',
         hiresSteps:    document.getElementById('checkpoint-edit-hires-steps')?.value   || '',
@@ -316,6 +321,7 @@ function _sendGens() {
         width:          s.width         ? Number(s.width)          : undefined,
         height:         s.height        ? Number(s.height)         : undefined,
         clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        vae:            s.vae           || undefined,
         hiresFix:       s.hiresEnabled  ? true                     : undefined,
         hiresUpscaler:  s.hiresUpscaler || undefined,
         hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
@@ -342,6 +348,7 @@ function _collectAndApply() {
         width:          s.width         ? Number(s.width)          : undefined,
         height:         s.height        ? Number(s.height)         : undefined,
         clipSkip:       s.clipSkip      ? Number(s.clipSkip)       : undefined,
+        vae:            s.vae           || undefined,
         hiresFix:       s.hiresEnabled  ? true                     : undefined,
         hiresUpscaler:  s.hiresUpscaler || undefined,
         hiresSteps:     s.hiresSteps    ? Number(s.hiresSteps)     : undefined,
@@ -420,6 +427,7 @@ function _fillFormFromParsed(parsed) {
     if (ci('CFG scale')) _setVal('checkpoint-edit-cfg',     ci('CFG scale'));
     if (ci('Seed'))      _setVal('checkpoint-edit-seed',    ci('Seed'));
     if (ci('Clip skip')) _setVal('checkpoint-edit-clipskip',ci('Clip skip'));
+    if (ci('VAE'))       _setVal('checkpoint-edit-vae',     ci('VAE'));
 
     const sizeStr = ci('Size');
     if (sizeStr) {
@@ -449,6 +457,7 @@ function _fillFormFromApiMeta(meta) {
     if (meta.cfgScale)       _setVal('checkpoint-edit-cfg',      String(meta.cfgScale));
     if (meta.seed)           _setVal('checkpoint-edit-seed',     String(meta.seed));
     if (meta.clipSkip)       _setVal('checkpoint-edit-clipskip', String(meta.clipSkip));
+    if (meta.VAE)            _setVal('checkpoint-edit-vae',       meta.VAE);
     if (meta.Size) {
         const [w, h] = meta.Size.split('x');
         if (w) _setVal('checkpoint-edit-width',  w.trim());
