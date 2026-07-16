@@ -5,6 +5,15 @@ Body:
       red eyes: red eyes
       green eyes: green eyes
       heterochromia: heterochromia
+    Mouth:
+      open mouth: open mouth
+      wide open mouth: wide open mouth
+      tongue: tongue
+      uvula: uvula
+      mouth focus: mouth focus
+      saliva: saliva
+      saliva trail: saliva trail
+      drooling: drooling
     Hair:
       Color:
         blonde hair: blonde hair
