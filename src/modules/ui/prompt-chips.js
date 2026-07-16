@@ -272,12 +272,12 @@ export function renderPromptChips(containerId, inputId) {
                 tagsList.forEach(t => {
                     if (State.selectedChips.has(t.name)) {
                         const cur = t.weight !== null ? t.weight : 1.0;
-                        t.weight = parseFloat(Math.max(0.1, Math.min(2.0, cur + delta)).toFixed(1));
+                        t.weight = parseFloat(Math.max(0.1, Math.min(10.0, cur + delta)).toFixed(1));
                     }
                 });
             } else if (tagsList[index]) {
                 const cur = tagsList[index].weight !== null ? tagsList[index].weight : 1.0;
-                tagsList[index].weight = parseFloat(Math.max(0.1, Math.min(2.0, cur + delta)).toFixed(1));
+                tagsList[index].weight = parseFloat(Math.max(0.1, Math.min(10.0, cur + delta)).toFixed(1));
             }
             input.value = stringifyPrompt(tagsList);
             input.dispatchEvent(new Event('input'));
@@ -536,7 +536,7 @@ function showChipMenu(x, y, ctx) {
             if (result === null) return;
             const val = parseFloat(result);
             if (isNaN(val)) return;
-            const clamped = parseFloat(Math.max(0.01, Math.min(2.0, val)).toFixed(2));
+            const clamped = parseFloat(Math.max(0.01, Math.min(10.0, val)).toFixed(2));
             const tagsList = parsePrompt(ctx.input.value);
             if (tagsList[ctx.index]) {
                 tagsList[ctx.index].weight = clamped;
